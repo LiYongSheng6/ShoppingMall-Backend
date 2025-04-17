@@ -6,6 +6,7 @@ package com.shoppingmall.demo.constant;
  * @time: 21:46
  */
 public class CacheConstants {
+
     /**
      * token用户ID
      */
@@ -27,64 +28,9 @@ public class CacheConstants {
     public static final String LOGIN_USER = "user:";
 
     /**
-     * 用户注册分配ID
-     */
-    public static final String USER_ID_KEY = "userId";
-
-    /**
      * 用户ID前缀
      */
     public static final String USER_ID_PREFIX = "user:key:";
-
-    /**
-     * 权限ID前缀
-     */
-    public static final String PERMISSION_ID = "permissionID";
-
-    /**
-     * 邮箱正则
-     */
-    public static final String EMAIL_REGEX = "\\w{2,}@\\w{2,20}(\\.\\w{2,20}){1,2}";
-
-    /**
-     * 学号正则
-     */
-    public static final String STUDENT_ID_REGEX = "3[12]2\\d00\\d{4}";
-
-    /**
-     * 密码正则
-     */
-    public static final String PASSWORD_REGEX = "^\\S{1,20}$";
-
-    /**
-     * 用户名正则
-     */
-    public static final String USERNAME_REGEX = ".{1,20}";
-
-    /**
-     * 手机号正则
-     */
-    public static final String PHONE_REGEX = "^1[3-9]\\d{9}$";
-
-    /**
-     * 逻辑删除字段正则
-     */
-    public static final String FORBIDDEN_REGEX = "^[01]$";
-
-    /**
-     * 性别正则
-     */
-    public static final String GENDER_REGEX = "^[01]$";
-
-    /**
-     * 用户类型正则
-     */
-    public static final String USER_TYPE_REGEX = "^[01]$";
-
-    /**
-     * 邮箱验证码正则
-     */
-    public static final String CODE_REGEX = "^\\w{6}$";
 
     /**
      * 账号注册-邮箱验证码key
@@ -122,13 +68,27 @@ public class CacheConstants {
     public static final int EMAIL_CODE_LENGTH = 6;
 
     /**
-     * 布尔值-是
+     * 用户注册分配ID
      */
-    public static final String TRUE = "1";
+    public static final String USER_ID_KEY = "userId";
+
     /**
-     * 布尔值-否
+     * 权限ID前缀
      */
-    public static final String FALSE = "0";
+    public static final String PERMISSION_ID = "permissionId";
 
+    /**
+     * 品牌ID前缀
+     */
+    public static final String BAND_ID_PREFIX = "bandId";
 
+    /**
+     * 收货地址ID前缀
+     */
+    public static final String DELIVERY_ID_PREFIX = "deliveryId";
+
+    /**
+     * 分类ID前缀
+     */
+    public static String CATEGORY_ID_PREFIX = "categoryId";
 }

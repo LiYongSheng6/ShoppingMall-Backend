@@ -1,7 +1,9 @@
 package com.shoppingmall.demo.model.VO;
 
+import cn.hutool.core.bean.BeanUtil;
 import com.shoppingmall.demo.annotation.UserTypePattern;
 import com.shoppingmall.demo.enums.UserType;
+import com.shoppingmall.demo.model.DO.PermissionDO;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -84,5 +86,10 @@ public class PermissionVO {
     @ApiModelProperty("权限类型(0-普通权限,1-管理权限)")
     @UserTypePattern
     private UserType type;
+
+    public PermissionVO(PermissionDO permissionDO){
+        BeanUtil.copyProperties(permissionDO,this);
+    }
+
 
 }

@@ -9,8 +9,8 @@ import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 import com.shoppingmall.demo.annotation.ForbiddenPattern;
 import com.shoppingmall.demo.annotation.GenderPattern;
 import com.shoppingmall.demo.annotation.UserTypePattern;
-import com.shoppingmall.demo.constant.CacheConstants;
 import com.shoppingmall.demo.constant.MessageConstants;
+import com.shoppingmall.demo.constant.RegexConstants;
 import com.shoppingmall.demo.enums.ForbiddenType;
 import com.shoppingmall.demo.enums.GenderType;
 import com.shoppingmall.demo.enums.UserType;
@@ -23,7 +23,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
-import net.bytebuddy.dynamic.TargetType;
 import org.hibernate.validator.constraints.Length;
 
 import java.io.Serializable;
@@ -53,7 +52,7 @@ public class UserDO implements Serializable {
      */
     @Length(min = 10, max= 10, message="学号长度为10位数字")
     @ApiModelProperty("用户学号")
-    @Pattern(regexp = CacheConstants.STUDENT_ID_REGEX, message = MessageConstants.STUDENT_ID_REGEX_MESSAGE)
+    @Pattern(regexp = RegexConstants.STUDENT_ID_REGEX, message = MessageConstants.STUDENT_ID_REGEX_MESSAGE)
     private String studentId;
 
     /**
@@ -61,7 +60,7 @@ public class UserDO implements Serializable {
     */
     @Length(max= 20,message="用户名称长度不能超过20")
     @ApiModelProperty("用户名称")
-    @Pattern(regexp = CacheConstants.USERNAME_REGEX, message = MessageConstants.USERNAME_REGEX_MESSAGE)
+    @Pattern(regexp = RegexConstants.USERNAME_REGEX, message = MessageConstants.USERNAME_REGEX_MESSAGE)
     private String username;
 
     /**
@@ -69,7 +68,7 @@ public class UserDO implements Serializable {
      */
     @Size(max= 255,message="密码长度不能超过20")
     @ApiModelProperty("用户密码")
-    @Pattern(regexp = CacheConstants.PASSWORD_REGEX, message = MessageConstants.PASSWORD_REGEX_MESSAGE)
+    @Pattern(regexp = RegexConstants.PASSWORD_REGEX, message = MessageConstants.PASSWORD_REGEX_MESSAGE)
     private String password;
 
     /**
@@ -77,7 +76,7 @@ public class UserDO implements Serializable {
      */
     @Length(min= 11, max= 11,message="手机号长度为11位")
     @ApiModelProperty("用户手机号码")
-    @Pattern(regexp = CacheConstants.PHONE_REGEX, message = MessageConstants.PHONE_REGEX_MESSAGE)
+    @Pattern(regexp = RegexConstants.PHONE_REGEX, message = MessageConstants.PHONE_REGEX_MESSAGE)
     private String phone;
 
     /**
@@ -85,7 +84,7 @@ public class UserDO implements Serializable {
     */
     @Length(max= 32,message="邮箱地址长度不能超过32")
     @ApiModelProperty("用户邮箱地址")
-    @Pattern(regexp = CacheConstants.EMAIL_REGEX, message = MessageConstants.EMAIL_REGEX_MESSAGE)
+    @Pattern(regexp = RegexConstants.EMAIL_REGEX, message = MessageConstants.EMAIL_REGEX_MESSAGE)
     private String email;
 
     /**

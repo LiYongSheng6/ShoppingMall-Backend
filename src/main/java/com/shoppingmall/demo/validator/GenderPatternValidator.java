@@ -1,14 +1,14 @@
 package com.shoppingmall.demo.validator;
 
 import com.shoppingmall.demo.annotation.GenderPattern;
-import com.shoppingmall.demo.constant.CacheConstants;
+import com.shoppingmall.demo.constant.RegexConstants;
 import com.shoppingmall.demo.enums.GenderType;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 
 public class GenderPatternValidator implements ConstraintValidator<GenderPattern, GenderType> {
 
-    private static final String PATTERN = CacheConstants.GENDER_REGEX; // 自定义正则表达式
+    private static final String PATTERN = RegexConstants.GENDER_REGEX; // 自定义正则表达式
 
     @Override
     public void initialize(GenderPattern constraintAnnotation) {

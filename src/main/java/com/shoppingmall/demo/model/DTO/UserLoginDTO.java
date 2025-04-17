@@ -1,7 +1,7 @@
 package com.shoppingmall.demo.model.DTO;
 
-import com.shoppingmall.demo.constant.CacheConstants;
 import com.shoppingmall.demo.constant.MessageConstants;
+import com.shoppingmall.demo.constant.RegexConstants;
 import io.swagger.annotations.ApiModelProperty;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
@@ -22,7 +22,7 @@ public class UserLoginDTO {
 
     @ApiModelProperty("用户邮箱")
     @NotBlank(message = MessageConstants.PARAM_MISSING)
-    @Pattern(regexp = CacheConstants.EMAIL_REGEX, message = MessageConstants.EMAIL_REGEX_MESSAGE)
+    @Pattern(regexp = RegexConstants.EMAIL_REGEX, message = MessageConstants.EMAIL_REGEX_MESSAGE)
     private String email;
 
     @ApiModelProperty("用户密码")

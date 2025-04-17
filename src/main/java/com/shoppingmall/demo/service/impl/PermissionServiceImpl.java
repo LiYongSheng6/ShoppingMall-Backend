@@ -11,6 +11,7 @@ import com.shoppingmall.demo.mapper.PermissionMapper;
 import com.shoppingmall.demo.model.DO.PermissionDO;
 import com.shoppingmall.demo.model.DTO.PermissionSaveDTO;
 import com.shoppingmall.demo.model.DTO.PermissionUpdateDTO;
+import com.shoppingmall.demo.model.VO.PermissionVO;
 import com.shoppingmall.demo.service.IPermissionService;
 import com.shoppingmall.demo.utils.RedisIdWorker;
 import com.shoppingmall.demo.utils.Result;
@@ -21,6 +22,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * @author redmi k50 ultra
@@ -34,9 +36,9 @@ public class PermissionServiceImpl extends ServiceImpl<PermissionMapper, Permiss
     private final RedisIdWorker redisIdWorker;
 
     @Override
-    public Result addPermission(PermissionSaveDTO permissionSaveDTO) {
+    public Result savePermission(PermissionSaveDTO permissionSaveDTO) {
         return save(BeanUtil.copyProperties(permissionSaveDTO, PermissionDO.class).setId(redisIdWorker.nextId(CacheConstants.PERMISSION_ID))) ?
-                Result.success(MessageConstants.ADD_SUCCESS) : Result.error(MessageConstants.ADD_ERROR);
+                Result.success(MessageConstants.SAVE_SUCCESS) : Result.error(MessageConstants.SAVE_ERROR);
     }
 
     @Override
@@ -52,10 +54,11 @@ public class PermissionServiceImpl extends ServiceImpl<PermissionMapper, Permiss
         if (UserType.ADMIN.getValue().equals(type)) permissionDOList = lambdaQuery().list();
         else permissionDOList = lambdaQuery().eq(PermissionDO::getType, type).list();
 
-        if (CollectionUtils.isEmpty(permissionDOList))
-            throw new ServiceException(MessageConstants.NO_FOUND_PERMISSION_ERROR);
+        if (CollectionUtils.isEmpty(permissionDOList)) throw new ServiceException(MessageConstants.NO_FOUND_PERMISSION_ERROR);
 
-        return Result.success(permissionDOList);
+        return Result.success(permissionDOList
+                .stream().map(permissionDO -> CompletableFuture.supplyAsync(() -> new PermissionVO(permissionDO))).toList()
+                .stream().map(CompletableFuture::join).toList());
     }
 
     @Override

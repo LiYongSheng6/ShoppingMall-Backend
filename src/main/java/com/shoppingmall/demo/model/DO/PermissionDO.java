@@ -33,7 +33,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @TableName("permission")
 public class PermissionDO {
-    private static  final  long serialVersionUID = 1L;
+
     /**
      * 权限id
      */

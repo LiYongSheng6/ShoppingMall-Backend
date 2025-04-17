@@ -27,10 +27,5 @@ public class HttpStatus {
      */
     public static final Integer ERROR = 500;
 
-    /**
-     * 没有权限状态码
-     */
-    public static final Integer NO_AUTH = 600;
-
 
 }

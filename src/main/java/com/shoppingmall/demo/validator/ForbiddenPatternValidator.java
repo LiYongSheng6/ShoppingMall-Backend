@@ -1,14 +1,14 @@
 package com.shoppingmall.demo.validator;
 
 import com.shoppingmall.demo.annotation.ForbiddenPattern;
-import com.shoppingmall.demo.constant.CacheConstants;
+import com.shoppingmall.demo.constant.RegexConstants;
 import com.shoppingmall.demo.enums.ForbiddenType;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 
 public class ForbiddenPatternValidator implements ConstraintValidator<ForbiddenPattern, ForbiddenType> {
 
-    private static final String PATTERN = CacheConstants.FORBIDDEN_REGEX; // 自定义正则表达式
+    private static final String PATTERN = RegexConstants.FORBIDDEN_REGEX; // 自定义正则表达式
 
     @Override
     public void initialize(ForbiddenPattern constraintAnnotation) {

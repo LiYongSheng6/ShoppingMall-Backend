@@ -22,12 +22,6 @@ public class MessageConstants {
     public static final String NO_PERMISSION_ERROR = "权限不足";
     public static final String ACCESS_RESTRICTED_ERROR = "访问受限";
 
-    public static final String PARAM_MISSING = "缺少必要参数";
-    public static final String INFO_ERROR = "报名信息缺失";
-    public static final String NO_FOUND_USER_ERROR = "找不到相关用户";
-    public static final String NO_FOUND_TIME_ERROR = "没有找到相关时间信息";
-    public static final String NO_FOUND_PERMISSION_ERROR = "没有找到相关权限信息";
-
     public static final String REGISTER_SUCCESS = "注册成功";
     public static final String REGISTER_ERROR = "注册失败";
     public static final String LOGIN_SUCCESS = "登录成功";
@@ -45,12 +39,13 @@ public class MessageConstants {
     public static final String COMMENT_ERROR = "评价失败";
     public static final String APPOINT_SUCCESS = "预约成功";
     public static final String APPOINT_ERROR = "预约失败";
-    public static final String ADD_SUCCESS = "添加成功";
-    public static final String ADD_ERROR = "添加失败";
+    public static final String SAVE_SUCCESS = "添加成功";
+    public static final String SAVE_ERROR = "添加失败";
     public static final String EXPORT_SUCCESS = "导出Excel文件成功";
     public static final String EXPORT_ERROR = "导出Excel文件失败";
     public static final String EMAIL_SEND_SUCCESS = "邮件信息发送成功";
     public static final String EMAIL_SEND_ERROR = "邮件信息发送失败";
+    public static final String EMAIL_CODE_TITLE = "邮箱验证码";
     public static final String EMAIL_CODE_SEND_SUCCESS = "邮箱验证码发送成功";
     public static final String EMAIL_CODE_SEND_ERROR = "邮箱验证码发送失败";
     public static final String EMAIL_CODE_STILL_VALID = "邮箱验证码还未失效，请稍后再试！";
@@ -70,8 +65,13 @@ public class MessageConstants {
     public static final String TIME_TYPE_REGEX_MESSAGE = "时间类型值不符合要求";
     public static final String FORBIDDEN_REGEX_MESSAGE = "封禁判定值不符合要求";
 
-    public static final String EMAIL_CODE_TITLE = "邮箱验证码";
-
-
+    public static final String PARAM_MISSING = "缺少必要参数";
+    public static final String INFO_ERROR = "报名信息缺失";
+    public static final String NO_FOUND_USER_ERROR = "找不到相关用户";
+    public static final String NO_FOUND_TIME_ERROR = "没有找到相关时间信息";
+    public static final String NO_FOUND_PERMISSION_ERROR = "没有找到相关权限信息";
+    public static final String NO_FOUND_BAND_ERROR = "没有找到相关品牌信息";
+    public static final String NO_FOUND_CATEGORY_ERROR = "没有找到相关分类信息";
+    public static final String NO_FOUND_DELIVERY_ERROR = "没有找到相关收货地址信息";
 }
 

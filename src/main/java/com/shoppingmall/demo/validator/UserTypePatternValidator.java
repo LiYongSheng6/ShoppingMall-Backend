@@ -1,14 +1,14 @@
 package com.shoppingmall.demo.validator;
 
 import com.shoppingmall.demo.annotation.UserTypePattern;
-import com.shoppingmall.demo.constant.CacheConstants;
+import com.shoppingmall.demo.constant.RegexConstants;
 import com.shoppingmall.demo.enums.UserType;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 
 public class UserTypePatternValidator implements ConstraintValidator<UserTypePattern, UserType> {
 
-    private static final String PATTERN = CacheConstants.USER_TYPE_REGEX; // 自定义正则表达式
+    private static final String PATTERN = RegexConstants.USER_TYPE_REGEX; // 自定义正则表达式
 
     @Override
     public void initialize(UserTypePattern constraintAnnotation) {

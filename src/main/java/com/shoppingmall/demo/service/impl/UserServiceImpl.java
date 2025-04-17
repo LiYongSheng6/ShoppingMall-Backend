@@ -178,12 +178,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements 
             throw new ServiceException(MessageConstants.USER_FORBIDDEN_ERROR);
         }
 
-        //if (account.matches(CacheConstants.EMAIL_REGEX)) {
-        //    userDO = lambdaQuery().eq(UserDO::getEmail, account).one();
-        //} else {
-        //    userDO = lambdaQuery().eq(UserDO::getPhone, account).one();
-        //}
-
         if (!StringUtils.hasLength(userLoginDTO.getCode()) && !StringUtils.hasLength(userLoginDTO.getPassword())) {
             throw new ServiceException(MessageConstants.PARAM_MISSING);
         }
@@ -217,7 +211,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements 
 
         return lambdaUpdate().eq(UserDO::getId, userDO.getId())
                 .set(UserDO::getPassword, MD5Util.generate(userResetDTO.getReset()))
-                .update() ? Result.success(MessageConstants.UPDATE_SUCCESS) : Result.error(MessageConstants.UPDATE_ERROR);
+                .set(UserDO::getUpdateTime, LocalDateTime.now()).update() ?
+                Result.success(MessageConstants.UPDATE_SUCCESS) : Result.error(MessageConstants.UPDATE_ERROR);
     }
 
     @Override
@@ -228,7 +223,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements 
 
         return lambdaUpdate().eq(UserDO::getId, userDO.getId())
                 .set(UserDO::getEmail, userResetDTO.getReset())
-                .update() ? Result.success(MessageConstants.UPDATE_SUCCESS) : Result.error(MessageConstants.UPDATE_ERROR);
+                .set(UserDO::getUpdateTime, LocalDateTime.now()).update() ?
+                Result.success(MessageConstants.UPDATE_SUCCESS) : Result.error(MessageConstants.UPDATE_ERROR);
     }
 
     @Override
@@ -268,7 +264,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements 
         UserDO userDO = getUserDO(id);
         if (userDO.getIsForbidden() == ForbiddenType.TRUE)
             throw new ServiceException(MessageConstants.USER_FORBIDDEN_EXIST);
-        return updateById(userDO.setIsForbidden(ForbiddenType.TRUE)) ?
+        return updateById(userDO.setIsForbidden(ForbiddenType.TRUE).setUpdateTime(LocalDateTime.now())) ?
                 Result.success(MessageConstants.OPERATION_SUCCESS) : Result.error(MessageConstants.OPERATION_ERROR);
     }
 
@@ -277,7 +273,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements 
         UserDO userDO = getUserDO(id);
         if (userDO.getIsForbidden() == ForbiddenType.FALSE)
             throw new ServiceException(MessageConstants.USER_UNBLOCKING_EXIST);
-        return updateById(userDO.setIsForbidden(ForbiddenType.FALSE)) ?
+        return updateById(userDO.setIsForbidden(ForbiddenType.FALSE).setUpdateTime(LocalDateTime.now())) ?
                 Result.success(MessageConstants.OPERATION_SUCCESS) : Result.error(MessageConstants.OPERATION_ERROR);
     }
 

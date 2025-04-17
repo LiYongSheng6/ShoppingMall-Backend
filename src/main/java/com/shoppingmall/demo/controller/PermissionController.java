@@ -25,7 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
  * @author redmi k50 ultra
  * * @date 2024/10/9
  */
-@Api(tags = "权限资源管理接口")
+@Api(tags = "权限资源接口")
 @Validated
 @RestController
 @RequiredArgsConstructor
@@ -38,9 +38,9 @@ public class PermissionController {
     @Log
     @Operation(summary = "添加权限资源接口")
     @PostMapping("/addPermission")
-    @PreAuthorize("sys:permission:addPermission")
-    public Result addPermission(@RequestBody @Validated PermissionSaveDTO PermissionSaveDTO) {
-        return permissionService.addPermission(PermissionSaveDTO);
+    @PreAuthorize("sys:permission:savePermission")
+    public Result addPermission(@RequestBody @Validated PermissionSaveDTO permissionSaveDTO) {
+        return permissionService.savePermission(permissionSaveDTO);
     }
 
     @Log
@@ -54,8 +54,8 @@ public class PermissionController {
     @Log
     @Operation(summary = "获取权限资源接口")
     @GetMapping("/getPermission")
-    @PreAuthorize("sys:permission:getPermission")
-    public Result getPermission(@RequestParam @NotNull Integer type) {
+    @PreAuthorize("sys:permission:getPermissionList")
+    public Result getPermissionList(@RequestParam @NotNull Integer type) {
         return permissionService.getPermissionList(type);
     }
 

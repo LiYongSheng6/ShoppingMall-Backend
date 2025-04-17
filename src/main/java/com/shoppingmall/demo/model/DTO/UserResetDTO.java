@@ -1,7 +1,7 @@
 package com.shoppingmall.demo.model.DTO;
 
-import com.shoppingmall.demo.constant.CacheConstants;
 import com.shoppingmall.demo.constant.MessageConstants;
+import com.shoppingmall.demo.constant.RegexConstants;
 import io.swagger.annotations.ApiModelProperty;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
@@ -26,7 +26,7 @@ public class UserResetDTO {
 
     @ApiModelProperty("验证码")
     @NotBlank(message = MessageConstants.PARAM_MISSING)
-    @Pattern(regexp = CacheConstants.CODE_REGEX, message = MessageConstants.CODE_LENGTH_MESSAGE)
+    @Pattern(regexp = RegexConstants.CODE_REGEX, message = MessageConstants.CODE_LENGTH_MESSAGE)
     private String code;
 
 }

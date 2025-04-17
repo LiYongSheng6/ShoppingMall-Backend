@@ -1,8 +1,8 @@
 package com.shoppingmall.demo.model.DTO;
 
 
-import com.shoppingmall.demo.constant.CacheConstants;
 import com.shoppingmall.demo.constant.MessageConstants;
+import com.shoppingmall.demo.constant.RegexConstants;
 import io.swagger.annotations.ApiModelProperty;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
@@ -37,7 +37,7 @@ public class EmailDTO {
      */
     @ApiModelProperty("收件人邮箱")
     @NotBlank(message = "收件人邮箱不能为空")
-    @Pattern(regexp = CacheConstants.EMAIL_REGEX, message = MessageConstants.EMAIL_REGEX_MESSAGE)
+    @Pattern(regexp = RegexConstants.EMAIL_REGEX, message = MessageConstants.EMAIL_REGEX_MESSAGE)
     public String toUserEmail;
 
     /**

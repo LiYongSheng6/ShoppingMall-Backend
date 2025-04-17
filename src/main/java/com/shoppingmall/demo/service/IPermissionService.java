@@ -12,11 +12,11 @@ import com.shoppingmall.demo.utils.Result;
  * * @date 2024/10/10
  */
 public interface IPermissionService extends IService<PermissionDO> {
-    Result addPermission(PermissionSaveDTO permissionSaveDTO);
-
-    Result getPermissionList(Integer type);
+    Result savePermission(PermissionSaveDTO permissionSaveDTO);
 
     Result updatePermission(PermissionUpdateDTO permissionUpdateDTO);
+
+    Result getPermissionList(Integer type);
 
     Result deletePermission(Long id);
 
