@@ -2,13 +2,11 @@ package com.shoppingmall.demo.service.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 
-import com.shoppingmall.demo.config.EmailConfigProperties;
+import com.shoppingmall.demo.config.property.EmailConfigProperties;
 import com.shoppingmall.demo.constant.CacheConstants;
 import com.shoppingmall.demo.constant.MessageConstants;
-import com.shoppingmall.demo.exception.ServiceException;
 import com.shoppingmall.demo.mapper.EmailMapper;
 import com.shoppingmall.demo.model.DO.EmailDO;
-import com.shoppingmall.demo.model.DTO.EmailDTO;
 import com.shoppingmall.demo.service.IEmailService;
 import com.shoppingmall.demo.utils.CheckCodeUtil;
 import com.shoppingmall.demo.utils.MailUtil;

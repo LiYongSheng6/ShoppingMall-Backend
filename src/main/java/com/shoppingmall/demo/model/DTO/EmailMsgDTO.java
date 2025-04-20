@@ -6,6 +6,7 @@ import com.shoppingmall.demo.constant.RegexConstants;
 import io.swagger.annotations.ApiModelProperty;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
+import jakarta.validation.groups.Default;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -24,7 +25,12 @@ import org.springframework.validation.annotation.Validated;
 @Builder
 @Validated
 @Accessors(chain = true)
-public class EmailSendDTO {
+public class EmailMsgDTO {
+    public interface Msg extends Default {
+    }
+
+    public interface Code extends Default {
+    }
 
     /**
      * 收件人邮箱
@@ -33,5 +39,19 @@ public class EmailSendDTO {
     @NotBlank(message = "收件人邮箱不能为空")
     @Pattern(regexp = RegexConstants.EMAIL_REGEX, message = MessageConstants.EMAIL_REGEX_MESSAGE)
     public String toUserEmail;
+
+    /**
+     * 邮件标题
+     */
+    @ApiModelProperty("邮件标题")
+    @NotBlank(groups = Msg.class, message = "邮件标题不能为空")
+    public String title;
+
+    /**
+     * 邮件正文
+     */
+    @ApiModelProperty("邮件正文")
+    @NotBlank(groups = Msg.class, message = "邮件正文不能为空")
+    public String content;
 
 }

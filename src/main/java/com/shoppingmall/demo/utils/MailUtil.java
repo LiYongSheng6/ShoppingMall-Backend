@@ -1,6 +1,6 @@
 package com.shoppingmall.demo.utils;
 
-import com.shoppingmall.demo.config.EmailConfigProperties;
+import com.shoppingmall.demo.config.property.EmailConfigProperties;
 import com.sun.mail.util.MailSSLSocketFactory;
 import lombok.extern.slf4j.Slf4j;
 

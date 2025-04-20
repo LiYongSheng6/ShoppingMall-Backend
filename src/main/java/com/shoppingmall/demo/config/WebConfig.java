@@ -23,11 +23,9 @@ public class WebConfig implements WebMvcConfigurer  {
 
         registry.addInterceptor(loginInterceptor)
                 .excludePathPatterns(
-                        "/user/hello"
+                        "/upload", "/user/hello"
                 )
                 .order(2);
-
     }
-
 
 }

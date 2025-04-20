@@ -2,7 +2,6 @@ package com.shoppingmall.demo.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.shoppingmall.demo.model.DO.EmailDO;
-import com.shoppingmall.demo.model.DTO.EmailDTO;
 import com.shoppingmall.demo.utils.Result;
 
 import java.io.IOException;

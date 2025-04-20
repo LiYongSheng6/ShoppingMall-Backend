@@ -62,8 +62,13 @@ public class MessageConstants {
     public static final String EMAIL_REGEX_MESSAGE = "请输入正确的邮箱地址";
     public static final String GENDER_REGEX_MESSAGE = "用户性别值不符合要求";
     public static final String USER_TYPE_REGEX_MESSAGE = "用户类型值不符合要求";
-    public static final String TIME_TYPE_REGEX_MESSAGE = "时间类型值不符合要求";
+    public static final String GOOD_TYPE_REGEX_MESSAGE = "商品类型值不符合要求";
+    public static final String GOOD_STATUS_REGEX_MESSAGE = "商品状态值不符合要求";
+    public static final String ORDER_STATUS_REGEX_MESSAGE = "订单状态值不符合要求";
     public static final String FORBIDDEN_REGEX_MESSAGE = "封禁判定值不符合要求";
+
+    public static final String GOOD_RANK_TYPE_NULL_ERROR = "商品榜单类型不能为空!";
+    public static final String NO_ENOUGH_GOOD_ERROR = "商品存货数量不足！";
 
     public static final String PARAM_MISSING = "缺少必要参数";
     public static final String INFO_ERROR = "报名信息缺失";
@@ -71,7 +76,13 @@ public class MessageConstants {
     public static final String NO_FOUND_TIME_ERROR = "没有找到相关时间信息";
     public static final String NO_FOUND_PERMISSION_ERROR = "没有找到相关权限信息";
     public static final String NO_FOUND_BAND_ERROR = "没有找到相关品牌信息";
+    public static final String NO_FOUND_TAG_ERROR = "没有找到相关标签信息";
     public static final String NO_FOUND_CATEGORY_ERROR = "没有找到相关分类信息";
     public static final String NO_FOUND_DELIVERY_ERROR = "没有找到相关收货地址信息";
+    public static final String NO_FOUND_ADDRESS_ERROR = "没有找到相关地址信息";
+    public static final String NO_FOUND_GOOD_ERROR = "没有找到相关商品信息";
+    public static final String NO_FOUND_ORDER_ERROR = "没有找到相关订单信息";
+
+
 }
 

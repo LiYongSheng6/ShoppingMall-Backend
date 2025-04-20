@@ -6,12 +6,12 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.shoppingmall.demo.constant.CacheConstants;
 import com.shoppingmall.demo.constant.MessageConstants;
 import com.shoppingmall.demo.exception.ServiceException;
-import com.shoppingmall.demo.mapper.BandMapper;
-import com.shoppingmall.demo.model.DO.BandDO;
-import com.shoppingmall.demo.model.DTO.BandSaveDTO;
-import com.shoppingmall.demo.model.DTO.BandUpdateDTO;
-import com.shoppingmall.demo.model.VO.BandVO;
-import com.shoppingmall.demo.service.IBandService;
+import com.shoppingmall.demo.mapper.TagMapper;
+import com.shoppingmall.demo.model.DO.TagDO;
+import com.shoppingmall.demo.model.DTO.TagSaveDTO;
+import com.shoppingmall.demo.model.DTO.TagUpdateDTO;
+import com.shoppingmall.demo.model.VO.TagVO;
+import com.shoppingmall.demo.service.ITagService;
 import com.shoppingmall.demo.utils.RedisIdWorker;
 import com.shoppingmall.demo.utils.Result;
 import lombok.RequiredArgsConstructor;
@@ -26,34 +26,34 @@ import java.util.concurrent.CompletableFuture;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class BandServiceImpl extends ServiceImpl<BandMapper, BandDO> implements IBandService {
+public class TagServiceImpl extends ServiceImpl<TagMapper, TagDO> implements ITagService {
 
     private final RedisIdWorker redisIdWorker;
 
     @Override
-    public Result saveBand(BandSaveDTO bandSaveDTO) {
-        return save(BeanUtil.copyProperties(bandSaveDTO, BandDO.class).setId(redisIdWorker.nextId(CacheConstants.BAND_ID_PREFIX))) ?
+    public Result saveTag(TagSaveDTO tagSaveDTO) {
+        return save(BeanUtil.copyProperties(tagSaveDTO, TagDO.class).setId(redisIdWorker.nextId(CacheConstants.TAG_ID_PREFIX))) ?
                 Result.success(MessageConstants.SAVE_SUCCESS) : Result.error(MessageConstants.SAVE_ERROR);
     }
 
     @Override
-    public Result updateBand(BandUpdateDTO bandUpdateDTO) {
-        return updateById(BeanUtil.copyProperties(bandUpdateDTO, BandDO.class).setUpdateTime(LocalDateTime.now())) ?
+    public Result updateTag(TagUpdateDTO tagUpdateDTO) {
+        return updateById(BeanUtil.copyProperties(tagUpdateDTO, TagDO.class).setUpdateTime(LocalDateTime.now())) ?
                 Result.success(MessageConstants.UPDATE_SUCCESS) : Result.error(MessageConstants.UPDATE_ERROR);
     }
 
     @Override
-    public Result getBandListByType(Integer type) {
-        List<BandDO> BandDOList = lambdaQuery().eq(BandDO::getType, type).list();
+    public Result getTagListByType(Integer type) {
+        List<TagDO> tagDOList = lambdaQuery().eq(TagDO::getType, type).list();
 
-        if (CollectionUtils.isEmpty(BandDOList)) throw new ServiceException(MessageConstants.NO_FOUND_BAND_ERROR);
+        if (CollectionUtils.isEmpty(tagDOList)) throw new ServiceException(MessageConstants.NO_FOUND_TAG_ERROR);
 
-        return Result.success(BandDOList.stream().map(bandDO -> CompletableFuture.supplyAsync(() -> new BandVO(bandDO))).toList()
+        return Result.success(tagDOList.stream().map(tagDO -> CompletableFuture.supplyAsync(() -> new TagVO(tagDO))).toList()
                 .stream().map(CompletableFuture::join).toList());
     }
 
     @Override
-    public Result deleteBandById(Long id) {
+    public Result deleteTagById(Long id) {
         return removeById(id) ? Result.success(MessageConstants.DELETE_SUCCESS) : Result.error(MessageConstants.DELETE_ERROR);
     }
     

@@ -32,6 +32,16 @@ public class CacheConstants {
      */
     public static final String USER_ID_PREFIX = "user:key:";
 
+
+    /**
+     * 商品销量排行榜
+     */
+    public static final String GOOD_SALES_NUM_DAY_KEY = "good:sales:num:day:goodId";
+    public static final String GOOD_SALES_NUM_WEEK_KEY = "good:sales:num:week:goodId";
+    public static final String GOOD_SALES_NUM_YEAR_KEY = "good:sales:num:year:goodId";
+    public static final String GOOD_SALES_NUM_OVERALL_KEY = "good:sales:num:overall:goodId";
+
+
     /**
      * 账号注册-邮箱验证码key
      */
@@ -68,6 +78,20 @@ public class CacheConstants {
     public static final int EMAIL_CODE_LENGTH = 6;
 
     /**
+     * 停用词文件路径
+     */
+    public static final String CLASSPATH_STOP_WORDS_TXT = "classpath:stopWords.txt";
+
+    /**
+     * 聊天历史记录ID前缀
+     */
+    public static final String CHAT_HISTORY_ID = "chat_history_id:";
+    public static final String NO_READ_CHAT_HISTORY_TOTAL_NUM_KEY = "no_read_chat_history_total_num_id";
+    public static final String NO_READ_CHAT_HISTORY_SEPARATE_NUM_KEY = "no_read_chat_history_separate_num_id";
+    public static final String NO_READ_TOTAL_NUM_KEY = "no_read_total_num_id";
+    public static final String CHAT_HISTORY_LOCK = "chat_history_lock:";
+
+    /**
      * 用户注册分配ID
      */
     public static final String USER_ID_KEY = "userId";
@@ -83,9 +107,34 @@ public class CacheConstants {
     public static final String BAND_ID_PREFIX = "bandId";
 
     /**
+     * 标签ID前缀
+     */
+    public static final String TAG_ID_PREFIX = "tagId";
+
+    /**
      * 收货地址ID前缀
      */
     public static final String DELIVERY_ID_PREFIX = "deliveryId";
+
+    /**
+     * 地址ID前缀
+     */
+    public static final String ADDRESS_ID_PREFIX = "addressId";
+
+    /**
+     * 商品ID前缀
+     */
+    public static final String GOOD_ID_PREFIX = "goodId";
+
+    /**
+     * 订单生成锁
+     */
+    public static final String ORDER_SAVE_LOCK = "order_save_lock:";
+
+    /**
+     * 订单ID前缀
+     */
+    public static final String ORDER_ID_PREFIX = "orderId";
 
     /**
      * 分类ID前缀

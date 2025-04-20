@@ -21,10 +21,6 @@ import org.hibernate.validator.constraints.Length;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
-/**
-* 
-* @TableName tag
-*/
 @Data
 @Builder
 @Accessors(chain = true)

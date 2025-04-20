@@ -1,0 +1,54 @@
+server:
+  port: ${shopping-mall.server.port}
+
+spring:
+  profiles:
+    active: prod
+  application:
+    name: ShoppingMall-Backend
+  datasource:
+    type: com.alibaba.druid.pool.DruidDataSource
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://${shopping-mall.db.host}:${shopping-mall.db.port}/${shopping-mall.db.name}?rewriteBatchedStatements=true&autoReconnect=true&useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true&useUnicode=true&characterEncoding=UTF-8
+    username: ${shopping-mall.db.username}
+    password: ${shopping-mall.db.password}
+    druid:
+      test-on-borrow: true  # 借用连接时测试其有效性
+      test-while-idle: true  # 空闲时测试连接
+      validation-query: SELECT 1  # 验证查询语句
+      time-between-eviction-runs-millis: 60000  # 连接池扫描间隔时间（毫秒）
+      min-evictable-idle-time-millis: 300000  # 连接最小空闲时间（毫秒）
+      max-active: 20  # 最大连接数
+      min-idle: 5  # 最小连接数
+      max-wait: 60000  # 获取连接最大等待时间（毫秒）
+      validation-query-timeout: 5000  # 验证查询超时时间（毫秒）
+  data:
+    redis:
+      host: ${shopping-mall.redis.host}
+      port: ${shopping-mall.redis.port}
+      password: ${shopping-mall.redis.password}
+      database: ${shopping-mall.redis.database}
+  transaction:
+    rollback-on-commit-failure: true
+
+email:
+  user: ${shopping-mall.email.user}
+  code: ${shopping-mall.email.code}
+  host: ${shopping-mall.email.host}
+  auth: ${shopping-mall.email.auth}
+
+oss:
+  endpoint: ${shopping-mall.oss.endpoint}
+  bucket-name: ${shopping-mall.oss.bucket-name}
+  access-key-id: ${shopping-mall.oss.access-key-id}
+  access-key-secret: ${shopping-mall.oss.access-key-secret}
+
+mybatis-plus:
+  global-config:
+    db-config:
+      id-type: assign_id
+      logic-delete-field: isDeleted
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+  configuration:
+    default-enum-type-handler: com.baomidou.mybatisplus.core.handlers.MybatisEnumTypeHandler

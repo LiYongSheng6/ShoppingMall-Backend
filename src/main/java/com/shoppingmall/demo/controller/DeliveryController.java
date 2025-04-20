@@ -27,7 +27,7 @@ import org.springframework.web.bind.annotation.RestController;
  * * @date 2024/10/9
  */
 
-@Api(tags = "收货地址接口")
+@Api(tags = "收货信息管理接口")
 @Validated
 @RequiredArgsConstructor
 @CrossOrigin(origins = "*")
@@ -38,46 +38,46 @@ public class DeliveryController {
     private final IDeliveryService deliveryService;
 
     @Log
-    @Operation(summary = "添加收货地址接口")
-    @PostMapping("/saveDelivery")
-    public Result saveDelivery(@RequestBody @Validated DeliverySaveDTO deliverySaveDTO) {
+    @Operation(summary = "添加收货信息接口")
+    @PostMapping("/save")
+    public Result save(@RequestBody @Validated DeliverySaveDTO deliverySaveDTO) {
         return deliveryService.saveDelivery(deliverySaveDTO);
     }
 
     @Log
-    @Operation(summary = "修改收货地址接口")
-    @PutMapping("/updateDelivery")
-    public Result updateDelivery(@RequestBody @Validated DeliveryUpdateDTO deliveryUpdateDTO) {
+    @Operation(summary = "修改收货信息接口")
+    @PutMapping("/update")
+    public Result update(@RequestBody @Validated DeliveryUpdateDTO deliveryUpdateDTO) {
         return deliveryService.updateDelivery(deliveryUpdateDTO);
     }
 
     @Log
-    @Operation(summary = "根据id获取收货地址信息接口")
-    @GetMapping("/getDelivery")
+    @Operation(summary = "删除收货信息接口")
+    @DeleteMapping("/delete")
+    public Result delete(@RequestParam @NotNull Long id) {
+        return deliveryService.deleteDeliveryById(id);
+    }
+
+    @Log
+    @Operation(summary = "获取单一收货信息详情接口")
+    @GetMapping("/detail")
     public Result getDelivery(@RequestParam @NotNull Long id) {
         return deliveryService.getDeliveryById(id);
     }
 
     @Log
-    @Operation(summary = "获取当前用户收货地址列表接口")
-    @GetMapping("/getDeliveryList")
+    @Operation(summary = "获取当前用户收货信息列表接口")
+    @GetMapping("/list/loginUser")
     public Result getDeliveryList() {
         return deliveryService.getDeliveryList();
     }
 
     @Log
-    @Operation(summary = "根据用户id获取其收货地址列表接口")
-    @GetMapping("/getDeliveryListByUserId")
+    @Operation(summary = "获取用户收货信息列表接口")
+    @GetMapping("/list/userId")
     @PreAuthorize("sys:Delivery:getDeliveryListByUserId")
     public Result getDeliveryListByUserId(@RequestParam @NotNull Long userId) {
         return deliveryService.getDeliveryListByUserId(userId);
-    }
-
-    @Log
-    @Operation(summary = "删除收货地址接口")
-    @DeleteMapping("/deleteDelivery")
-    public Result deleteDelivery(@RequestParam @NotNull Long id) {
-        return deliveryService.deleteDeliveryById(id);
     }
 
 

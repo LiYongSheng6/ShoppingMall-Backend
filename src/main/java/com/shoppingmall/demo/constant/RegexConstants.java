@@ -31,9 +31,24 @@ public class RegexConstants {
     public static final String PHONE_REGEX = "^1[3-9]\\d{9}$";
 
     /**
+     * 商品类型正则
+     */
+    public static final String GOOD_TYPE_REGEX = "^[01234]$";
+
+    /**
+     * 订单状态正则
+     */
+    public static final String ORDER_STATUS_REGEX = "^[01234]$";
+
+    /**
      * 逻辑删除字段正则
      */
     public static final String FORBIDDEN_REGEX = "^[01]$";
+
+    /**
+     * 商品状态正则
+     */
+    public static final String GOOD_STATUS_REGEX = "^[01]$";
 
     /**
      * 性别正则
@@ -49,5 +64,6 @@ public class RegexConstants {
      * 邮箱验证码正则
      */
     public static final String CODE_REGEX = "^\\w{6}$";
+
 
 }

@@ -1,4 +1,4 @@
-package com.shoppingmall.demo.config;
+package com.shoppingmall.demo.config.property;
 
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Value;

@@ -12,12 +12,6 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 import org.hibernate.validator.constraints.Length;
 
-/**
- * 资源权限信息实体类
- *
- * @author redmi k50 ultra
- * * @date 2024/7/19
- */
 @Data
 @Builder
 @Accessors(chain = true)

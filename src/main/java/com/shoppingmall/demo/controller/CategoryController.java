@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-@Api(tags = "分类信息接口")
+@Api(tags = "分类信息管理接口")
 @Validated
 @RequiredArgsConstructor
 @CrossOrigin(origins = "*")
@@ -33,33 +33,33 @@ public class CategoryController {
 
     @Log
     @Operation(summary = "添加分类信息接口")
-    @PostMapping("/saveCategory")
-    @PreAuthorize("sys:Category:saveCategory")
-    public Result saveCategory(@RequestBody @Validated CategorySaveDTO categorySaveDTO) {
+    @PostMapping("/save")
+    @PreAuthorize("sys:Category:save")
+    public Result save(@RequestBody @Validated CategorySaveDTO categorySaveDTO) {
         return categoryService.saveCategory(categorySaveDTO);
     }
 
     @Log
     @Operation(summary = "修改分类信息接口")
-    @PutMapping("/updateCategory")
-    @PreAuthorize("sys:Category:updateCategory")
-    public Result updateCategory(@RequestBody @Validated CategoryUpdateDTO categoryUpdateDTO) {
+    @PutMapping("/update")
+    @PreAuthorize("sys:Category:update")
+    public Result update(@RequestBody @Validated CategoryUpdateDTO categoryUpdateDTO) {
         return categoryService.updateCategory(categoryUpdateDTO);
     }
 
     @Log
-    @Operation(summary = "获取分类信息接口")
-    @GetMapping("/getCategoryList")
-    public Result getCategoryList(@RequestParam @NotNull Integer type) {
-        return categoryService.getCategoryListByType(type);
+    @Operation(summary = "删除分类信息接口")
+    @DeleteMapping("/delete")
+    @PreAuthorize("sys:Category:delete")
+    public Result delete(@RequestParam @NotNull Long id) {
+        return categoryService.deleteCategoryById(id);
     }
 
     @Log
-    @Operation(summary = "删除分类信息接口")
-    @DeleteMapping("/deleteCategory")
-    @PreAuthorize("sys:Category:deleteCategory")
-    public Result deleteCategory(@RequestParam @NotNull Long id) {
-        return categoryService.deleteCategoryById(id);
+    @Operation(summary = "获取分类名称列表接口")
+    @GetMapping("/list")
+    public Result getCategoryList(@RequestParam @NotNull Integer type) {
+        return categoryService.getCategoryListByType(type);
     }
 
 }

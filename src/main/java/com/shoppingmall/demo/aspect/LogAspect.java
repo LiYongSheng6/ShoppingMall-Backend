@@ -1,7 +1,15 @@
 package com.shoppingmall.demo.aspect;
 
+import com.alibaba.fastjson2.JSON;
 import com.shoppingmall.demo.annotation.Log;
+import com.shoppingmall.demo.service.common.SystemLog;
+import com.shoppingmall.demo.utils.IPUtils;
+import com.shoppingmall.demo.utils.ServletUtils;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.AfterThrowing;
@@ -56,40 +64,40 @@ public class LogAspect {
     }
 
     protected void handleLog(final JoinPoint joinPoint, Log controllerLog, final Exception e, Object jsonResult) {
-//        try {
-//            HttpServletRequest request = ServletUtils.getRequest();
-//            HttpServletResponse response = ServletUtils.getResponse();
-//            SystemLog systemLog = new SystemLog();
-//            Long costTime = System.currentTimeMillis() - TIME_THREADLOCAL.get();
-//            String url = request.getRequestURI();
-//            String className = joinPoint.getTarget().getClass().getName();
-//            String methodName = joinPoint.getSignature().getName();
-//            String ip = IPUtils.getIpAddr(request);
-//            systemLog.setClassMethod(className + "." + methodName + "()");
-//            systemLog.setStatus(response.getStatus());
-//            systemLog.setIp(ip);
-//            systemLog.setResponseTime(costTime);
-//            systemLog.setRequestMethod(request.getMethod());
-//            systemLog.setUrl(url);
-////            systemLog.setNode(Constants.VERSION.getNode());
-//            if (ObjectUtils.isNotEmpty(e)) {
-//                systemLog.setErrMsg(StringUtils.substring(e.getMessage(), 0, 1000));
-//            }
-//            if (controllerLog.isSaveRequestData()) {
-//                Object[] args = joinPoint.getArgs();
-//                systemLog.setParams(args);
-//            }
-//            if (controllerLog.isSaveResponseData()) {
-//                systemLog.setResult(jsonResult);
-//            }
-//
-//            log.info(JSON.toJSONString(systemLog));
-//        } catch (Exception exp) {
-//            // 记录本地异常日志
-//            log.error("异常信息:{}", exp.getMessage());
-//        } finally {
-//            TIME_THREADLOCAL.remove();
-//        }
+        try {
+            HttpServletRequest request = ServletUtils.getRequest();
+            HttpServletResponse response = ServletUtils.getResponse();
+            SystemLog systemLog = new SystemLog();
+            Long costTime = System.currentTimeMillis() - TIME_THREADLOCAL.get();
+            String url = request.getRequestURI();
+            String className = joinPoint.getTarget().getClass().getName();
+            String methodName = joinPoint.getSignature().getName();
+            String ip = IPUtils.getIpAddr(request);
+            systemLog.setClassMethod(className + "." + methodName + "()");
+            systemLog.setStatus(response.getStatus());
+            systemLog.setIp(ip);
+            systemLog.setResponseTime(costTime);
+            systemLog.setRequestMethod(request.getMethod());
+            systemLog.setUrl(url);
+//            systemLog.setNode(Constants.VERSION.getNode());
+            if (ObjectUtils.isNotEmpty(e)) {
+                systemLog.setErrMsg(StringUtils.substring(e.getMessage(), 0, 1000));
+            }
+            if (controllerLog.isSaveRequestData()) {
+                Object[] args = joinPoint.getArgs();
+                systemLog.setParams(args);
+            }
+            if (controllerLog.isSaveResponseData()) {
+                systemLog.setResult(jsonResult);
+            }
+
+            log.info(JSON.toJSONString(systemLog));
+        } catch (Exception exp) {
+            // 记录本地异常日志
+            log.error("异常信息:{}", exp.getMessage());
+        } finally {
+            TIME_THREADLOCAL.remove();
+        }
     }
 
 }

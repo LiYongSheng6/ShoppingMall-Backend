@@ -23,32 +23,19 @@ import java.io.Serializable;
 @Builder
 @Validated
 @Accessors(chain = true)
-public class BandUpdateDTO implements Serializable {
+public class TagSaveDTO implements Serializable {
 
     /**
-     * 品牌id
-     */
-    @NotNull(message="[品牌id]不能为空")
-    @ApiModelProperty("品牌id")
-    private Long id;
-
-    /**
-    * 品牌名称
+    * 标签名称
     */
-    @Length(max= 255,message="品牌名称长度不能超过255")
-    @ApiModelProperty("品牌名称")
-    private String bandName;
+    @Length(max= 255,message="标签名称长度不能超过255")
+    @ApiModelProperty("标签名称")
+    private String tagName;
 
     /**
-     * 品牌所属商品类型
+     * 标签所属商品类型
      */
-    @ApiModelProperty("品牌所属商品类型")
+    @NotNull(message="[标签所属商品类型]不能为空")
+    @ApiModelProperty("标签所属商品类型")
     private Integer type;
-
-    /**
-     * 品牌简介
-     */
-    @Length(max= 512,message="简介内容长度不能超过512")
-    @ApiModelProperty("品牌简介")
-    private String description;
 }

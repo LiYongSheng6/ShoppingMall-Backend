@@ -25,7 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
  * @author redmi k50 ultra
  * * @date 2024/10/9
  */
-@Api(tags = "权限资源接口")
+@Api(tags = "权限资源管理接口")
 @Validated
 @RestController
 @RequiredArgsConstructor
@@ -37,34 +37,34 @@ public class PermissionController {
 
     @Log
     @Operation(summary = "添加权限资源接口")
-    @PostMapping("/addPermission")
-    @PreAuthorize("sys:permission:savePermission")
-    public Result addPermission(@RequestBody @Validated PermissionSaveDTO permissionSaveDTO) {
+    @PostMapping("/save")
+    @PreAuthorize("sys:permission:save")
+    public Result save(@RequestBody @Validated PermissionSaveDTO permissionSaveDTO) {
         return permissionService.savePermission(permissionSaveDTO);
     }
 
     @Log
     @Operation(summary = "修改权限资源接口")
-    @PutMapping("/updatePermission")
-    @PreAuthorize("sys:permission:updatePermission")
-    public Result updatePermission(@RequestBody @Validated PermissionUpdateDTO permissionUpdateDTO) {
+    @PutMapping("/update")
+    @PreAuthorize("sys:permission:update")
+    public Result update(@RequestBody @Validated PermissionUpdateDTO permissionUpdateDTO) {
         return permissionService.updatePermission(permissionUpdateDTO);
     }
 
     @Log
-    @Operation(summary = "获取权限资源接口")
-    @GetMapping("/getPermission")
-    @PreAuthorize("sys:permission:getPermissionList")
-    public Result getPermissionList(@RequestParam @NotNull Integer type) {
-        return permissionService.getPermissionList(type);
+    @Operation(summary = "删除权限资源接口")
+    @DeleteMapping("/delete")
+    @PreAuthorize("sys:permission:delete")
+    public Result delete(@RequestParam @NotNull Long id) {
+        return permissionService.deletePermission(id);
     }
 
     @Log
-    @Operation(summary = "删除权限资源接口")
-    @DeleteMapping("/deletePermission")
-    @PreAuthorize("sys:permission:deletePermission")
-    public Result deletePermission(@RequestParam @NotNull Long id) {
-        return permissionService.deletePermission(id);
+    @Operation(summary = "获取权限资源接口")
+    @GetMapping("/list")
+    @PreAuthorize("sys:permission:list")
+    public Result getPermissionList(@RequestParam @NotNull Integer type) {
+        return permissionService.getPermissionList(type);
     }
 
 

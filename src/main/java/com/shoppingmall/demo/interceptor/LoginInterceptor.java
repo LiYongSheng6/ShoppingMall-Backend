@@ -31,7 +31,7 @@ public class LoginInterceptor implements HandlerInterceptor {
 
     private final RedisCacheService redisCacheService;
     public static String TOKEN_HEADER = "Authorization";
-    private static final List<String> list = List.of("/user/register", "/user/login", "/email/register", "/email/login");
+    private static final List<String> list = List.of("/user/register", "/user/login", "/email/register", "/email/login", "/error");
 
     /**
      * 执行请求接口前的处理
@@ -45,7 +45,7 @@ public class LoginInterceptor implements HandlerInterceptor {
     @Override
     public boolean preHandle(@NotNull HttpServletRequest request, @NotNull HttpServletResponse response, @NotNull Object handler) throws Exception {
         // 记录请求路径
-        String requestURI = request.getRequestURI();
+        String requestURI = request.getRequestURI().strip();
         log.info("登录拦截器拦截：{}", requestURI);
         if (list.contains(requestURI)) {
             // 跳过登录验证逻辑

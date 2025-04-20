@@ -2,24 +2,16 @@ package com.shoppingmall.demo.model.VO;
 
 
 import cn.hutool.core.bean.BeanUtil;
-import com.shoppingmall.demo.model.DO.BandDO;
 import com.shoppingmall.demo.model.DO.DeliveryDO;
 import io.swagger.annotations.ApiModelProperty;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
-import org.hibernate.validator.constraints.Length;
 
 import java.io.Serializable;
 
-/**
-* 
-* @TableName tag
-*/
 @Data
 @Builder
 @Accessors(chain = true)

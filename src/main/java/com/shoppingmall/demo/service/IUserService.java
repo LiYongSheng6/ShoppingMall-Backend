@@ -2,16 +2,12 @@ package com.shoppingmall.demo.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.shoppingmall.demo.model.DO.UserDO;
-import com.shoppingmall.demo.model.DTO.UserCommentDTO;
 import com.shoppingmall.demo.model.DTO.UserInfoDTO;
 import com.shoppingmall.demo.model.DTO.UserLoginDTO;
 import com.shoppingmall.demo.model.DTO.UserResetDTO;
 import com.shoppingmall.demo.model.DTO.UserRgsDTO;
 import com.shoppingmall.demo.model.DTO.UserUpdateDTO;
 import com.shoppingmall.demo.model.Query.UserQuery;
-import com.shoppingmall.demo.model.VO.PageVO;
-import com.shoppingmall.demo.model.VO.UserPageVO;
-import com.shoppingmall.demo.model.VO.UserVO;
 import com.shoppingmall.demo.utils.Result;
 
 /**
@@ -42,12 +38,12 @@ public interface IUserService extends IService<UserDO> {
 
     Result unblockingUserById(Long id);
 
-    Result<UserVO> getLoginUserInfo();
+    Result getLoginUserInfo();
 
-    Result<UserVO> getUserInfoById(Long id);
+    Result getUserInfoById(Long id);
 
     Result deleteUserById(Long id);
 
-    Result<PageVO<UserPageVO>> pageUserListByCondition(UserQuery userQuery);
+    Result pageUserListByCondition(UserQuery userQuery);
 
 }

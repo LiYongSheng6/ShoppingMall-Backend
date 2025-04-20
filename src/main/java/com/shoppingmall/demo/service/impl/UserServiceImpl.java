@@ -4,18 +4,13 @@ import cn.hutool.core.bean.BeanUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.baomidou.mybatisplus.extension.toolkit.Db;
-
 import com.shoppingmall.demo.constant.CacheConstants;
 import com.shoppingmall.demo.constant.MessageConstants;
 import com.shoppingmall.demo.enums.ForbiddenType;
 import com.shoppingmall.demo.enums.UserType;
 import com.shoppingmall.demo.exception.ServiceException;
 import com.shoppingmall.demo.mapper.UserMapper;
-import com.shoppingmall.demo.model.DO.EmailDO;
 import com.shoppingmall.demo.model.DO.UserDO;
-import com.shoppingmall.demo.model.DTO.EmailDTO;
-import com.shoppingmall.demo.model.DTO.UserCommentDTO;
 import com.shoppingmall.demo.model.DTO.UserInfoDTO;
 import com.shoppingmall.demo.model.DTO.UserLoginDTO;
 import com.shoppingmall.demo.model.DTO.UserResetDTO;
@@ -23,9 +18,7 @@ import com.shoppingmall.demo.model.DTO.UserRgsDTO;
 import com.shoppingmall.demo.model.DTO.UserUpdateDTO;
 import com.shoppingmall.demo.model.Query.UserQuery;
 import com.shoppingmall.demo.model.VO.PageVO;
-import com.shoppingmall.demo.model.VO.UserPageVO;
 import com.shoppingmall.demo.model.VO.UserVO;
-import com.shoppingmall.demo.service.IEmailService;
 import com.shoppingmall.demo.service.IPermissionService;
 import com.shoppingmall.demo.service.IUserService;
 import com.shoppingmall.demo.service.common.LoginInfoService;
@@ -38,32 +31,16 @@ import com.shoppingmall.demo.utils.ThreadLocalUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.Base64;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicReference;
 
 
 /**
@@ -278,14 +255,14 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements 
     }
 
     @Override
-    public Result<UserVO> getLoginUserInfo() {
+    public Result getLoginUserInfo() {
         return getUserInfoById(loginInfoService.getLoginId());
     }
 
     @Override
-    public Result<UserVO> getUserInfoById(Long id) {
+    public Result getUserInfoById(Long id) {
         UserDO userDO = getUserDO(id);
-        return Result.success(BeanUtil.copyProperties(userDO, UserVO.class));
+        return Result.success(new UserVO(userDO));
     }
 
     private UserDO getUserDO(Long id) {
@@ -314,21 +291,19 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements 
     }
 
     @Override
-    public Result<PageVO<UserPageVO>> pageUserListByCondition(UserQuery userQuery) {
+    public Result pageUserListByCondition(UserQuery userQuery) {
         Page<UserDO> page = userQuery.toMpPageDefaultSortByUpdateTime();
 
-        //Integer target = userQuery.getTarget();
-        //UserStatusType status = userQuery.getStatus();
+        UserType type = userQuery.getType();
 
         Page<UserDO> pageDO = lambdaQuery()
-                //.eq(target != null, UserDO::getTarget, target)
-                //.eq(status != null, UserDO::getStatus, status)
+                .eq(type != null, UserDO::getType, type)
                 .page(page);
 
         if (CollectionUtils.isEmpty(pageDO.getRecords())) {
             throw new ServiceException(MessageConstants.NO_FOUND_USER_ERROR);
         }
-        return Result.success(PageVO.of(pageDO, UserDO -> BeanUtil.copyProperties(UserDO, UserPageVO.class)));
+        return Result.success(PageVO.of(pageDO, UserVO::new));
     }
 
 

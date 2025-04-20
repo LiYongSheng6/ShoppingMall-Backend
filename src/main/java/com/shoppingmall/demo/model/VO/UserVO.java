@@ -8,6 +8,7 @@ import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 
 import com.shoppingmall.demo.enums.GenderType;
 import com.shoppingmall.demo.enums.UserType;
+import com.shoppingmall.demo.model.DO.UserDO;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -15,6 +16,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 import net.bytebuddy.dynamic.TargetType;
+import org.springframework.beans.BeanUtils;
 
 import java.time.LocalDateTime;
 
@@ -78,5 +80,8 @@ public class UserVO {
     @ApiModelProperty("用户类型(0普通用户，1超管)")
     private UserType type;
 
+    public UserVO(UserDO userDO){
+        BeanUtils.copyProperties(userDO,this);
+    }
 
 }
