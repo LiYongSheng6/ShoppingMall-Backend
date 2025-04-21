@@ -26,10 +26,10 @@ public class DeliveryVO implements Serializable {
     private Long id;
 
     /**
-     * 创建者id
+     * 创建者名称
      */
-    @ApiModelProperty("创建者id")
-    private Long userId;
+    @ApiModelProperty("创建者名称")
+    private String username;
 
     /**
      * 收货人姓名
@@ -47,19 +47,19 @@ public class DeliveryVO implements Serializable {
      * 省份
      */
     @ApiModelProperty("省份")
-    private Long provinceId;
+    private String province;
 
     /**
      * 城市
      */
     @ApiModelProperty("城市")
-    private Long cityId;
+    private String city;
 
     /**
      * 区县
      */
     @ApiModelProperty("区县")
-    private Long countyId;
+    private String county;
 
     /**
      * 详细地址

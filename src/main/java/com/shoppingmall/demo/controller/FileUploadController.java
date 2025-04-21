@@ -16,7 +16,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.UUID;
 
-@Tag(name = "上传图片接口")
+@Tag(name = "图片上传存储接口")
 @RestController
 @CrossOrigin
 @Validated
@@ -27,7 +27,10 @@ public class FileUploadController {
     @PostMapping("/upload")
     public Result upload(@NotNull MultipartFile file) throws Exception {
         String originalFilename=file.getOriginalFilename();
-        String suffix = originalFilename.substring(originalFilename.lastIndexOf("."));
+        String suffix = null;
+        if (originalFilename != null) {
+            suffix = originalFilename.substring(originalFilename.lastIndexOf("."));
+        }
         if(".image".equals(suffix)||".jpeg".equals(suffix)){
             return Result.error("图片格式错误");
         }

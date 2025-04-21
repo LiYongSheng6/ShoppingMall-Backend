@@ -11,15 +11,18 @@ import com.shoppingmall.demo.constant.MessageConstants;
 import com.shoppingmall.demo.enums.OrderStatus;
 import com.shoppingmall.demo.exception.ServiceException;
 import com.shoppingmall.demo.mapper.OrderMapper;
-import com.shoppingmall.demo.model.DO.DeliveryDO;
 import com.shoppingmall.demo.model.DO.GoodDO;
 import com.shoppingmall.demo.model.DO.OrderDO;
 import com.shoppingmall.demo.model.DO.UserDO;
 import com.shoppingmall.demo.model.DTO.OrderSaveDTO;
 import com.shoppingmall.demo.model.DTO.OrderUpdateDTO;
 import com.shoppingmall.demo.model.Query.OrderQuery;
+import com.shoppingmall.demo.model.VO.DeliveryVO;
+import com.shoppingmall.demo.model.VO.GoodVO;
 import com.shoppingmall.demo.model.VO.OrderVO;
 import com.shoppingmall.demo.model.VO.PageVO;
+import com.shoppingmall.demo.service.IDeliveryService;
+import com.shoppingmall.demo.service.IGoodService;
 import com.shoppingmall.demo.service.IOrderService;
 import com.shoppingmall.demo.service.common.LoginInfoService;
 import com.shoppingmall.demo.utils.RedisIdWorker;
@@ -47,6 +50,8 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, OrderDO> implemen
     private final LoginInfoService loginInfoService;
     private final OrderMapper orderMapper;
     private final RedissonClient redissonClient;
+    private final IDeliveryService deliveryService;
+    private final IGoodService goodService;
 
     @Override
     public Result<OrderVO> selectOrderById(Long orderId) {
@@ -167,15 +172,14 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, OrderDO> implemen
         }
 
         return Result.success(PageVO.of(pageDO, OrderDO -> {
-            GoodDO goodDO = Db.lambdaQuery(GoodDO.class).eq(GoodDO::getId, OrderDO.getGoodId()).one();
-            DeliveryDO deliveryDO = Db.lambdaQuery(DeliveryDO.class).eq(DeliveryDO::getId, OrderDO.getDeliveryId()).one();
+            GoodVO goodVO = (GoodVO) goodService.getGoodById(OrderDO.getGoodId()).getData();
+            DeliveryVO deliveryVO = (DeliveryVO) deliveryService.getDeliveryById(OrderDO.getDeliveryId()).getData();
             return BeanUtil.copyProperties(OrderDO, OrderVO.class)
                     .setUsername(userDoOptional.get().getUsername())
-                    .setGoodName(goodDO.getGoodName())
-                    .setPrice(goodDO.getPrice())
-                    .setConsigneeName(deliveryDO.getConsigneeName())
-                    .setPhone(deliveryDO.getPhone())
-                    .setDetailAddress(deliveryDO.getAddress());
+                    .setGoodName(goodVO.getGoodName()).setPrice(goodVO.getPrice())
+                    .setConsigneeName(deliveryVO.getConsigneeName()).setPhone(deliveryVO.getPhone())
+                    .setProvince(deliveryVO.getProvince()).setCity(deliveryVO.getCity()).setCounty(deliveryVO.getCounty())
+                    .setDetailAddress(deliveryVO.getAddress());
         }));
     }
 

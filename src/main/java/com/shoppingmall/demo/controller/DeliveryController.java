@@ -1,7 +1,6 @@
 package com.shoppingmall.demo.controller;
 
 import com.shoppingmall.demo.annotation.Log;
-
 import com.shoppingmall.demo.annotation.PreAuthorize;
 import com.shoppingmall.demo.model.DTO.DeliverySaveDTO;
 import com.shoppingmall.demo.model.DTO.DeliveryUpdateDTO;
@@ -67,14 +66,14 @@ public class DeliveryController {
 
     @Log
     @Operation(summary = "获取当前用户收货信息列表接口")
-    @GetMapping("/list/loginUser")
+    @GetMapping("/list")
     public Result getDeliveryList() {
         return deliveryService.getDeliveryList();
     }
 
     @Log
     @Operation(summary = "获取用户收货信息列表接口")
-    @GetMapping("/list/userId")
+    @GetMapping("/list/admin")
     @PreAuthorize("sys:Delivery:getDeliveryListByUserId")
     public Result getDeliveryListByUserId(@RequestParam @NotNull Long userId) {
         return deliveryService.getDeliveryListByUserId(userId);

@@ -6,13 +6,11 @@ import com.shoppingmall.demo.constant.CacheConstants;
 import com.shoppingmall.demo.constant.MessageConstants;
 import com.shoppingmall.demo.exception.ServiceException;
 import com.shoppingmall.demo.mapper.DeliveryMapper;
-import com.shoppingmall.demo.mapper.DeliveryMapper;
-import com.shoppingmall.demo.model.DO.DeliveryDO;
 import com.shoppingmall.demo.model.DO.DeliveryDO;
 import com.shoppingmall.demo.model.DTO.DeliverySaveDTO;
 import com.shoppingmall.demo.model.DTO.DeliveryUpdateDTO;
 import com.shoppingmall.demo.model.VO.DeliveryVO;
-import com.shoppingmall.demo.service.IDeliveryService;
+import com.shoppingmall.demo.service.IAddressService;
 import com.shoppingmall.demo.service.IDeliveryService;
 import com.shoppingmall.demo.service.common.LoginInfoService;
 import com.shoppingmall.demo.utils.RedisIdWorker;
@@ -24,6 +22,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 @Slf4j
@@ -33,6 +32,7 @@ public class DeliveryServiceImpl extends ServiceImpl<DeliveryMapper, DeliveryDO>
 
     private final RedisIdWorker redisIdWorker;
     private final LoginInfoService loginInfoService;
+    private final IAddressService addressService;
 
     @Override
     public Result saveDelivery(DeliverySaveDTO DeliverySaveDTO) {
@@ -48,7 +48,13 @@ public class DeliveryServiceImpl extends ServiceImpl<DeliveryMapper, DeliveryDO>
 
     @Override
     public Result getDeliveryById(Long id) {
-        return getById(id) != null? Result.success(new DeliveryVO(getById(id))) : Result.error(MessageConstants.NO_FOUND_DELIVERY_ERROR);
+        DeliveryDO deliveryDO = getById(id);
+        Optional.ofNullable(deliveryDO).orElseThrow(() -> new ServiceException(MessageConstants.NO_FOUND_DELIVERY_ERROR));
+
+        return Result.success(BeanUtil.copyProperties(deliveryDO, DeliveryVO.class)
+                .setProvince(addressService.getById(deliveryDO.getProvinceId()).getAddressName())
+                .setCity(addressService.getById(deliveryDO.getCityId()).getAddressName())
+                .setCounty(addressService.getById(deliveryDO.getCountyId()).getAddressName()));
     }
 
     @Override

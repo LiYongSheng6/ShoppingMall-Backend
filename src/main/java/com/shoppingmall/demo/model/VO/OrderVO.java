@@ -1,11 +1,6 @@
 package com.shoppingmall.demo.model.VO;
 
 import cn.hutool.core.bean.BeanUtil;
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
-import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 import com.shoppingmall.demo.model.DO.OrderDO;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -15,7 +10,6 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 
 import java.io.Serializable;
-import java.time.LocalDateTime;
 
 /**
 * 
@@ -51,6 +45,15 @@ public class OrderVO implements Serializable {
 
     @ApiModelProperty("收货人电话")
     private String phone;
+
+    @ApiModelProperty("收货地址-省份")
+    private String province;
+
+    @ApiModelProperty("收货地址-城市")
+    private String city;
+
+    @ApiModelProperty("收货地址-区县")
+    private String county;
 
     @ApiModelProperty("详细地址")
     private String detailAddress;

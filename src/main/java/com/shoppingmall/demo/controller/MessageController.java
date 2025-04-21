@@ -3,11 +3,13 @@ package com.shoppingmall.demo.controller;
 import com.shoppingmall.demo.service.IChatHistoryService;
 import com.shoppingmall.demo.service.common.LoginInfoService;
 import com.shoppingmall.demo.utils.Result;
+import io.swagger.annotations.Api;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -17,10 +19,12 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ForkJoinPool;
 
+@Api(tags = "系统消息推送接口")
 @Validated
 @RestController
 @RequiredArgsConstructor
 @Slf4j
+@CrossOrigin(origins = "*")
 @RequestMapping("/poll")
 public class MessageController {
 

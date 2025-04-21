@@ -83,12 +83,15 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements 
 
     @Override
     public Result updateToken() {
-        UserDO userDO = getById(loginInfoService.getLoginId());
-        if (userDO == null) throw new ServiceException(MessageConstants.NO_FOUND_USER_ERROR);
+        UserDO userDO = getUserDO(loginInfoService.getLoginId());
 
         String token = getToken(userDO);
         log.info("用户更新token信息：{}", userDO);
         return Result.success(MessageConstants.TOKEN_UPDATE_SUCCESS, token);
+    }
+
+    private void deleteRedisCache(String key) {
+        stringRedisTemplate.opsForValue().getOperations().delete(key);
     }
 
     public void checkVerifyCode(String key, String inputCode) {
@@ -112,7 +115,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements 
         // 检查比对验证码
         checkVerifyCode(key, checkValue);
         //删除redis验证码
-        stringRedisTemplate.opsForValue().getOperations().delete(key);
+        deleteRedisCache(key);
     }
 
     @Override
@@ -139,7 +142,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements 
                 .setUpdateTime(LocalDateTime.now());
 
         // 删除redis验证码
-        stringRedisTemplate.opsForValue().getOperations().delete(key);
+        deleteRedisCache(key);
         // 保存用户信息
         return save(userDO) ? Result.success(MessageConstants.REGISTER_SUCCESS) : Result.error(MessageConstants.REGISTER_ERROR);
     }
@@ -174,6 +177,13 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements 
     }
 
     @Override
+    public Result logout() {
+        UserDO userDO = getUserDO(loginInfoService.getLoginId());
+        deleteRedisCache(CacheConstants.LOGIN_USER_TOKEN_KEY + userDO.getId());
+        return Result.success(MessageConstants.LOGOUT_SUCCESS);
+    }
+
+    @Override
     public Result updateLoginUserInfo(UserUpdateDTO userUpdateDTO) {
         userUpdateDTO.setId(loginInfoService.getLoginId());
 
@@ -186,10 +196,14 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements 
 
         checkVerifyCode(CacheConstants.RESET_EMAIL_CODE_KEY, userDO.getEmail(), userResetDTO.getCode());
 
-        return lambdaUpdate().eq(UserDO::getId, userDO.getId())
+        if (lambdaUpdate().eq(UserDO::getId, userDO.getId())
                 .set(UserDO::getPassword, MD5Util.generate(userResetDTO.getReset()))
-                .set(UserDO::getUpdateTime, LocalDateTime.now()).update() ?
-                Result.success(MessageConstants.UPDATE_SUCCESS) : Result.error(MessageConstants.UPDATE_ERROR);
+                .set(UserDO::getUpdateTime, LocalDateTime.now()).update()
+        ) {
+            deleteRedisCache(CacheConstants.LOGIN_USER_TOKEN_KEY + userDO.getId());
+            return Result.success(MessageConstants.UPDATE_SUCCESS);
+        }
+        return Result.error(MessageConstants.UPDATE_ERROR);
     }
 
     @Override
@@ -241,8 +255,12 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements 
         UserDO userDO = getUserDO(id);
         if (userDO.getIsForbidden() == ForbiddenType.TRUE)
             throw new ServiceException(MessageConstants.USER_FORBIDDEN_EXIST);
-        return updateById(userDO.setIsForbidden(ForbiddenType.TRUE).setUpdateTime(LocalDateTime.now())) ?
-                Result.success(MessageConstants.OPERATION_SUCCESS) : Result.error(MessageConstants.OPERATION_ERROR);
+
+        if (updateById(userDO.setIsForbidden(ForbiddenType.TRUE).setUpdateTime(LocalDateTime.now()))) {
+            deleteRedisCache(CacheConstants.LOGIN_USER_TOKEN_KEY + userDO.getId());
+            return Result.success(MessageConstants.OPERATION_SUCCESS);
+        }
+        return Result.error(MessageConstants.OPERATION_ERROR);
     }
 
     @Override
@@ -287,7 +305,11 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements 
 
     @Override
     public Result deleteUserById(Long id) {
-        return removeById(id) ? Result.success(MessageConstants.DELETE_SUCCESS) : Result.error(MessageConstants.DELETE_ERROR);
+        if (removeById(id)) {
+            deleteRedisCache(CacheConstants.LOGIN_USER_TOKEN_KEY + id);
+            return Result.success(MessageConstants.DELETE_SUCCESS);
+        }
+        return Result.error(MessageConstants.DELETE_ERROR);
     }
 
     @Override

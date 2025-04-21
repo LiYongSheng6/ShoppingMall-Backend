@@ -26,7 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
  * * @date 2024/10/9
  */
 
-@Api(tags = "地名信息接口")
+@Api(tags = "地名信息管理接口")
 @Validated
 @RequiredArgsConstructor
 @CrossOrigin(origins = "*")

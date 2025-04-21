@@ -6,17 +6,11 @@ import com.shoppingmall.demo.constant.CacheConstants;
 import com.shoppingmall.demo.constant.MessageConstants;
 import com.shoppingmall.demo.exception.ServiceException;
 import com.shoppingmall.demo.mapper.AddressMapper;
-import com.shoppingmall.demo.mapper.AddressMapper;
 import com.shoppingmall.demo.model.DO.AddressDO;
-import com.shoppingmall.demo.model.DO.AddressDO;
-import com.shoppingmall.demo.model.DO.DeliveryDO;
 import com.shoppingmall.demo.model.DTO.AddressSaveDTO;
 import com.shoppingmall.demo.model.DTO.AddressUpdateDTO;
 import com.shoppingmall.demo.model.VO.AddressVO;
-import com.shoppingmall.demo.model.VO.DeliveryVO;
 import com.shoppingmall.demo.service.IAddressService;
-import com.shoppingmall.demo.service.IAddressService;
-import com.shoppingmall.demo.service.common.LoginInfoService;
 import com.shoppingmall.demo.utils.RedisIdWorker;
 import com.shoppingmall.demo.utils.Result;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +20,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 @Slf4j
@@ -37,14 +32,22 @@ public class AddressServiceImpl extends ServiceImpl<AddressMapper, AddressDO> im
 
     @Override
     public Result saveAddress(AddressSaveDTO addressSaveDTO) {
+        checkDuplicationColumn(addressSaveDTO.getAddressName());
         return save(BeanUtil.copyProperties(addressSaveDTO, AddressDO.class).setId(redisIdWorker.nextId(CacheConstants.ADDRESS_ID_PREFIX))) ?
                 Result.success(MessageConstants.SAVE_SUCCESS) : Result.error(MessageConstants.SAVE_ERROR);
     }
 
     @Override
     public Result updateAddress(AddressUpdateDTO addressUpdateDTO) {
+        checkDuplicationColumn(addressUpdateDTO.getAddressName());
         return updateById(BeanUtil.copyProperties(addressUpdateDTO, AddressDO.class).setUpdateTime(LocalDateTime.now())) ?
                 Result.success(MessageConstants.UPDATE_SUCCESS) : Result.error(MessageConstants.UPDATE_ERROR);
+    }
+
+    private void checkDuplicationColumn(String addressName) {
+        Optional.ofNullable(lambdaQuery().eq(AddressDO::getAddressName, addressName).one()).ifPresent(addressDO -> {
+            throw new ServiceException(MessageConstants.ADDRESS_NAME_EXIST);
+        });
     }
 
     @Override

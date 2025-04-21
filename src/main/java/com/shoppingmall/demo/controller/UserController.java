@@ -77,8 +77,15 @@ public class UserController {
     }
 
     @Log
+    @Operation(summary = "用户登出接口")
+    @DeleteMapping("/logout")
+    public Result logout() {
+        return userService.logout();
+    }
+
+    @Log
     @Operation(summary = "获取当前登录用户信息")
-    @GetMapping("/detail/loginUser")
+    @GetMapping("/detail")
     public Result getLoginUserInfo() {
         return userService.getLoginUserInfo();
     }
@@ -86,7 +93,7 @@ public class UserController {
     @Log
     @Operation(summary = "根据ID获取用户信息")
     @ApiImplicitParam(name = "id", value = "用户id", required = true)
-    @GetMapping("/detail/userInfo")
+    @GetMapping("/detail/admin")
     @PreAuthorize("sys:user:getUserInfoById")
     public Result getUserInfoById(@RequestParam @NotNull Long id) {
         return userService.getUserInfoById(id);
@@ -116,14 +123,14 @@ public class UserController {
 
     @Log
     @Operation(summary = "修改当前登录用户信息")
-    @PutMapping("/update/loginUser")
+    @PutMapping("/update")
     public Result updateLoginUserInfo(@RequestBody @Validated UserUpdateDTO userUpdateDTO) {
         return userService.updateLoginUserInfo(userUpdateDTO);
     }
 
     @Log
     @Operation(summary = "根据ID修改用户信息")
-    @PutMapping("/update/userInfo")
+    @PutMapping("/update/admin")
     @PreAuthorize("sys:user:updateUserInfoById")
     public Result updateUserInfoById(@RequestBody @Validated UserInfoDTO userInfoDTO) {
         return userService.updateUserInfoById(userInfoDTO);

@@ -1,7 +1,6 @@
 package com.shoppingmall.demo.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
-
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.shoppingmall.demo.constant.CacheConstants;
 import com.shoppingmall.demo.constant.MessageConstants;
@@ -21,6 +20,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 @Slf4j
@@ -32,20 +32,29 @@ public class TagServiceImpl extends ServiceImpl<TagMapper, TagDO> implements ITa
 
     @Override
     public Result saveTag(TagSaveDTO tagSaveDTO) {
+        checkDuplicationColumn(tagSaveDTO.getTagName());
+
         return save(BeanUtil.copyProperties(tagSaveDTO, TagDO.class).setId(redisIdWorker.nextId(CacheConstants.TAG_ID_PREFIX))) ?
                 Result.success(MessageConstants.SAVE_SUCCESS) : Result.error(MessageConstants.SAVE_ERROR);
     }
 
     @Override
     public Result updateTag(TagUpdateDTO tagUpdateDTO) {
+        checkDuplicationColumn(tagUpdateDTO.getTagName());
+
         return updateById(BeanUtil.copyProperties(tagUpdateDTO, TagDO.class).setUpdateTime(LocalDateTime.now())) ?
                 Result.success(MessageConstants.UPDATE_SUCCESS) : Result.error(MessageConstants.UPDATE_ERROR);
+    }
+
+    private void checkDuplicationColumn(String tagName) {
+        Optional.ofNullable(lambdaQuery().eq(TagDO::getTagName, tagName).one()).ifPresent(tag -> {
+            throw new ServiceException(MessageConstants.TAG_NAME_EXIST);
+        });
     }
 
     @Override
     public Result getTagListByType(Integer type) {
         List<TagDO> tagDOList = lambdaQuery().eq(TagDO::getType, type).list();
-
         if (CollectionUtils.isEmpty(tagDOList)) throw new ServiceException(MessageConstants.NO_FOUND_TAG_ERROR);
 
         return Result.success(tagDOList.stream().map(tagDO -> CompletableFuture.supplyAsync(() -> new TagVO(tagDO))).toList()
@@ -56,5 +65,5 @@ public class TagServiceImpl extends ServiceImpl<TagMapper, TagDO> implements ITa
     public Result deleteTagById(Long id) {
         return removeById(id) ? Result.success(MessageConstants.DELETE_SUCCESS) : Result.error(MessageConstants.DELETE_ERROR);
     }
-    
+
 }

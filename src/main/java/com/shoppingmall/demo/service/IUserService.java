@@ -26,6 +26,8 @@ public interface IUserService extends IService<UserDO> {
 
     Result login(UserLoginDTO userLoginDTO);
 
+    Result logout();
+
     Result updateLoginUserInfo(UserUpdateDTO userUpdateDTO);
 
     Result updateUserPassword(UserResetDTO userResetDTO);
@@ -45,5 +47,4 @@ public interface IUserService extends IService<UserDO> {
     Result deleteUserById(Long id);
 
     Result pageUserListByCondition(UserQuery userQuery);
-
 }

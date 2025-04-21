@@ -25,7 +25,7 @@ public class MessageConstants {
     public static final String REGISTER_SUCCESS = "注册成功";
     public static final String REGISTER_ERROR = "注册失败";
     public static final String LOGIN_SUCCESS = "登录成功";
-    public static final String Login_ERROR = "登录失败";
+    public static final String LOGOUT_SUCCESS = "退出登录成功";
     public static final String PASSWORD_ERROR = "密码错误";
     public static final String UPDATE_SUCCESS = "修改成功";
     public static final String UPDATE_ERROR = "修改失败";
@@ -53,6 +53,8 @@ public class MessageConstants {
     public static final String USER_FORBIDDEN_EXIST = "当前用户已被封禁！";
     public static final String USER_UNBLOCKING_EXIST = "当前用户已被解封！";
     public static final String USER_FORBIDDEN_ERROR = "该用户已被禁用，请联系管理员";
+
+    public static final String TAG_NAME_EXIST = "标签名称已存在";
 
     public static final String STUDENT_ID_REGEX_MESSAGE = "学号格式为3x2x00xxxx";
     public static final String USERNAME_REGEX_MESSAGE = "用户名为1到20位非空字符";
@@ -84,5 +86,9 @@ public class MessageConstants {
     public static final String NO_FOUND_ORDER_ERROR = "没有找到相关订单信息";
 
 
+    public static final String PERMISSION_CODE_EXIST = "资源编码已存在";
+    public static final String PERMISSION_PATH_EXIST = "资源路径已存在";
+    public static final String ADDRESS_NAME_EXIST = "地名名称已存在";
+    public static final String CATEGORY_NAME_EXIST = "分类名称已存在";
 }
 

@@ -2,7 +2,6 @@ package com.shoppingmall.demo.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-
 import com.shoppingmall.demo.constant.CacheConstants;
 import com.shoppingmall.demo.constant.MessageConstants;
 import com.shoppingmall.demo.enums.UserType;
@@ -22,6 +21,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 /**
@@ -37,14 +37,25 @@ public class PermissionServiceImpl extends ServiceImpl<PermissionMapper, Permiss
 
     @Override
     public Result savePermission(PermissionSaveDTO permissionSaveDTO) {
+        checkDuplicationColumn(permissionSaveDTO.getCode(), permissionSaveDTO.getPath());
         return save(BeanUtil.copyProperties(permissionSaveDTO, PermissionDO.class).setId(redisIdWorker.nextId(CacheConstants.PERMISSION_ID))) ?
                 Result.success(MessageConstants.SAVE_SUCCESS) : Result.error(MessageConstants.SAVE_ERROR);
     }
 
     @Override
     public Result updatePermission(PermissionUpdateDTO permissionUpdateDTO) {
+        checkDuplicationColumn(permissionUpdateDTO.getCode(), permissionUpdateDTO.getPath());
         return updateById(BeanUtil.copyProperties(permissionUpdateDTO, PermissionDO.class).setUpdateTime(LocalDateTime.now())) ?
                 Result.success(MessageConstants.UPDATE_SUCCESS) : Result.error(MessageConstants.UPDATE_ERROR);
+    }
+
+    private void checkDuplicationColumn(String code, String path) {
+        Optional.ofNullable(lambdaQuery().eq(PermissionDO::getCode, code).one()).ifPresent(permissionDO -> {
+            throw new ServiceException(MessageConstants.PERMISSION_CODE_EXIST);
+        });
+        Optional.ofNullable(lambdaQuery().eq(PermissionDO::getPath, path).one()).ifPresent(permissionDO -> {
+            throw new ServiceException(MessageConstants.PERMISSION_PATH_EXIST);
+        });
     }
 
     @Override

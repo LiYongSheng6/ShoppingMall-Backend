@@ -24,7 +24,7 @@ import java.io.IOException;
  * @author redmi k50 ultra
  * * @date 2024/7/17
  */
-@Api(tags = "邮箱发送接口")
+@Api(tags = "邮箱验证码发送接口")
 @Validated
 @RestController
 @RequiredArgsConstructor

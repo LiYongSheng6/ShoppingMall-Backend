@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 @Slf4j
@@ -31,14 +32,22 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, CategoryDO>
 
     @Override
     public Result saveCategory(CategorySaveDTO categorySaveDTO) {
+        checkDuplicationColumn(categorySaveDTO.getCategoryName());
         return save(BeanUtil.copyProperties(categorySaveDTO, CategoryDO.class).setId(redisIdWorker.nextId(CacheConstants.CATEGORY_ID_PREFIX))) ?
                 Result.success(MessageConstants.SAVE_SUCCESS) : Result.error(MessageConstants.SAVE_ERROR);
     }
 
     @Override
     public Result updateCategory(CategoryUpdateDTO categoryUpdateDTO) {
+        checkDuplicationColumn(categoryUpdateDTO.getCategoryName());
         return updateById(BeanUtil.copyProperties(categoryUpdateDTO, CategoryDO.class).setUpdateTime(LocalDateTime.now())) ?
                 Result.success(MessageConstants.UPDATE_SUCCESS) : Result.error(MessageConstants.UPDATE_ERROR);
+    }
+
+    private void checkDuplicationColumn(String categoryName) {
+        Optional.ofNullable(lambdaQuery().eq(CategoryDO::getCategoryName, categoryName).one()).ifPresent(category -> {
+            throw new ServiceException(MessageConstants.CATEGORY_NAME_EXIST);
+        });
     }
 
     @Override
