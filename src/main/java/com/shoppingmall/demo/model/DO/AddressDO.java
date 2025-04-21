@@ -7,6 +7,8 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
+import com.shoppingmall.demo.annotation.AddressTypePattern;
+import com.shoppingmall.demo.enums.AddressType;
 import io.swagger.annotations.ApiModelProperty;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -55,9 +57,9 @@ public class AddressDO implements Serializable {
     /**
      * 地名类型
      */
-    @NotNull(message="[地名类型]不能为空")
+    @AddressTypePattern
     @ApiModelProperty("地名类型")
-    private Integer type;
+    private AddressType type;
 
     /**
      * 创建时间

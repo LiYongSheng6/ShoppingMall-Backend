@@ -2,11 +2,14 @@ package com.shoppingmall.demo.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.baomidou.mybatisplus.extension.toolkit.Db;
 import com.shoppingmall.demo.constant.CacheConstants;
 import com.shoppingmall.demo.constant.MessageConstants;
+import com.shoppingmall.demo.enums.AddressType;
 import com.shoppingmall.demo.exception.ServiceException;
 import com.shoppingmall.demo.mapper.DeliveryMapper;
 import com.shoppingmall.demo.model.DO.DeliveryDO;
+import com.shoppingmall.demo.model.DTO.DeliveryDeleteBatchDTO;
 import com.shoppingmall.demo.model.DTO.DeliverySaveDTO;
 import com.shoppingmall.demo.model.DTO.DeliveryUpdateDTO;
 import com.shoppingmall.demo.model.VO.DeliveryVO;
@@ -35,14 +38,23 @@ public class DeliveryServiceImpl extends ServiceImpl<DeliveryMapper, DeliveryDO>
     private final IAddressService addressService;
 
     @Override
-    public Result saveDelivery(DeliverySaveDTO DeliverySaveDTO) {
-        return save(BeanUtil.copyProperties(DeliverySaveDTO, DeliveryDO.class).setId(redisIdWorker.nextId(CacheConstants.DELIVERY_ID_PREFIX))) ?
+    public Result saveDelivery(DeliverySaveDTO deliverySaveDTO) {
+        return save(BeanUtil.copyProperties(deliverySaveDTO, DeliveryDO.class)
+                .setId(redisIdWorker.nextId(CacheConstants.DELIVERY_ID_PREFIX))
+                .setUserId(loginInfoService.getLoginId())
+                .setProvinceId(addressService.getAddressIdByName(deliverySaveDTO.getProvince(), AddressType.PROVINCE))
+                .setCityId(addressService.getAddressIdByName(deliverySaveDTO.getCity(), AddressType.CITY))
+                .setCountyId(addressService.getAddressIdByName(deliverySaveDTO.getCounty(), AddressType.COUNTY))) ?
                 Result.success(MessageConstants.SAVE_SUCCESS) : Result.error(MessageConstants.SAVE_ERROR);
     }
 
     @Override
-    public Result updateDelivery(DeliveryUpdateDTO DeliveryUpdateDTO) {
-        return updateById(BeanUtil.copyProperties(DeliveryUpdateDTO, DeliveryDO.class).setUpdateTime(LocalDateTime.now())) ?
+    public Result updateDelivery(DeliveryUpdateDTO deliveryUpdateDTO) {
+        return updateById(BeanUtil.copyProperties(deliveryUpdateDTO, DeliveryDO.class)
+                .setProvinceId(addressService.getAddressIdByName(deliveryUpdateDTO.getProvince(), AddressType.PROVINCE))
+                .setCityId(addressService.getAddressIdByName(deliveryUpdateDTO.getCity(), AddressType.CITY))
+                .setCountyId(addressService.getAddressIdByName(deliveryUpdateDTO.getCounty(), AddressType.COUNTY))
+                .setUpdateTime(LocalDateTime.now())) ?
                 Result.success(MessageConstants.UPDATE_SUCCESS) : Result.error(MessageConstants.UPDATE_ERROR);
     }
 
@@ -52,9 +64,9 @@ public class DeliveryServiceImpl extends ServiceImpl<DeliveryMapper, DeliveryDO>
         Optional.ofNullable(deliveryDO).orElseThrow(() -> new ServiceException(MessageConstants.NO_FOUND_DELIVERY_ERROR));
 
         return Result.success(BeanUtil.copyProperties(deliveryDO, DeliveryVO.class)
-                .setProvince(addressService.getById(deliveryDO.getProvinceId()).getAddressName())
-                .setCity(addressService.getById(deliveryDO.getCityId()).getAddressName())
-                .setCounty(addressService.getById(deliveryDO.getCountyId()).getAddressName()));
+                .setProvince(addressService.getAddressNameById(deliveryDO.getProvinceId()))
+                .setCity(addressService.getAddressNameById(deliveryDO.getCityId()))
+                .setCounty(addressService.getAddressNameById(deliveryDO.getCountyId())));
     }
 
     @Override
@@ -64,17 +76,30 @@ public class DeliveryServiceImpl extends ServiceImpl<DeliveryMapper, DeliveryDO>
 
     @Override
     public Result getDeliveryListByUserId(Long userId) {
-        List<DeliveryDO> deliveryDOList = lambdaQuery().eq(DeliveryDO::getId, userId).list();
-
+        List<DeliveryDO> deliveryDOList = lambdaQuery().eq(DeliveryDO::getUserId, userId).list();
         if (CollectionUtils.isEmpty(deliveryDOList)) throw new ServiceException(MessageConstants.NO_FOUND_DELIVERY_ERROR);
 
-        return Result.success(deliveryDOList.stream().map(deliveryDO -> CompletableFuture.supplyAsync(() -> new DeliveryVO(deliveryDO))).toList()
-                .stream().map(CompletableFuture::join).toList());
+        return Result.success(deliveryDOList.stream()
+                .map(deliveryDO -> CompletableFuture.supplyAsync(() -> new DeliveryVO(deliveryDO)
+                        .setProvince(addressService.getAddressNameById(deliveryDO.getProvinceId()))
+                        .setCity(addressService.getAddressNameById(deliveryDO.getCityId()))
+                        .setCounty(addressService.getAddressNameById(deliveryDO.getCountyId()))))
+                .toList().stream().map(CompletableFuture::join).toList());
     }
 
     @Override
     public Result deleteDeliveryById(Long id) {
         return removeById(id) ? Result.success(MessageConstants.DELETE_SUCCESS) : Result.error(MessageConstants.DELETE_ERROR);
     }
-    
+
+    @Override
+    public Result deleteDeliveryBatch(DeliveryDeleteBatchDTO deleteBatchDTO) {
+        List<DeliveryDO> deliveryDOList = lambdaQuery().in(DeliveryDO::getId, deleteBatchDTO.getDeliveryIds()).list();
+        if (CollectionUtils.isEmpty(deliveryDOList))
+            throw new ServiceException(MessageConstants.NO_FOUND_DELIVERY_ERROR);
+
+        return Db.removeByIds(deliveryDOList, DeliveryDO.class) ?
+                Result.success(MessageConstants.OPERATION_SUCCESS) : Result.error(MessageConstants.OPERATION_ERROR);
+    }
+
 }

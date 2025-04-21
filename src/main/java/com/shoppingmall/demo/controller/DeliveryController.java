@@ -2,6 +2,7 @@ package com.shoppingmall.demo.controller;
 
 import com.shoppingmall.demo.annotation.Log;
 import com.shoppingmall.demo.annotation.PreAuthorize;
+import com.shoppingmall.demo.model.DTO.DeliveryDeleteBatchDTO;
 import com.shoppingmall.demo.model.DTO.DeliverySaveDTO;
 import com.shoppingmall.demo.model.DTO.DeliveryUpdateDTO;
 import com.shoppingmall.demo.service.IDeliveryService;
@@ -11,7 +12,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -29,7 +29,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Api(tags = "收货信息管理接口")
 @Validated
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*")
+//@CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/delivery")
 public class DeliveryController {
@@ -79,5 +79,11 @@ public class DeliveryController {
         return deliveryService.getDeliveryListByUserId(userId);
     }
 
+    @Log
+    @Operation(summary = "批量删除收货信息接口")
+    @DeleteMapping("/delete/batch")
+    public Result deleteBatch(@RequestBody @Validated DeliveryDeleteBatchDTO deliveryDeleteBatchDTO) {
+        return deliveryService.deleteDeliveryBatch(deliveryDeleteBatchDTO);
+    }
 
 }

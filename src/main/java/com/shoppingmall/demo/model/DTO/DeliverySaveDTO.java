@@ -4,9 +4,7 @@ package com.shoppingmall.demo.model.DTO;
 import com.shoppingmall.demo.constant.MessageConstants;
 import com.shoppingmall.demo.constant.RegexConstants;
 import io.swagger.annotations.ApiModelProperty;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -30,13 +28,6 @@ import java.io.Serializable;
 public class DeliverySaveDTO implements Serializable {
 
     /**
-     * 创建者id
-     */
-    @NotNull(message="[创建者id]不能为空")
-    @ApiModelProperty("创建者id")
-    private Long userId;
-
-    /**
      * 收货人姓名
      */
     @Length(max= 255,message="收货人姓名长度不能超过255")
@@ -53,23 +44,23 @@ public class DeliverySaveDTO implements Serializable {
     /**
      * 省份
      */
-    @NotNull(message="[省份]不能为空")
+    @Length(max = 255, message = "省份名称长度不能超过255")
     @ApiModelProperty("省份")
-    private Long provinceId;
+    private String province;
 
     /**
      * 城市
      */
-    @NotNull(message="[城市]不能为空")
+    @Length(max = 255, message = "城市名称长度不能超过255")
     @ApiModelProperty("城市")
-    private Long cityId;
+    private String city;
 
     /**
      * 区县
      */
-    @NotNull(message="[区县]不能为空")
+    @Length(max = 255, message = "区县名称长度不能超过255")
     @ApiModelProperty("区县")
-    private Long countyId;
+    private String county;
 
     /**
      * 详细地址

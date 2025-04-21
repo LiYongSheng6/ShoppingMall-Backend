@@ -22,6 +22,9 @@ public class MessageConstants {
     public static final String NO_PERMISSION_ERROR = "权限不足";
     public static final String ACCESS_RESTRICTED_ERROR = "访问受限";
 
+    public static final String FILE_SIZE_EXCEEDED = "文件大小超出限制！";
+    public static final String PICTURE_FORMAT_ERROR = "图片格式错误";
+
     public static final String REGISTER_SUCCESS = "注册成功";
     public static final String REGISTER_ERROR = "注册失败";
     public static final String LOGIN_SUCCESS = "登录成功";
@@ -68,6 +71,7 @@ public class MessageConstants {
     public static final String GOOD_STATUS_REGEX_MESSAGE = "商品状态值不符合要求";
     public static final String ORDER_STATUS_REGEX_MESSAGE = "订单状态值不符合要求";
     public static final String FORBIDDEN_REGEX_MESSAGE = "封禁判定值不符合要求";
+    public static final String ADDRESS_TYPE_REGEX_MESSAGE = "地址类型值不符合要求";
 
     public static final String GOOD_RANK_TYPE_NULL_ERROR = "商品榜单类型不能为空!";
     public static final String NO_ENOUGH_GOOD_ERROR = "商品存货数量不足！";
@@ -84,7 +88,8 @@ public class MessageConstants {
     public static final String NO_FOUND_ADDRESS_ERROR = "没有找到相关地址信息";
     public static final String NO_FOUND_GOOD_ERROR = "没有找到相关商品信息";
     public static final String NO_FOUND_ORDER_ERROR = "没有找到相关订单信息";
-
+    public static final String NO_FOUND_ADDRESS_NAME_ERROR = "没有要操作的相关地名信息";
+    public static final String NO_FOUND_CATEGORY_NAME_ERROR = "没有要操作的相关分类名称信息";
 
     public static final String PERMISSION_CODE_EXIST = "资源编码已存在";
     public static final String PERMISSION_PATH_EXIST = "资源路径已存在";

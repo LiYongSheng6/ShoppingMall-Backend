@@ -32,22 +32,20 @@ public class TagServiceImpl extends ServiceImpl<TagMapper, TagDO> implements ITa
 
     @Override
     public Result saveTag(TagSaveDTO tagSaveDTO) {
-        checkDuplicationColumn(tagSaveDTO.getTagName());
-
+        checkDuplicationColumn(null, tagSaveDTO.getTagName());
         return save(BeanUtil.copyProperties(tagSaveDTO, TagDO.class).setId(redisIdWorker.nextId(CacheConstants.TAG_ID_PREFIX))) ?
                 Result.success(MessageConstants.SAVE_SUCCESS) : Result.error(MessageConstants.SAVE_ERROR);
     }
 
     @Override
     public Result updateTag(TagUpdateDTO tagUpdateDTO) {
-        checkDuplicationColumn(tagUpdateDTO.getTagName());
-
+        checkDuplicationColumn(tagUpdateDTO.getId(), tagUpdateDTO.getTagName());
         return updateById(BeanUtil.copyProperties(tagUpdateDTO, TagDO.class).setUpdateTime(LocalDateTime.now())) ?
                 Result.success(MessageConstants.UPDATE_SUCCESS) : Result.error(MessageConstants.UPDATE_ERROR);
     }
 
-    private void checkDuplicationColumn(String tagName) {
-        Optional.ofNullable(lambdaQuery().eq(TagDO::getTagName, tagName).one()).ifPresent(tag -> {
+    private void checkDuplicationColumn(Long id, String tagName) {
+        Optional.ofNullable(lambdaQuery().ne(id != null, TagDO::getId, id).eq(TagDO::getTagName, tagName).one()).ifPresent(tag -> {
             throw new ServiceException(MessageConstants.TAG_NAME_EXIST);
         });
     }

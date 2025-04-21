@@ -26,12 +26,6 @@ public class DeliveryVO implements Serializable {
     private Long id;
 
     /**
-     * 创建者名称
-     */
-    @ApiModelProperty("创建者名称")
-    private String username;
-
-    /**
      * 收货人姓名
      */
     @ApiModelProperty("收货人姓名")

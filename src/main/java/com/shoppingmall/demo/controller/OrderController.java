@@ -1,4 +1,5 @@
 package com.shoppingmall.demo.controller;
+
 import com.shoppingmall.demo.annotation.Log;
 import com.shoppingmall.demo.model.DTO.OrderSaveDTO;
 import com.shoppingmall.demo.model.DTO.OrderUpdateDTO;
@@ -11,7 +12,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -29,7 +29,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Validated
 @RestController
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*")
+//@CrossOrigin(origins = "*")
 @RequestMapping("/order")
 public class OrderController {
 

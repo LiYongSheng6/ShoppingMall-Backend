@@ -36,7 +36,7 @@ public class RedisConfig {
     @Bean
     public RedissonClient redissonClient() {
         Config config = new Config();
-        config.useSingleServer().setAddress(getRedisAddress()).setPassword(password);
+        config.useSingleServer().setAddress(getRedisAddress()).setPassword(password).setTimeout(5000);
         return Redisson.create(config);
     }
     private String getRedisAddress(){

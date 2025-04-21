@@ -1,15 +1,16 @@
 package com.shoppingmall.demo.controller;
 
+import com.shoppingmall.demo.annotation.Log;
 import com.shoppingmall.demo.service.IChatHistoryService;
 import com.shoppingmall.demo.service.common.LoginInfoService;
 import com.shoppingmall.demo.utils.Result;
 import io.swagger.annotations.Api;
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -24,7 +25,7 @@ import java.util.concurrent.ForkJoinPool;
 @RestController
 @RequiredArgsConstructor
 @Slf4j
-@CrossOrigin(origins = "*")
+//@CrossOrigin(origins = "*")
 @RequestMapping("/poll")
 public class MessageController {
 
@@ -33,6 +34,8 @@ public class MessageController {
     private final IChatHistoryService chatHistoryService;
     private final LoginInfoService loginInfoService;
 
+    @Log
+    @Operation(summary = "长轮询接口")
     @GetMapping
     public DeferredResult<ResponseEntity<Result>> longPoll() {
         DeferredResult<ResponseEntity<Result>> deferredResult = new DeferredResult<>(1000L, ResponseEntity.status(HttpStatus.NO_CONTENT).build());

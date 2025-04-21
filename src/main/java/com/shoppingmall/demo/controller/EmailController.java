@@ -12,7 +12,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.constraints.Pattern;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -28,7 +27,7 @@ import java.io.IOException;
 @Validated
 @RestController
 @RequiredArgsConstructor
-@CrossOrigin //支持跨域
+//@CrossOrigin //支持跨域
 @RequestMapping("/email")
 public class EmailController {
     private final IEmailService emailService;

@@ -1,6 +1,8 @@
 package com.shoppingmall.demo.model.DTO;
 
 
+import com.shoppingmall.demo.annotation.AddressTypePattern;
+import com.shoppingmall.demo.enums.AddressType;
 import io.swagger.annotations.ApiModelProperty;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -42,8 +44,8 @@ public class AddressSaveDTO implements Serializable {
     /**
      * 地名类型
      */
-    @NotNull(message="[地名类型]不能为空")
+    @AddressTypePattern
     @ApiModelProperty("地名类型")
-    private Integer type;
+    private AddressType type;
 
 }

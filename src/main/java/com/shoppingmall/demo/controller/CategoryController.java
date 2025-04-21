@@ -2,6 +2,8 @@ package com.shoppingmall.demo.controller;
 
 import com.shoppingmall.demo.annotation.Log;
 import com.shoppingmall.demo.annotation.PreAuthorize;
+import com.shoppingmall.demo.model.DTO.CategoryDeleteBatchDTO;
+import com.shoppingmall.demo.model.DTO.CategorySaveBatchDTO;
 import com.shoppingmall.demo.model.DTO.CategorySaveDTO;
 import com.shoppingmall.demo.model.DTO.CategoryUpdateDTO;
 import com.shoppingmall.demo.service.ICategoryService;
@@ -11,7 +13,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -24,7 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Api(tags = "分类信息管理接口")
 @Validated
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*")
+//@CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/category")
 public class CategoryController {
@@ -60,6 +61,20 @@ public class CategoryController {
     @GetMapping("/list")
     public Result getCategoryList(@RequestParam @NotNull Integer type) {
         return categoryService.getCategoryListByType(type);
+    }
+
+    @Log
+    @Operation(summary = "批量添加修改分类信息")
+    @PostMapping("/saveOrUpdate/batch")
+    public Result saveOrUpdateBatch(@RequestBody @Validated CategorySaveBatchDTO categorySaveBatchDTO) {
+        return categoryService.saveOrUpdateCategoryBatch(categorySaveBatchDTO);
+    }
+
+    @Log
+    @Operation(summary = "批量删除地名信息接口")
+    @DeleteMapping("/delete/batch")
+    public Result deleteBatch(@RequestBody @Validated CategoryDeleteBatchDTO categoryDeleteBatchDTO) {
+        return categoryService.deleteCategoryBatch(categoryDeleteBatchDTO);
     }
 
 }

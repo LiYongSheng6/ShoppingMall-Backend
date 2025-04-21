@@ -41,6 +41,11 @@ public class RegexConstants {
     public static final String ORDER_STATUS_REGEX = "^[01234]$";
 
     /**
+     * 地名类型正则
+     */
+    public static final String ADDRESS_TYPE_REGEX = "^[012]$";
+
+    /**
      * 逻辑删除字段正则
      */
     public static final String FORBIDDEN_REGEX = "^[01]$";
@@ -64,6 +69,5 @@ public class RegexConstants {
      * 邮箱验证码正则
      */
     public static final String CODE_REGEX = "^\\w{6}$";
-
 
 }
