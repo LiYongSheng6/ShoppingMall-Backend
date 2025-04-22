@@ -4,6 +4,7 @@ package com.shoppingmall.demo.service;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.shoppingmall.demo.enums.OrderStatus;
 import com.shoppingmall.demo.model.DO.OrderDO;
+import com.shoppingmall.demo.model.DTO.OrderDeleteBatchDTO;
 import com.shoppingmall.demo.model.DTO.OrderSaveDTO;
 import com.shoppingmall.demo.model.DTO.OrderUpdateDTO;
 import com.shoppingmall.demo.model.Query.OrderQuery;
@@ -23,6 +24,8 @@ public interface IOrderService extends IService<OrderDO> {
     Result updateOrder(OrderUpdateDTO orderUpdateDTO, OrderStatus type);
 
     Result deleteOrderById(Long orderId);
+
+    Result deleteOrderBatch(OrderDeleteBatchDTO deleteBatchDTO);
 
     Result pageOrderListByUserId(OrderQuery orderQuery);
 

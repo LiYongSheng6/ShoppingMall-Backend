@@ -1,8 +1,6 @@
 package com.shoppingmall.demo.model.DTO;
 
 
-import com.shoppingmall.demo.annotation.CategoryTypePattern;
-import com.shoppingmall.demo.enums.CategoryType;
 import io.swagger.annotations.ApiModelProperty;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -24,20 +22,13 @@ import java.util.List;
 @Builder
 @Validated
 @Accessors(chain = true)
-public class CategorySaveBatchDTO implements Serializable {
+public class PermissionDeleteBatchDTO implements Serializable {
 
     /**
-     * 分类名称列表
+     * 权限id列表
      */
-    @NotNull(message = "[分类名称列表]不能为空")
-    @ApiModelProperty("分类名称列表")
-    private List<String> categoryNameList;
-
-    /**
-     * 分类所属商品类型
-     */
-    @CategoryTypePattern
-    @ApiModelProperty("分类所属商品类型")
-    private CategoryType type;
+    @NotNull(message = "[权限id列表]不能为空")
+    @ApiModelProperty("权限id列表")
+    private List<Long> permissionIds;
 
 }

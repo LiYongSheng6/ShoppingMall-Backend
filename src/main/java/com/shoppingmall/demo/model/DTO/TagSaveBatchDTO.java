@@ -1,6 +1,8 @@
 package com.shoppingmall.demo.model.DTO;
 
 
+import com.shoppingmall.demo.annotation.TagTypePattern;
+import com.shoppingmall.demo.enums.TagType;
 import io.swagger.annotations.ApiModelProperty;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -34,8 +36,8 @@ public class TagSaveBatchDTO implements Serializable {
     /**
      * 标签所属商品类型
      */
-    @NotNull(message = "[标签所属商品类型]不能为空")
+    @TagTypePattern
     @ApiModelProperty("标签所属商品类型")
-    private Integer type;
+    private TagType type;
 
 }

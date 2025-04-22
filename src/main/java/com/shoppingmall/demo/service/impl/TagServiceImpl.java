@@ -2,11 +2,15 @@ package com.shoppingmall.demo.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.baomidou.mybatisplus.extension.toolkit.Db;
 import com.shoppingmall.demo.constant.CacheConstants;
 import com.shoppingmall.demo.constant.MessageConstants;
+import com.shoppingmall.demo.enums.TagType;
 import com.shoppingmall.demo.exception.ServiceException;
 import com.shoppingmall.demo.mapper.TagMapper;
 import com.shoppingmall.demo.model.DO.TagDO;
+import com.shoppingmall.demo.model.DTO.TagDeleteBatchDTO;
+import com.shoppingmall.demo.model.DTO.TagSaveBatchDTO;
 import com.shoppingmall.demo.model.DTO.TagSaveDTO;
 import com.shoppingmall.demo.model.DTO.TagUpdateDTO;
 import com.shoppingmall.demo.model.VO.TagVO;
@@ -62,6 +66,38 @@ public class TagServiceImpl extends ServiceImpl<TagMapper, TagDO> implements ITa
     @Override
     public Result deleteTagById(Long id) {
         return removeById(id) ? Result.success(MessageConstants.DELETE_SUCCESS) : Result.error(MessageConstants.DELETE_ERROR);
+    }
+
+    @Override
+    public Result saveOrUpdateTagBatch(TagSaveBatchDTO TagSaveBatchDTO) {
+        TagType type = TagSaveBatchDTO.getType();
+
+        List<String> tagNameList = TagSaveBatchDTO.getTagNameList();
+        if (CollectionUtils.isEmpty(tagNameList))
+            throw new ServiceException(MessageConstants.NO_FOUND_TAG_NAME_ERROR);
+
+        List<TagDO> addressDOList = tagNameList.stream().map(tagName -> {
+            TagDO tagDO = lambdaQuery().eq(TagDO::getTagName, tagName).one();
+            if (tagDO == null)
+                tagDO = new TagDO().setId(redisIdWorker.nextId(CacheConstants.TAG_ID_PREFIX)).setTagName(tagName);
+
+            return tagDO.setType(type);
+        }).toList();
+
+        return Db.saveOrUpdateBatch(addressDOList, addressDOList.size()) ?
+                Result.success(MessageConstants.OPERATION_SUCCESS) : Result.error(MessageConstants.OPERATION_ERROR);
+    }
+
+    @Override
+    public Result deleteTagBatch(TagDeleteBatchDTO tagDeleteBatchDTO) {
+        if (CollectionUtils.isEmpty(tagDeleteBatchDTO.getTagNameList()))
+            throw new ServiceException(MessageConstants.NO_FOUND_TAG_NAME_ERROR);
+
+        List<TagDO> TagDOList = tagDeleteBatchDTO.getTagNameList()
+                .stream().map(tagName -> lambdaQuery().eq(TagDO::getTagName, tagName).one()).toList();
+
+        return Db.removeByIds(TagDOList, TagDO.class) ?
+                Result.success(MessageConstants.OPERATION_SUCCESS) : Result.error(MessageConstants.OPERATION_ERROR);
     }
 
 }

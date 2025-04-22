@@ -2,6 +2,7 @@ package com.shoppingmall.demo.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.shoppingmall.demo.model.DO.PermissionDO;
+import com.shoppingmall.demo.model.DTO.PermissionDeleteBatchDTO;
 import com.shoppingmall.demo.model.DTO.PermissionSaveDTO;
 import com.shoppingmall.demo.model.DTO.PermissionUpdateDTO;
 import com.shoppingmall.demo.utils.Result;
@@ -19,5 +20,7 @@ public interface IPermissionService extends IService<PermissionDO> {
     Result getPermissionList(Integer type);
 
     Result deletePermission(Long id);
+
+    Result deletePermissionBatch(PermissionDeleteBatchDTO deleteBatchDTO);
 
 }

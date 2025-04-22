@@ -1,12 +1,8 @@
 package com.shoppingmall.demo.model.DTO;
 
 
-import com.baomidou.mybatisplus.annotation.TableName;
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
-import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
+import com.shoppingmall.demo.annotation.CategoryTypePattern;
+import com.shoppingmall.demo.enums.CategoryType;
 import io.swagger.annotations.ApiModelProperty;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -18,7 +14,6 @@ import org.hibernate.validator.constraints.Length;
 import org.springframework.validation.annotation.Validated;
 
 import java.io.Serializable;
-import java.time.LocalDateTime;
 
 /**
 * 
@@ -49,9 +44,8 @@ public class CategoryUpdateDTO implements Serializable {
     /**
      * 分类所属商品类型
      */
-    @NotNull(message="[分类所属商品类型]不能为空")
+    @CategoryTypePattern
     @ApiModelProperty("分类所属商品类型")
-    private Integer type;
-
+    private CategoryType type;
 
 }

@@ -7,6 +7,8 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
+import com.shoppingmall.demo.annotation.TagTypePattern;
+import com.shoppingmall.demo.enums.TagType;
 import io.swagger.annotations.ApiModelProperty;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -48,9 +50,9 @@ public class TagDO implements Serializable {
     /**
      * 标签所属商品类型
      */
-    @NotNull(message="[标签所属商品类型]不能为空")
+    @TagTypePattern
     @ApiModelProperty("标签所属商品类型")
-    private Integer type;
+    private TagType type;
 
     /**
      * 创建时间

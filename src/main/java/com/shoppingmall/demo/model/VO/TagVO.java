@@ -2,6 +2,7 @@ package com.shoppingmall.demo.model.VO;
 
 
 import cn.hutool.core.bean.BeanUtil;
+import com.shoppingmall.demo.enums.TagType;
 import com.shoppingmall.demo.model.DO.TagDO;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -35,7 +36,7 @@ public class TagVO implements Serializable {
      * 分类所属商品类型
      */
     @ApiModelProperty("分类所属商品类型")
-    private Integer type;
+    private TagType type;
 
     public TagVO(TagDO tagDO){
         BeanUtil.copyProperties(tagDO,this);

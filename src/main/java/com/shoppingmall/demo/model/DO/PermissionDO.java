@@ -6,7 +6,6 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
-
 import com.shoppingmall.demo.annotation.UserTypePattern;
 import com.shoppingmall.demo.enums.UserType;
 import io.swagger.annotations.ApiModelProperty;
@@ -18,6 +17,7 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 import org.hibernate.validator.constraints.Length;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 
 /**
@@ -32,7 +32,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @TableName("permission")
-public class PermissionDO {
+public class PermissionDO implements Serializable {
 
     /**
      * 权限id

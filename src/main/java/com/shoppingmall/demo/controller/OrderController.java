@@ -1,6 +1,7 @@
 package com.shoppingmall.demo.controller;
 
 import com.shoppingmall.demo.annotation.Log;
+import com.shoppingmall.demo.model.DTO.OrderDeleteBatchDTO;
 import com.shoppingmall.demo.model.DTO.OrderSaveDTO;
 import com.shoppingmall.demo.model.DTO.OrderUpdateDTO;
 import com.shoppingmall.demo.model.Query.OrderQuery;
@@ -69,6 +70,13 @@ public class OrderController {
     @DeleteMapping("/delete")
     public Result delete(@RequestParam @NotNull Long orderId) {
         return orderService.deleteOrderById(orderId);
+    }
+
+    @Log
+    @Operation(summary = "批量删除订单信息接口")
+    @DeleteMapping("/delete/batch")
+    public Result deleteBatch(@RequestBody @Validated OrderDeleteBatchDTO deleteBatchDTO) {
+        return orderService.deleteOrderBatch(deleteBatchDTO);
     }
 
     @Log

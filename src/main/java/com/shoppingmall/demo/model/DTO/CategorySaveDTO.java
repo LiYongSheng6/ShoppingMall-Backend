@@ -1,8 +1,9 @@
 package com.shoppingmall.demo.model.DTO;
 
 
+import com.shoppingmall.demo.annotation.CategoryTypePattern;
+import com.shoppingmall.demo.enums.CategoryType;
 import io.swagger.annotations.ApiModelProperty;
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -35,9 +36,9 @@ public class CategorySaveDTO implements Serializable {
     /**
      * 分类所属商品类型
      */
-    @NotNull(message="[分类所属商品类型]不能为空")
+    @CategoryTypePattern
     @ApiModelProperty("分类所属商品类型")
-    private Integer type;
+    private CategoryType type;
 
 
 }

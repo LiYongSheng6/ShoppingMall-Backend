@@ -72,7 +72,8 @@ public class MessageConstants {
     public static final String ORDER_STATUS_REGEX_MESSAGE = "订单状态值不符合要求";
     public static final String FORBIDDEN_REGEX_MESSAGE = "封禁判定值不符合要求";
     public static final String ADDRESS_TYPE_REGEX_MESSAGE = "地址类型值不符合要求";
-
+    public static final String TAG_TYPE_REGEX_MESSAGE = "标签类型值不符合要求";
+    public static final String CATEGORY_TYPE_REGEX_MESSAGE = "分类类型值不符合要求";
     public static final String GOOD_RANK_TYPE_NULL_ERROR = "商品榜单类型不能为空!";
     public static final String NO_ENOUGH_GOOD_ERROR = "商品存货数量不足！";
 
@@ -89,11 +90,13 @@ public class MessageConstants {
     public static final String NO_FOUND_GOOD_ERROR = "没有找到相关商品信息";
     public static final String NO_FOUND_ORDER_ERROR = "没有找到相关订单信息";
     public static final String NO_FOUND_ADDRESS_NAME_ERROR = "没有要操作的相关地名信息";
-    public static final String NO_FOUND_CATEGORY_NAME_ERROR = "没有要操作的相关分类名称信息";
+    public static final String NO_FOUND_CATEGORY_NAME_ERROR = "没有要操作的相关分类信息";
+    public static final String NO_FOUND_TAG_NAME_ERROR = "没有要操作的相关标签信息";
 
     public static final String PERMISSION_CODE_EXIST = "资源编码已存在";
     public static final String PERMISSION_PATH_EXIST = "资源路径已存在";
     public static final String ADDRESS_NAME_EXIST = "地名名称已存在";
     public static final String CATEGORY_NAME_EXIST = "分类名称已存在";
+
 }
 

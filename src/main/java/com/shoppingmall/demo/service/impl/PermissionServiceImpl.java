@@ -2,12 +2,14 @@ package com.shoppingmall.demo.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.baomidou.mybatisplus.extension.toolkit.Db;
 import com.shoppingmall.demo.constant.CacheConstants;
 import com.shoppingmall.demo.constant.MessageConstants;
 import com.shoppingmall.demo.enums.UserType;
 import com.shoppingmall.demo.exception.ServiceException;
 import com.shoppingmall.demo.mapper.PermissionMapper;
 import com.shoppingmall.demo.model.DO.PermissionDO;
+import com.shoppingmall.demo.model.DTO.PermissionDeleteBatchDTO;
 import com.shoppingmall.demo.model.DTO.PermissionSaveDTO;
 import com.shoppingmall.demo.model.DTO.PermissionUpdateDTO;
 import com.shoppingmall.demo.model.VO.PermissionVO;
@@ -77,5 +79,14 @@ public class PermissionServiceImpl extends ServiceImpl<PermissionMapper, Permiss
         return removeById(id) ? Result.success(MessageConstants.DELETE_SUCCESS) : Result.error(MessageConstants.DELETE_ERROR);
     }
 
+    @Override
+    public Result deletePermissionBatch(PermissionDeleteBatchDTO deleteBatchDTO) {
+        List<PermissionDO> list = lambdaQuery().in(PermissionDO::getId, deleteBatchDTO.getPermissionIds()).list();
+        if (CollectionUtils.isEmpty(list))
+            throw new ServiceException(MessageConstants.NO_FOUND_PERMISSION_ERROR);
+
+        return Db.removeByIds(list, PermissionDO.class) ?
+                Result.success(MessageConstants.OPERATION_SUCCESS) : Result.error(MessageConstants.OPERATION_ERROR);
+    }
 
 }

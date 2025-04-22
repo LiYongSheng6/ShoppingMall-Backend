@@ -7,9 +7,10 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
+import com.shoppingmall.demo.annotation.CategoryTypePattern;
+import com.shoppingmall.demo.enums.CategoryType;
 import io.swagger.annotations.ApiModelProperty;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -49,9 +50,9 @@ public class CategoryDO implements Serializable {
     /**
      * 分类所属商品类型
      */
-    @NotNull(message="[分类所属商品类型]不能为空")
+    @CategoryTypePattern
     @ApiModelProperty("分类所属商品类型")
-    private Integer type;
+    private CategoryType type;
 
     /**
      * 创建时间

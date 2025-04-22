@@ -71,7 +71,7 @@ public class CategoryController {
     }
 
     @Log
-    @Operation(summary = "批量删除地名信息接口")
+    @Operation(summary = "批量删除分类信息接口")
     @DeleteMapping("/delete/batch")
     public Result deleteBatch(@RequestBody @Validated CategoryDeleteBatchDTO categoryDeleteBatchDTO) {
         return categoryService.deleteCategoryBatch(categoryDeleteBatchDTO);

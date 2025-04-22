@@ -2,6 +2,7 @@ package com.shoppingmall.demo.controller;
 
 import com.shoppingmall.demo.annotation.Log;
 import com.shoppingmall.demo.annotation.PreAuthorize;
+import com.shoppingmall.demo.model.DTO.PermissionDeleteBatchDTO;
 import com.shoppingmall.demo.model.DTO.PermissionSaveDTO;
 import com.shoppingmall.demo.model.DTO.PermissionUpdateDTO;
 import com.shoppingmall.demo.service.IPermissionService;
@@ -66,5 +67,10 @@ public class PermissionController {
         return permissionService.getPermissionList(type);
     }
 
-
+    @Log
+    @Operation(summary = "批量删除权限信息接口")
+    @DeleteMapping("/delete/batch")
+    public Result deleteBatch(@RequestBody @Validated PermissionDeleteBatchDTO deleteBatchDTO) {
+        return permissionService.deletePermissionBatch(deleteBatchDTO);
+    }
 }

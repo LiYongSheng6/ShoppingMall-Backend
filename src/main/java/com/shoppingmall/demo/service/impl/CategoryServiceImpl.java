@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.baomidou.mybatisplus.extension.toolkit.Db;
 import com.shoppingmall.demo.constant.CacheConstants;
 import com.shoppingmall.demo.constant.MessageConstants;
+import com.shoppingmall.demo.enums.CategoryType;
 import com.shoppingmall.demo.exception.ServiceException;
 import com.shoppingmall.demo.mapper.CategoryMapper;
 import com.shoppingmall.demo.model.DO.CategoryDO;
@@ -71,16 +72,16 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, CategoryDO>
 
     @Override
     public Result saveOrUpdateCategoryBatch(CategorySaveBatchDTO categorySaveBatchDTO) {
-        Integer type = categorySaveBatchDTO.getType();
+        CategoryType type = categorySaveBatchDTO.getType();
 
-        List<String> addressNameList = categorySaveBatchDTO.getCategoryNameList();
-        if (CollectionUtils.isEmpty(addressNameList))
+        List<String> categoryNameList = categorySaveBatchDTO.getCategoryNameList();
+        if (CollectionUtils.isEmpty(categoryNameList))
             throw new ServiceException(MessageConstants.NO_FOUND_CATEGORY_NAME_ERROR);
 
-        List<CategoryDO> addressDOList = addressNameList.stream().map(addressName -> {
-            CategoryDO categoryDO = lambdaQuery().eq(CategoryDO::getCategoryName, addressName).one();
+        List<CategoryDO> addressDOList = categoryNameList.stream().map(categoryName -> {
+            CategoryDO categoryDO = lambdaQuery().eq(CategoryDO::getCategoryName, categoryName).one();
             if (categoryDO == null)
-                categoryDO = new CategoryDO().setId(redisIdWorker.nextId(CacheConstants.CATEGORY_ID_PREFIX)).setCategoryName(addressName);
+                categoryDO = new CategoryDO().setId(redisIdWorker.nextId(CacheConstants.CATEGORY_ID_PREFIX)).setCategoryName(categoryName);
 
             return categoryDO.setType(type);
         }).toList();
@@ -95,7 +96,7 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, CategoryDO>
             throw new ServiceException(MessageConstants.NO_FOUND_CATEGORY_NAME_ERROR);
 
         List<CategoryDO> categoryDOList = categoryDeleteBatchDTO.getCategoryNameList()
-                .stream().map(addressName -> lambdaQuery().eq(CategoryDO::getCategoryName, addressName).one()).toList();
+                .stream().map(categoryName -> lambdaQuery().eq(CategoryDO::getCategoryName, categoryName).one()).toList();
 
         return Db.removeByIds(categoryDOList, CategoryDO.class) ?
                 Result.success(MessageConstants.OPERATION_SUCCESS) : Result.error(MessageConstants.OPERATION_ERROR);

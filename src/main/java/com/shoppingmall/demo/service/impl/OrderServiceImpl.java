@@ -14,6 +14,7 @@ import com.shoppingmall.demo.mapper.OrderMapper;
 import com.shoppingmall.demo.model.DO.GoodDO;
 import com.shoppingmall.demo.model.DO.OrderDO;
 import com.shoppingmall.demo.model.DO.UserDO;
+import com.shoppingmall.demo.model.DTO.OrderDeleteBatchDTO;
 import com.shoppingmall.demo.model.DTO.OrderSaveDTO;
 import com.shoppingmall.demo.model.DTO.OrderUpdateDTO;
 import com.shoppingmall.demo.model.Query.OrderQuery;
@@ -35,6 +36,7 @@ import org.redisson.api.RedissonClient;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -150,6 +152,16 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, OrderDO> implemen
             throw new ServiceException(MessageConstants.NO_FOUND_ORDER_ERROR);
         });
         return Result.success(MessageConstants.DELETE_SUCCESS);
+    }
+
+    @Override
+    public Result deleteOrderBatch(OrderDeleteBatchDTO deleteBatchDTO) {
+        List<OrderDO> list = lambdaQuery().in(OrderDO::getId, deleteBatchDTO.getOrderIds()).list();
+        if (CollectionUtils.isEmpty(list))
+            throw new ServiceException(MessageConstants.NO_FOUND_ORDER_ERROR);
+
+        return Db.removeByIds(list, OrderDO.class) ?
+                Result.success(MessageConstants.OPERATION_SUCCESS) : Result.error(MessageConstants.OPERATION_ERROR);
     }
 
     @Override

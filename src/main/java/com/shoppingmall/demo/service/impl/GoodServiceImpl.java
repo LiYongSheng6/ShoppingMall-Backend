@@ -10,10 +10,11 @@ import com.shoppingmall.demo.enums.GoodRankType;
 import com.shoppingmall.demo.enums.GoodType;
 import com.shoppingmall.demo.exception.ServiceException;
 import com.shoppingmall.demo.mapper.GoodMapper;
-import com.shoppingmall.demo.model.DO.TagDO;
 import com.shoppingmall.demo.model.DO.CategoryDO;
 import com.shoppingmall.demo.model.DO.GoodDO;
+import com.shoppingmall.demo.model.DO.TagDO;
 import com.shoppingmall.demo.model.DO.UserDO;
+import com.shoppingmall.demo.model.DTO.GoodDeleteBatchDTO;
 import com.shoppingmall.demo.model.DTO.GoodSaveDTO;
 import com.shoppingmall.demo.model.DTO.GoodUpdateDTO;
 import com.shoppingmall.demo.model.Query.GoodQuery;
@@ -61,15 +62,25 @@ public class GoodServiceImpl extends ServiceImpl<GoodMapper, GoodDO> implements 
     }
 
     @Override
+    public Result deleteGoodBatch(GoodDeleteBatchDTO deleteBatchDTO) {
+        List<GoodDO> list = lambdaQuery().in(GoodDO::getId, deleteBatchDTO.getGoodIds()).list();
+        if (CollectionUtils.isEmpty(list))
+            throw new ServiceException(MessageConstants.NO_FOUND_GOOD_ERROR);
+
+        return Db.removeByIds(list, GoodDO.class) ?
+                Result.success(MessageConstants.OPERATION_SUCCESS) : Result.error(MessageConstants.OPERATION_ERROR);
+    }
+
+    @Override
     public Result getGoodById(Long id) {
         GoodDO goodDO = getById(id);
         Optional.ofNullable(goodDO).orElseThrow(() -> new ServiceException(MessageConstants.NO_FOUND_GOOD_ERROR));
 
         UserDO creator = Db.lambdaQuery(UserDO.class).eq(UserDO::getId, goodDO.getCreatorId()).one();
         return Result.success(new GoodVO(getById(id))
-                        .setCategoryName(creator.getUsername()).setCreatorAvatar(creator.getAvatar())
-                        .setTagName(Db.lambdaQuery(TagDO.class).eq(TagDO::getId, goodDO.getTagId()).one().getTagName())
-                        .setCategoryName(Db.lambdaQuery(CategoryDO.class).eq(CategoryDO::getId, goodDO.getCategoryId()).one().getCategoryName()));
+                .setCategoryName(creator.getUsername()).setCreatorAvatar(creator.getAvatar())
+                .setTagName(Db.lambdaQuery(TagDO.class).eq(TagDO::getId, goodDO.getTagId()).one().getTagName())
+                .setCategoryName(Db.lambdaQuery(CategoryDO.class).eq(CategoryDO::getId, goodDO.getCategoryId()).one().getCategoryName()));
     }
 
     @Override
@@ -89,7 +100,7 @@ public class GoodServiceImpl extends ServiceImpl<GoodMapper, GoodDO> implements 
                 .eq(type != null, GoodDO::getType, type)
                 .page(page);
 
-        if(CollectionUtils.isEmpty(pageDO.getRecords())) return Result.error(MessageConstants.NO_FOUND_GOOD_ERROR);
+        if (CollectionUtils.isEmpty(pageDO.getRecords())) return Result.error(MessageConstants.NO_FOUND_GOOD_ERROR);
 
         return Result.success(PageVO.of(pageDO, GoodDO -> BeanUtil.copyProperties(GoodDO, GoodVO.class)
                 .setTagName(Db.getById(GoodDO.getTagId(), TagDO.class).getTagName())
@@ -102,7 +113,7 @@ public class GoodServiceImpl extends ServiceImpl<GoodMapper, GoodDO> implements 
         GoodRankType goodRankType = goodQuery.getRankType();
 
         String hashKey;
-        if(GoodRankType.DAY.equals(goodRankType)) hashKey = CacheConstants.GOOD_SALES_NUM_DAY_KEY;
+        if (GoodRankType.DAY.equals(goodRankType)) hashKey = CacheConstants.GOOD_SALES_NUM_DAY_KEY;
         else if (GoodRankType.WEEK.equals(goodRankType)) hashKey = CacheConstants.GOOD_SALES_NUM_WEEK_KEY;
         else if (GoodRankType.YEAR.equals(goodRankType)) hashKey = CacheConstants.GOOD_SALES_NUM_YEAR_KEY;
         else if (GoodRankType.OVERALL.equals(goodRankType)) hashKey = CacheConstants.GOOD_SALES_NUM_OVERALL_KEY;
@@ -110,12 +121,14 @@ public class GoodServiceImpl extends ServiceImpl<GoodMapper, GoodDO> implements 
 
         List<GoodDO> goodDOList = new ArrayList<>();
         Map<Object, Object> hashAll = redisCacheService.getHashAll(hashKey);
-        hashAll.forEach((key,value)->{
-            goodDOList.add(lambdaQuery().eq(GoodDO::getId, key).eq(GoodDO::getType,type).one().setSalesNum(Integer.parseInt(value.toString())));
+        hashAll.forEach((key, value) -> {
+            goodDOList.add(lambdaQuery().eq(GoodDO::getId, key).eq(GoodDO::getType, type).one().setSalesNum(Integer.parseInt(value.toString())));
         });
 
-        if(CollectionUtils.isEmpty(goodDOList))return Result.error(MessageConstants.NO_FOUND_GOOD_ERROR);
-        else return Result.success(BeanUtil.copyToList(goodDOList.stream().sorted(Comparator.comparing(GoodDO::getSalesNum).reversed()).limit(50).toList(), GoodVO.class));
+        if (CollectionUtils.isEmpty(goodDOList)) return Result.error(MessageConstants.NO_FOUND_GOOD_ERROR);
+        else
+            return Result.success(BeanUtil.copyToList(goodDOList.stream().sorted(Comparator.comparing(GoodDO::getSalesNum).reversed()).limit(50).toList(), GoodVO.class));
     }
+
 
 }

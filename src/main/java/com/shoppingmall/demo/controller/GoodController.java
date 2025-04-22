@@ -1,6 +1,7 @@
 package com.shoppingmall.demo.controller;
 
 import com.shoppingmall.demo.annotation.Log;
+import com.shoppingmall.demo.model.DTO.GoodDeleteBatchDTO;
 import com.shoppingmall.demo.model.DTO.GoodSaveDTO;
 import com.shoppingmall.demo.model.DTO.GoodUpdateDTO;
 import com.shoppingmall.demo.model.Query.GoodQuery;
@@ -55,6 +56,13 @@ public class GoodController {
     @DeleteMapping("/delete")
     public Result delete(@RequestParam @NotNull Long GoodId) {
         return goodService.deleteGoodById(GoodId);
+    }
+
+    @Log
+    @Operation(summary = "批量删除商品信息接口")
+    @DeleteMapping("/delete/batch")
+    public Result deleteBatch(@RequestBody @Validated GoodDeleteBatchDTO deleteBatchDTO) {
+        return goodService.deleteGoodBatch(deleteBatchDTO);
     }
 
     @Log
