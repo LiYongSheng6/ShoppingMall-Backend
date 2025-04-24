@@ -2,20 +2,15 @@ package com.shoppingmall.demo.model.VO;
 
 
 import cn.hutool.core.bean.BeanUtil;
-import com.shoppingmall.demo.annotation.GoodStatusPattern;
-import com.shoppingmall.demo.annotation.GoodTypePattern;
 import com.shoppingmall.demo.enums.GoodStatus;
 import com.shoppingmall.demo.enums.GoodType;
-import com.shoppingmall.demo.model.DO.AddressDO;
 import com.shoppingmall.demo.model.DO.GoodDO;
 import io.swagger.annotations.ApiModelProperty;
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
-import org.hibernate.validator.constraints.Length;
 
 import java.io.Serializable;
 
@@ -60,7 +55,7 @@ public class GoodVO implements Serializable {
      * 商品已购数
      */
     @ApiModelProperty("商品销量数")
-    private Integer salesNum;
+    private Integer saleNum;
 
     /**
      * 商品上架状态
@@ -73,6 +68,12 @@ public class GoodVO implements Serializable {
      */
     @ApiModelProperty("商品类型")
     private GoodType type;
+
+    /**
+     * 创建人id
+     */
+    @ApiModelProperty("创建人id")
+    private Long creatorId;
 
     /**
      * 创建人名称
@@ -108,7 +109,7 @@ public class GoodVO implements Serializable {
      * 商品详情
      */
     @ApiModelProperty("商品详情")
-    private String details;
+    private String detail;
 
     public GoodVO(GoodDO goodDO){
         BeanUtil.copyProperties(goodDO,this);

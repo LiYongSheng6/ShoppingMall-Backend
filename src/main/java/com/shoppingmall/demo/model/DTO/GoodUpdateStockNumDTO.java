@@ -1,5 +1,6 @@
 package com.shoppingmall.demo.model.DTO;
 
+
 import io.swagger.annotations.ApiModelProperty;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -12,31 +13,28 @@ import org.springframework.validation.annotation.Validated;
 import java.io.Serializable;
 
 /**
-* 
-* @TableName tag
-*/
+ * @TableName tag
+ */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
 @Validated
 @Accessors(chain = true)
-public class OrderSaveDTO implements Serializable {
+public class GoodUpdateStockNumDTO implements Serializable {
 
-    @NotNull(message="[用户id]不能为空")
-    @ApiModelProperty("用户id")
-    private Long userId;
-
-    @NotNull(message="[商品id]不能为空")
+    /**
+     * 商品id
+     */
+    @NotNull(message = "[商品id]不能为空")
     @ApiModelProperty("商品id")
-    private Long goodId;
+    private Long id;
 
-    @NotNull(message="[收货信息id]不能为空")
-    @ApiModelProperty("收货信息id")
-    private Long deliveryId;
-
-    @NotNull(message="[商品购买数]不能为空")
-    @ApiModelProperty("商品购买数")
-    private Integer purchaseNum;
+    /**
+     * 商品存货添改数量
+     */
+    @NotNull(message = "[商品存货添改数量]不能为空")
+    @ApiModelProperty("商品存货添改数量")
+    private Integer stockNum;
 
 }

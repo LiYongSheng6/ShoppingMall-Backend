@@ -13,7 +13,6 @@ import com.shoppingmall.demo.enums.GoodStatus;
 import com.shoppingmall.demo.enums.GoodType;
 import io.swagger.annotations.ApiModelProperty;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -76,7 +75,7 @@ public class GoodDO implements Serializable {
      */
     @NotNull(message="[商品已购数]不能为空")
     @ApiModelProperty("商品销量数")
-    private Integer salesNum;
+    private Integer saleNum;
 
     /**
      * 商品上架状态
@@ -125,7 +124,7 @@ public class GoodDO implements Serializable {
      */
     @Length(max= 512,message="编码长度不能超过512")
     @ApiModelProperty("商品详情")
-    private String details;
+    private String detail;
 
     /**
      * 创建时间

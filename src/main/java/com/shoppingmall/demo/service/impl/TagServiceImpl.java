@@ -55,6 +55,12 @@ public class TagServiceImpl extends ServiceImpl<TagMapper, TagDO> implements ITa
     }
 
     @Override
+    public String getTagNameById(Long id) {
+        TagDO tagDO = getById(id);
+        return tagDO != null ? tagDO.getTagName() : "NULL";
+    }
+
+    @Override
     public Result getTagListByType(Integer type) {
         List<TagDO> tagDOList = lambdaQuery().eq(TagDO::getType, type).list();
         if (CollectionUtils.isEmpty(tagDOList)) throw new ServiceException(MessageConstants.NO_FOUND_TAG_ERROR);
@@ -80,8 +86,7 @@ public class TagServiceImpl extends ServiceImpl<TagMapper, TagDO> implements ITa
             TagDO tagDO = lambdaQuery().eq(TagDO::getTagName, tagName).one();
             if (tagDO == null)
                 tagDO = new TagDO().setId(redisIdWorker.nextId(CacheConstants.TAG_ID_PREFIX)).setTagName(tagName);
-
-            return tagDO.setType(type);
+            return tagDO.setType(type).setUpdateTime(LocalDateTime.now());
         }).toList();
 
         return Db.saveOrUpdateBatch(addressDOList, addressDOList.size()) ?

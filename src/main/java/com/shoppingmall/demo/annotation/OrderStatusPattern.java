@@ -1,7 +1,7 @@
 package com.shoppingmall.demo.annotation;
 
 import com.shoppingmall.demo.constant.MessageConstants;
-import com.shoppingmall.demo.validator.GenderPatternValidator;
+import com.shoppingmall.demo.validator.OrderStatusPatternValidator;
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;
 
@@ -12,7 +12,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 @Documented
-@Constraint(validatedBy = GenderPatternValidator.class)
+@Constraint(validatedBy = OrderStatusPatternValidator.class)
 @Target({ ElementType.FIELD, ElementType.METHOD })
 @Retention(RetentionPolicy.RUNTIME)
 public @interface OrderStatusPattern {

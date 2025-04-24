@@ -127,11 +127,6 @@ public class CacheConstants {
     public static final String GOOD_ID_PREFIX = "goodId";
 
     /**
-     * 订单生成锁
-     */
-    public static final String ORDER_SAVE_LOCK = "order_save_lock:";
-
-    /**
      * 订单ID前缀
      */
     public static final String ORDER_ID_PREFIX = "orderId";
@@ -140,4 +135,15 @@ public class CacheConstants {
      * 分类ID前缀
      */
     public static String CATEGORY_ID_PREFIX = "categoryId";
+
+    /**
+     * 商品库存更新锁
+     */
+    public static final String GOOD_STOCK_UPDATE_LOCK = "good_stock_update_lock:";
+
+    /**
+     * 订单生成锁
+     */
+    public static final String ORDER_SAVE_LOCK = "order_save_lock:";
+
 }

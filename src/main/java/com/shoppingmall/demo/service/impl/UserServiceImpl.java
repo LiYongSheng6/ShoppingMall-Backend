@@ -328,5 +328,17 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements 
         return Result.success(PageVO.of(pageDO, UserVO::new));
     }
 
+    @Override
+    public String getUserNameById(Long id) {
+        UserDO userDO = getById(id);
+        return userDO != null ? userDO.getUsername() : "NULL";
+    }
+
+    @Override
+    public String getUserAvatarById(Long id) {
+        UserDO userDO = getById(id);
+        return userDO != null ? userDO.getAvatar() : "NULL";
+    }
+
 
 }

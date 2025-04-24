@@ -40,8 +40,6 @@ public class MessageConstants {
     public static final String OPERATION_ERROR = "操作失败";
     public static final String COMMENT_SUCCESS = "评价成功";
     public static final String COMMENT_ERROR = "评价失败";
-    public static final String APPOINT_SUCCESS = "预约成功";
-    public static final String APPOINT_ERROR = "预约失败";
     public static final String SAVE_SUCCESS = "添加成功";
     public static final String SAVE_ERROR = "添加失败";
     public static final String EXPORT_SUCCESS = "导出Excel文件成功";
@@ -57,7 +55,6 @@ public class MessageConstants {
     public static final String USER_UNBLOCKING_EXIST = "当前用户已被解封！";
     public static final String USER_FORBIDDEN_ERROR = "该用户已被禁用，请联系管理员";
 
-    public static final String TAG_NAME_EXIST = "标签名称已存在";
 
     public static final String STUDENT_ID_REGEX_MESSAGE = "学号格式为3x2x00xxxx";
     public static final String USERNAME_REGEX_MESSAGE = "用户名为1到20位非空字符";
@@ -93,10 +90,12 @@ public class MessageConstants {
     public static final String NO_FOUND_CATEGORY_NAME_ERROR = "没有要操作的相关分类信息";
     public static final String NO_FOUND_TAG_NAME_ERROR = "没有要操作的相关标签信息";
 
+    public static final String PERMISSION_PROHIBITED_ERROR = "禁止操作";
     public static final String PERMISSION_CODE_EXIST = "资源编码已存在";
     public static final String PERMISSION_PATH_EXIST = "资源路径已存在";
     public static final String ADDRESS_NAME_EXIST = "地名名称已存在";
     public static final String CATEGORY_NAME_EXIST = "分类名称已存在";
+    public static final String TAG_NAME_EXIST = "标签名称已存在";
 
 }
 

@@ -3,7 +3,6 @@ package com.shoppingmall.demo.controller;
 import com.shoppingmall.demo.annotation.Log;
 import com.shoppingmall.demo.model.DTO.OrderDeleteBatchDTO;
 import com.shoppingmall.demo.model.DTO.OrderSaveDTO;
-import com.shoppingmall.demo.model.DTO.OrderUpdateDTO;
 import com.shoppingmall.demo.model.Query.OrderQuery;
 import com.shoppingmall.demo.model.VO.OrderVO;
 import com.shoppingmall.demo.service.IOrderService;
@@ -47,29 +46,44 @@ public class OrderController {
     @Log
     @Operation(summary = "修改订单状态为待发货")
     @PutMapping("/update/shipping")
-    public Result updateToBeShipping(@RequestBody @Validated OrderUpdateDTO orderUpdateDTO) {
-        return orderService.updateToBeShipping(orderUpdateDTO);
+    public Result updateToBeShipping(@RequestParam @NotNull Long id) {
+        return orderService.updateToBeShipping(id);
+    }
+
+    @Log
+    @Operation(summary = "修改订单状态为待收货")
+    @PutMapping("/update/receiving")
+    public Result updateToBeReceiving(@RequestParam @NotNull Long id) {
+        return orderService.updateToBeReceiving(id);
     }
 
     @Log
     @Operation(summary = "修改订单状态为已完成")
     @PutMapping("/update/completed")
-    public Result updateToBeCompleted(@RequestBody @Validated OrderUpdateDTO orderUpdateDTO) {
-        return orderService.updateToBeCompleted(orderUpdateDTO);
+    public Result updateToBeCompleted(@RequestParam @NotNull Long id) {
+        return orderService.updateToBeCompleted(id);
     }
 
     @Log
     @Operation(summary = "修改订单状态为已取消")
     @PutMapping("/update/canceled")
-    public Result updateToBeCanceled(@RequestBody @Validated OrderUpdateDTO orderUpdateDTO) {
-        return orderService.updateToBeCancelled(orderUpdateDTO);
+    public Result updateToBeCanceled(@RequestParam @NotNull Long id) {
+        return orderService.updateToBeCancelled(id);
+    }
+
+    @Log
+    @Operation(summary = "修改订单收货地址信息")
+    @PutMapping("/update/delivery")
+    public Result updateDelivery(@RequestParam @NotNull Long id,
+                                 @RequestParam @NotNull Long deliveryId) {
+        return orderService.updateDelivery(id, deliveryId);
     }
 
     @Log
     @Operation(summary = "删除订单信息接口")
     @DeleteMapping("/delete")
-    public Result delete(@RequestParam @NotNull Long orderId) {
-        return orderService.deleteOrderById(orderId);
+    public Result delete(@RequestParam @NotNull Long id) {
+        return orderService.deleteOrderById(id);
     }
 
     @Log
@@ -82,12 +96,19 @@ public class OrderController {
     @Log
     @Operation(summary = "查询单个订单信息")
     @GetMapping("/detail")
-    public Result<OrderVO> detail(@RequestParam @NotNull Long orderId) {
-        return orderService.selectOrderById(orderId);
+    public Result<OrderVO> detail(@RequestParam @NotNull Long id) {
+        return orderService.getOrderById(id);
     }
 
     @Log
-    @Operation(summary = "查询订单信息列表")
+    @Operation(summary = "获取当前用户订单信息分页列表")
+    @GetMapping("/list/own")
+    public Result getDeliveryList(@RequestBody @Validated OrderQuery orderQuery) {
+        return orderService.getMyOrderListPage(orderQuery);
+    }
+
+    @Log
+    @Operation(summary = "分页查询订单信息列表")
     @GetMapping("/list/page")
     public Result listByPlaylistId(@Validated OrderQuery orderQuery) {
         return orderService.pageOrderListByUserId(orderQuery);

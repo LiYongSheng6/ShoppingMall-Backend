@@ -4,7 +4,9 @@ import com.shoppingmall.demo.annotation.Log;
 import com.shoppingmall.demo.annotation.PreAuthorize;
 import com.shoppingmall.demo.model.DTO.DeliveryDeleteBatchDTO;
 import com.shoppingmall.demo.model.DTO.DeliverySaveDTO;
+import com.shoppingmall.demo.model.DTO.DeliverySaveIdDTO;
 import com.shoppingmall.demo.model.DTO.DeliveryUpdateDTO;
+import com.shoppingmall.demo.model.DTO.DeliveryUpdateIdDTO;
 import com.shoppingmall.demo.service.IDeliveryService;
 import com.shoppingmall.demo.utils.Result;
 import io.swagger.annotations.Api;
@@ -42,12 +44,25 @@ public class DeliveryController {
     public Result save(@RequestBody @Validated DeliverySaveDTO deliverySaveDTO) {
         return deliveryService.saveDelivery(deliverySaveDTO);
     }
-
     @Log
     @Operation(summary = "修改收货信息接口")
     @PutMapping("/update")
     public Result update(@RequestBody @Validated DeliveryUpdateDTO deliveryUpdateDTO) {
         return deliveryService.updateDelivery(deliveryUpdateDTO);
+    }
+
+    @Log
+    @Operation(summary = "添加收货信息Id接口")
+    @PostMapping("/save/id")
+    public Result save(@RequestBody @Validated DeliverySaveIdDTO deliverySaveDTO) {
+        return deliveryService.saveIdDelivery(deliverySaveDTO);
+    }
+
+    @Log
+    @Operation(summary = "修改收货信息Id接口")
+    @PutMapping("/update/id")
+    public Result update(@RequestBody @Validated DeliveryUpdateIdDTO deliveryUpdateDTO) {
+        return deliveryService.updateIdDelivery(deliveryUpdateDTO);
     }
 
     @Log

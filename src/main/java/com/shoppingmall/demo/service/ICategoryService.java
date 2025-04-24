@@ -14,7 +14,11 @@ public interface ICategoryService extends IService<CategoryDO> {
 
     Result updateCategory(CategoryUpdateDTO categoryUpdateDTO);
 
+    String getCategoryNameById(Long id);
+
     Result getCategoryListByType(Integer type);
+
+    Result getCategoryTreeInfo();
 
     Result deleteCategoryById(Long id);
 

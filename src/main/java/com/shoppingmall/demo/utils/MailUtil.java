@@ -36,10 +36,12 @@ public class MailUtil {
         prop.setProperty("mail.smtp.auth", emailConfigProperties.auth);
         // 发送邮件协议名称
         prop.setProperty("mail.transport.protocol", "smtp");
-        // 开启SSL加密可能会失败
+        // 设置端口号为465或587
+        prop.setProperty("mail.smtp.port", "25");
         try {
             MailSSLSocketFactory sf = new MailSSLSocketFactory();
             sf.setTrustAllHosts(true);
+            // 启用SSL加密（大概率会失败，默认false）
             prop.put("mail.smtp.ssl.enable", "false");
             prop.put("mail.smtp.ssl.socketFactory", sf);
             // 创建session

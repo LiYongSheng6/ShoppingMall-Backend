@@ -53,23 +53,8 @@ public class GoodUpdateDTO implements Serializable {
     /**
      * 商品价格
      */
-    @NotNull(message="[商品价格]不能为空")
     @ApiModelProperty("商品价格")
     private Integer price;
-
-    /**
-     * 商品存货数
-     */
-    @NotNull(message="[商品存货数]不能为空")
-    @ApiModelProperty("商品存货数")
-    private Integer stockNum;
-
-    /**
-     * 商品已购数
-     */
-    @NotNull(message="[商品已购数]不能为空")
-    @ApiModelProperty("商品销量数")
-    private Integer salesNum;
 
     /**
      * 商品上架状态
@@ -86,23 +71,14 @@ public class GoodUpdateDTO implements Serializable {
     private GoodType type;
 
     /**
-     * 创建人id
-     */
-    @NotNull(message="[创建人id]不能为空")
-    @ApiModelProperty("创建人id")
-    private Long creatorId;
-
-    /**
      * 分类id
      */
-    @NotNull(message="[分类id]不能为空")
     @ApiModelProperty("分类id")
     private Long categoryId;
 
     /**
      * 标签id
      */
-    @NotNull(message="[标签id]不能为空")
     @ApiModelProperty("标签id")
     private Long tagId;
 
@@ -118,7 +94,6 @@ public class GoodUpdateDTO implements Serializable {
      */
     @Length(max= 512,message="编码长度不能超过512")
     @ApiModelProperty("商品详情")
-    private String details;
-
+    private String detail;
 
 }

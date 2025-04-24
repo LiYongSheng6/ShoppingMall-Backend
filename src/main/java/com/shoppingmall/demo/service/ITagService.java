@@ -14,6 +14,8 @@ public interface ITagService extends IService<TagDO> {
 
     Result updateTag(TagUpdateDTO tagUpdateDTO);
 
+    String getTagNameById(Long id);
+
     Result getTagListByType(Integer type);
 
     Result deleteTagById(Long id);

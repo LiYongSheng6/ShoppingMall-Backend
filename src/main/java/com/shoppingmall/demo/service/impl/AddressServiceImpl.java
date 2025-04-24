@@ -23,6 +23,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -48,23 +49,30 @@ public class AddressServiceImpl extends ServiceImpl<AddressMapper, AddressDO> im
                 Result.success(MessageConstants.UPDATE_SUCCESS) : Result.error(MessageConstants.UPDATE_ERROR);
     }
 
+    private static List<AddressVO> makeAddressTree(List<AddressVO> addressList, Long pid) {
+        //创建集合保存分类数据
+        List<AddressVO> addressVOList = new ArrayList<AddressVO>();
+        //判断分类列表是否为空，如果不为空则使用分类列表，否则创建集合对象
+        Optional.ofNullable(addressList).orElse(new ArrayList<AddressVO>())
+                .stream().filter(item -> item != null && item.getParentId().equals(pid))
+                .forEach(item -> {
+                    //获取每一个item对象的子分类，递归生成分类树
+                    List<AddressVO> children = makeAddressTree(addressList, item.getId());
+                    //设置子分类
+                    item.setChildren(children);
+                    //将分类对象添加到集合
+                    addressVOList.add(item);
+                });
+        //返回分类信息
+        return addressVOList;
+    }
+
     private void checkDuplicationColumn(Long id, String addressName) {
         Optional.ofNullable(lambdaQuery().ne(id != null, AddressDO::getId, id).eq(AddressDO::getAddressName, addressName).one())
                 .ifPresent(addressDO -> {
             throw new ServiceException(MessageConstants.ADDRESS_NAME_EXIST);
         });
     }
-
-    public Result getAddressListByIdAndType(Long parentId, AddressType type) {
-        List<AddressDO> addressDOList = lambdaQuery()
-                .eq(parentId != null, AddressDO::getParentId, parentId)
-                .eq(type != null, AddressDO::getType, type).list();
-
-        if(CollectionUtils.isEmpty(addressDOList)) throw new ServiceException(MessageConstants.NO_FOUND_ADDRESS_ERROR);
-
-        return Result.success(addressDOList.stream().map(addressDO -> CompletableFuture.supplyAsync(() -> new AddressVO(addressDO))).toList()
-                .stream().map(CompletableFuture::join).toList());
-     }
 
     @Override
     public String getAddressNameById(Long id) {
@@ -73,16 +81,39 @@ public class AddressServiceImpl extends ServiceImpl<AddressMapper, AddressDO> im
     }
 
     @Override
-    public Result deleteAddressById(Long id) {
-        return removeById(id) ? Result.success(MessageConstants.DELETE_SUCCESS) : Result.error(MessageConstants.DELETE_ERROR);
-    }
-
-    @Override
     public Long getAddressIdByName(String name, AddressType type) {
         AddressDO addressDO = lambdaQuery().eq(AddressDO::getAddressName, name).eq(AddressDO::getType, type).one();
         if (addressDO == null)
             throw new ServiceException(MessageConstants.NO_FOUND_ADDRESS_ERROR + ": " + name + "-" + type.getDesc());
         return addressDO.getId();
+    }
+
+    @Override
+    public Result deleteAddressById(Long id) {
+        return removeById(id) ? Result.success(MessageConstants.DELETE_SUCCESS) : Result.error(MessageConstants.DELETE_ERROR);
+    }
+
+    public Result getAddressListByIdAndType(Long parentId, Integer type) {
+        List<AddressDO> addressDOList = lambdaQuery()
+                .eq(parentId != null, AddressDO::getParentId, parentId)
+                .eq(type != null, AddressDO::getType, type).list();
+
+        if (CollectionUtils.isEmpty(addressDOList)) throw new ServiceException(MessageConstants.NO_FOUND_ADDRESS_ERROR);
+
+        return Result.success(addressDOList.stream().map(addressDO -> CompletableFuture.supplyAsync(() -> new AddressVO(addressDO))).toList()
+                .stream().map(CompletableFuture::join).toList());
+    }
+
+    @Override
+    public Result deleteAddressBatch(AddressDeleteBatchDTO addressDeleteBatchDTO) {
+        if (CollectionUtils.isEmpty(addressDeleteBatchDTO.getAddressNameList()))
+            throw new ServiceException(MessageConstants.NO_FOUND_ADDRESS_NAME_ERROR);
+
+        List<AddressDO> addressDOList = addressDeleteBatchDTO.getAddressNameList()
+                .stream().map(addressName -> lambdaQuery().eq(AddressDO::getAddressName, addressName).one()).toList();
+
+        return Db.removeByIds(addressDOList, AddressDO.class) ?
+                Result.success(MessageConstants.OPERATION_SUCCESS) : Result.error(MessageConstants.OPERATION_ERROR);
     }
 
     @Override
@@ -98,7 +129,7 @@ public class AddressServiceImpl extends ServiceImpl<AddressMapper, AddressDO> im
             AddressDO addressDO = lambdaQuery().eq(AddressDO::getAddressName, addressName).one();
             if (addressDO == null)
                 addressDO = new AddressDO().setId(redisIdWorker.nextId(CacheConstants.ADDRESS_ID_PREFIX)).setAddressName(addressName);
-            addressDO.setParentId(parentId).setType(type);
+            addressDO.setParentId(parentId).setType(type).setUpdateTime(LocalDateTime.now());
             return addressDO;
         }).toList();
 
@@ -107,15 +138,15 @@ public class AddressServiceImpl extends ServiceImpl<AddressMapper, AddressDO> im
     }
 
     @Override
-    public Result deleteAddressBatch(AddressDeleteBatchDTO addressDeleteBatchDTO) {
-        if (CollectionUtils.isEmpty(addressDeleteBatchDTO.getAddressNameList()))
-            throw new ServiceException(MessageConstants.NO_FOUND_ADDRESS_NAME_ERROR);
+    public Result getAddressTreeInfo() {
+        List<AddressDO> addressDOList = lambdaQuery().list();
+        if (CollectionUtils.isEmpty(addressDOList))
+            throw new ServiceException(MessageConstants.NO_FOUND_ADDRESS_ERROR);
 
-        List<AddressDO> addressDOList = addressDeleteBatchDTO.getAddressNameList()
-                .stream().map(addressName -> lambdaQuery().eq(AddressDO::getAddressName, addressName).one()).toList();
-
-        return Db.removeByIds(addressDOList, AddressDO.class) ?
-                Result.success(MessageConstants.OPERATION_SUCCESS) : Result.error(MessageConstants.OPERATION_ERROR);
+        List<AddressVO> addressVOList = addressDOList.stream()
+                .map(item -> CompletableFuture.supplyAsync(() -> new AddressVO(item).setParentName(getAddressNameById(item.getParentId())))).toList()
+                .stream().map(CompletableFuture::join).toList();
+        return Result.success(makeAddressTree(addressVOList, 0L));
     }
 
 }

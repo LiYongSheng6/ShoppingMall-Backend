@@ -47,4 +47,9 @@ public interface IUserService extends IService<UserDO> {
     Result deleteUserById(Long id);
 
     Result pageUserListByCondition(UserQuery userQuery);
+
+    String getUserNameById(Long id);
+
+    String getUserAvatarById(Long id);
+
 }

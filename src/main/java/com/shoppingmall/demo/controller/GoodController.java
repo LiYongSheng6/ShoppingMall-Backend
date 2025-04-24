@@ -4,6 +4,7 @@ import com.shoppingmall.demo.annotation.Log;
 import com.shoppingmall.demo.model.DTO.GoodDeleteBatchDTO;
 import com.shoppingmall.demo.model.DTO.GoodSaveDTO;
 import com.shoppingmall.demo.model.DTO.GoodUpdateDTO;
+import com.shoppingmall.demo.model.DTO.GoodUpdateStockNumDTO;
 import com.shoppingmall.demo.model.Query.GoodQuery;
 import com.shoppingmall.demo.service.IGoodService;
 import com.shoppingmall.demo.utils.Result;
@@ -20,8 +21,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.io.IOException;
 
 /**
  * @author redmi k50 ultra
@@ -40,15 +39,22 @@ public class GoodController {
     @Log
     @Operation(summary = "添加商品信息接口")
     @PostMapping("/save")
-    public Result save(@RequestBody @Validated GoodSaveDTO GoodSaveDTO) {
-        return goodService.saveGood(GoodSaveDTO);
+    public Result save(@RequestBody @Validated GoodSaveDTO saveDTO) {
+        return goodService.saveGood(saveDTO);
     }
 
     @Log
     @Operation(summary = "修改商品信息接口")
     @PutMapping("/update")
-    public Result update(@RequestBody @Validated GoodUpdateDTO GoodUpdateDTO) {
-        return goodService.updateGood(GoodUpdateDTO);
+    public Result update(@RequestBody @Validated GoodUpdateDTO updateDTO) {
+        return goodService.updateGood(updateDTO);
+    }
+
+    @Log
+    @Operation(summary = "修改商品库存接口")
+    @PutMapping("/update/stock")
+    public Result updateStockNum(@RequestBody @Validated GoodUpdateStockNumDTO updateDTO) {
+        return goodService.updateGoodStockNum(updateDTO);
     }
 
     @Log
@@ -69,13 +75,20 @@ public class GoodController {
     @Operation(summary = "获取单个商品信息接口")
     @GetMapping("/detail")
     public Result getGoodById(@RequestParam @NotNull Long id) {
-        return goodService.getGoodById(id);
+        return goodService.getGoodInfoById(id);
+    }
+
+    @Log
+    @Operation(summary = "获取当前用户商品信息分页列表")
+    @GetMapping("/list/own")
+    public Result getDeliveryList(@RequestBody @Validated GoodQuery goodQuery) {
+        return goodService.getMyGoodListPage(goodQuery);
     }
 
     @Log
     @Operation(summary = "分页查询商品信息列表")
     @PostMapping("/list/page")
-    public Result listByCondition(@RequestBody @Validated GoodQuery goodQuery) throws IOException {
+    public Result listByCondition(@RequestBody @Validated GoodQuery goodQuery) {
         return goodService.pageGoodListByCondition(goodQuery);
     }
 

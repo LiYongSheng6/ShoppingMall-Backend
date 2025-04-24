@@ -23,6 +23,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -48,21 +49,58 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, CategoryDO>
                 Result.success(MessageConstants.UPDATE_SUCCESS) : Result.error(MessageConstants.UPDATE_ERROR);
     }
 
+    private static List<CategoryVO> makeCategoryTree(List<CategoryVO> categoryList, Long pid) {
+        //创建集合保存分类数据
+        List<CategoryVO> categoryVOList = new ArrayList<CategoryVO>();
+        //判断分类列表是否为空，如果不为空则使用分类列表，否则创建集合对象
+        Optional.ofNullable(categoryList).orElse(new ArrayList<CategoryVO>())
+                .stream().filter(item -> item != null && item.getParentId().equals(pid))
+                .forEach(item -> {
+                    //获取每一个item对象的子分类，递归生成分类树
+                    List<CategoryVO> children = makeCategoryTree(categoryList, item.getId());
+                    //设置子分类
+                    item.setChildren(children);
+                    //将分类对象添加到集合
+                    categoryVOList.add(item);
+                });
+        //返回分类信息
+        return categoryVOList;
+    }
+
     private void checkDuplicationColumn(Long id, String categoryName) {
         Optional.ofNullable(lambdaQuery().ne(id != null, CategoryDO::getId, id).eq(CategoryDO::getCategoryName, categoryName).one())
                 .ifPresent(category -> {
-            throw new ServiceException(MessageConstants.CATEGORY_NAME_EXIST);
-        });
+                    throw new ServiceException(MessageConstants.CATEGORY_NAME_EXIST);
+                });
+    }
+
+    @Override
+    public String getCategoryNameById(Long id) {
+        CategoryDO categoryDO = getById(id);
+        return categoryDO != null ? categoryDO.getCategoryName() : "NULL";
     }
 
     @Override
     public Result getCategoryListByType(Integer type) {
         List<CategoryDO> CategoryDOList = lambdaQuery().eq(CategoryDO::getType, type).list();
 
-        if (CollectionUtils.isEmpty(CategoryDOList)) throw new ServiceException(MessageConstants.NO_FOUND_CATEGORY_ERROR);
+        if (CollectionUtils.isEmpty(CategoryDOList))
+            throw new ServiceException(MessageConstants.NO_FOUND_CATEGORY_ERROR);
 
         return Result.success(CategoryDOList.stream().map(categoryDO -> CompletableFuture.supplyAsync(() -> new CategoryVO(categoryDO))).toList()
                 .stream().map(CompletableFuture::join).toList());
+    }
+
+    @Override
+    public Result getCategoryTreeInfo() {
+        List<CategoryDO> categoryDOList = lambdaQuery().list();
+        if (CollectionUtils.isEmpty(categoryDOList))
+            throw new ServiceException(MessageConstants.NO_FOUND_CATEGORY_ERROR);
+
+        List<CategoryVO> categoryVOList = categoryDOList.stream()
+                .map(item -> CompletableFuture.supplyAsync(() -> new CategoryVO(item).setParentName(getCategoryNameById(item.getParentId())))).toList()
+                .stream().map(CompletableFuture::join).toList();
+        return Result.success(makeCategoryTree(categoryVOList, 0L));
     }
 
     @Override
@@ -82,8 +120,7 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, CategoryDO>
             CategoryDO categoryDO = lambdaQuery().eq(CategoryDO::getCategoryName, categoryName).one();
             if (categoryDO == null)
                 categoryDO = new CategoryDO().setId(redisIdWorker.nextId(CacheConstants.CATEGORY_ID_PREFIX)).setCategoryName(categoryName);
-
-            return categoryDO.setType(type);
+            return categoryDO.setType(type).setUpdateTime(LocalDateTime.now());
         }).toList();
 
         return Db.saveOrUpdateBatch(addressDOList, addressDOList.size()) ?
@@ -101,4 +138,5 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, CategoryDO>
         return Db.removeByIds(categoryDOList, CategoryDO.class) ?
                 Result.success(MessageConstants.OPERATION_SUCCESS) : Result.error(MessageConstants.OPERATION_ERROR);
     }
+
 }

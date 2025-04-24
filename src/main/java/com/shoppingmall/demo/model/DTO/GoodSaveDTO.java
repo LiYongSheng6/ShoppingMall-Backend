@@ -33,7 +33,7 @@ public class GoodSaveDTO implements Serializable {
      * 商品名称
      */
     @Length(max= 255,message="编码长度不能超过255")
-    @ApiModelProperty("标签名称")
+    @ApiModelProperty("商品名称")
     private String goodName;
 
     /**
@@ -58,13 +58,6 @@ public class GoodSaveDTO implements Serializable {
     private Integer stockNum;
 
     /**
-     * 商品已购数
-     */
-    @NotNull(message="[商品已购数]不能为空")
-    @ApiModelProperty("商品销量数")
-    private Integer salesNum;
-
-    /**
      * 商品上架状态
      */
     @GoodStatusPattern(message = "商品状态只能为0或1")
@@ -77,13 +70,6 @@ public class GoodSaveDTO implements Serializable {
     @GoodTypePattern
     @ApiModelProperty("商品类型")
     private GoodType type;
-
-    /**
-     * 创建人id
-     */
-    @NotNull(message="[创建人id]不能为空")
-    @ApiModelProperty("创建人id")
-    private Long creatorId;
 
     /**
      * 分类id
@@ -111,7 +97,6 @@ public class GoodSaveDTO implements Serializable {
      */
     @Length(max= 512,message="编码长度不能超过512")
     @ApiModelProperty("商品详情")
-    private String details;
-
+    private String detail;
 
 }

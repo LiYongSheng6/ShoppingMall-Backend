@@ -64,6 +64,14 @@ public class CategoryController {
     }
 
     @Log
+    @Operation(summary = "获取树形分类信息接口")
+    @GetMapping("/tree")
+    @PreAuthorize("sys:address:getCategoryTreeInfo")
+    public Result getCategoryTreeInfo() {
+        return categoryService.getCategoryTreeInfo();
+    }
+
+    @Log
     @Operation(summary = "批量添加修改分类信息")
     @PostMapping("/saveOrUpdate/batch")
     public Result saveOrUpdateBatch(@RequestBody @Validated CategorySaveBatchDTO categorySaveBatchDTO) {

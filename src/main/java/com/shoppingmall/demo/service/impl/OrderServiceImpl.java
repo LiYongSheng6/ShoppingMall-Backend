@@ -11,6 +11,7 @@ import com.shoppingmall.demo.constant.MessageConstants;
 import com.shoppingmall.demo.enums.OrderStatus;
 import com.shoppingmall.demo.exception.ServiceException;
 import com.shoppingmall.demo.mapper.OrderMapper;
+import com.shoppingmall.demo.model.DO.DeliveryDO;
 import com.shoppingmall.demo.model.DO.GoodDO;
 import com.shoppingmall.demo.model.DO.OrderDO;
 import com.shoppingmall.demo.model.DO.UserDO;
@@ -25,6 +26,7 @@ import com.shoppingmall.demo.model.VO.PageVO;
 import com.shoppingmall.demo.service.IDeliveryService;
 import com.shoppingmall.demo.service.IGoodService;
 import com.shoppingmall.demo.service.IOrderService;
+import com.shoppingmall.demo.service.IUserService;
 import com.shoppingmall.demo.service.common.LoginInfoService;
 import com.shoppingmall.demo.utils.RedisIdWorker;
 import com.shoppingmall.demo.utils.Result;
@@ -50,16 +52,10 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, OrderDO> implemen
 
     private final RedisIdWorker redisIdWorker;
     private final LoginInfoService loginInfoService;
-    private final OrderMapper orderMapper;
     private final RedissonClient redissonClient;
     private final IDeliveryService deliveryService;
     private final IGoodService goodService;
-
-    @Override
-    public Result<OrderVO> selectOrderById(Long orderId) {
-        OrderDO orderDO = orderMapper.selectById(orderId);
-        return orderDO == null ? Result.error(MessageConstants.NO_FOUND_ORDER_ERROR) : Result.success(new OrderVO(orderDO));
-    }
+    private final IUserService userService;
 
     @Override
     public Result saveOrder(OrderSaveDTO orderSaveDTO) {
@@ -82,12 +78,14 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, OrderDO> implemen
 
             orderDO.setUserId(userId)
                     .setId(redisIdWorker.nextId(CacheConstants.ORDER_ID_PREFIX))
+                    .setTotal(orderDO.getPurchaseNum() * goodDO.getPrice())
+                    .setStatus(OrderStatus.PAYING)
                     .setCreateTime(LocalDateTime.now())
                     .setUpdateTime(LocalDateTime.now());
 
             boolean isSuccess = Db.lambdaUpdate(GoodDO.class).set(GoodDO::getStockNum, goodDO.getStockNum() - purchaseNum).eq(GoodDO::getId, goodId).update();
             if (!isSuccess) throw new ServiceException(MessageConstants.OPERATION_ERROR);
-            return orderMapper.insert(orderDO) > 0 ? Result.success(MessageConstants.OPERATION_SUCCESS) : Result.error(MessageConstants.OPERATION_ERROR);
+            return save(orderDO) ? Result.success(MessageConstants.OPERATION_SUCCESS) : Result.error(MessageConstants.OPERATION_ERROR);
         } finally {
             if (isLock) { // 是否还是锁定状态
                 if (lock.isHeldByCurrentThread()) { // 是否是当前执行线程的锁
@@ -97,28 +95,53 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, OrderDO> implemen
         }
     }
 
-
     @Override
-    public Result updateToBeShipping(OrderUpdateDTO orderUpdateDTO) {
-        return updateOrder(orderUpdateDTO.setStatus(OrderStatus.Shipping), OrderStatus.PAYING);
+    public Result updateToBeShipping(Long orderId) {
+        return updateOrder(new OrderUpdateDTO(orderId, null, OrderStatus.Shipping), OrderStatus.PAYING);
     }
 
     @Override
-    public Result updateToBeCompleted(OrderUpdateDTO orderUpdateDTO) {
-        return updateOrder(orderUpdateDTO.setStatus(OrderStatus.COMPLETED), OrderStatus.Receiving);
+    public Result updateToBeReceiving(Long orderId) {
+        return updateOrder(new OrderUpdateDTO(orderId, null, OrderStatus.Receiving), OrderStatus.Shipping);
     }
 
     @Override
-    public Result updateToBeCancelled(OrderUpdateDTO orderUpdateDTO) {
-        return updateOrder(orderUpdateDTO.setStatus(OrderStatus.CANCELLED), OrderStatus.CANCELLED);
+    public Result updateToBeCompleted(Long orderId) {
+        return updateOrder(new OrderUpdateDTO(orderId, null, OrderStatus.COMPLETED), OrderStatus.Receiving);
     }
 
+    @Override
+    public Result updateToBeCancelled(Long orderId) {
+        return updateOrder(new OrderUpdateDTO(orderId, null, OrderStatus.CANCELLED), OrderStatus.CANCELLED);
+    }
+
+    @Override
+    public Result updateDelivery(Long orderId, Long deliveryId) {
+        OrderDO orderDO = getById(orderId);
+        if (orderDO == null) throw new ServiceException(MessageConstants.NO_FOUND_ORDER_ERROR);
+        DeliveryDO deliveryDO = Db.getById(deliveryId, DeliveryDO.class);
+        if (deliveryDO == null) throw new ServiceException(MessageConstants.NO_FOUND_DELIVERY_ERROR);
+
+        //查询是否为创建者
+        Long userId = loginInfoService.getLoginId();
+        if (!orderDO.getUserId().equals(userId)) {
+            throw new ServiceException(HttpStatus.ACCESS_RESTRICTED, MessageConstants.PERMISSION_PROHIBITED_ERROR);
+        }
+
+        if (!(OrderStatus.PAYING.equals(orderDO.getStatus()) || OrderStatus.Shipping.equals(orderDO.getStatus()))) {
+            return Result.error(MessageConstants.OPERATION_ERROR);
+        }
+
+        //更新订单信息
+        OrderDO OrderDO = orderDO.setDeliveryId(deliveryId).setUpdateTime(LocalDateTime.now());
+        return updateById(OrderDO) ? Result.success(MessageConstants.UPDATE_SUCCESS) : Result.error(MessageConstants.UPDATE_ERROR);
+    }
 
     @Override
     public Result updateOrder(OrderUpdateDTO orderUpdateDTO, OrderStatus originType) {
         Optional<OrderDO> optionalOrderDO = Optional.ofNullable(getById(orderUpdateDTO.getId()));
         optionalOrderDO.ifPresentOrElse(orderDO -> {
-             OrderStatus orderDOStatus = orderDO.getStatus();
+            OrderStatus orderDOStatus = orderDO.getStatus();
             if (originType.equals(OrderStatus.CANCELLED)) {
                 if (OrderStatus.COMPLETED.equals(orderDOStatus) || OrderStatus.CANCELLED.equals(orderDOStatus)) {
                     throw new ServiceException(MessageConstants.OPERATION_ERROR);
@@ -128,7 +151,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, OrderDO> implemen
             Long userId = loginInfoService.getLoginId();
             //查询是否为创建者
             if (!orderDO.getUserId().equals(userId)) {
-                throw new ServiceException(HttpStatus.ACCESS_RESTRICTED, MessageConstants.NO_PERMISSION_ERROR);
+                throw new ServiceException(HttpStatus.ACCESS_RESTRICTED, MessageConstants.PERMISSION_PROHIBITED_ERROR);
             }
             //更新订单信息
             OrderDO OrderDO = BeanUtil.copyProperties(orderUpdateDTO, OrderDO.class).setUpdateTime(LocalDateTime.now());
@@ -145,7 +168,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, OrderDO> implemen
             Long userId = loginInfoService.getLoginId();
             //查询是否为创建者
             if (!OrderDO.getUserId().equals(userId)) {
-                throw new ServiceException(HttpStatus.ACCESS_RESTRICTED, MessageConstants.NO_PERMISSION_ERROR);
+                throw new ServiceException(HttpStatus.ACCESS_RESTRICTED, MessageConstants.PERMISSION_PROHIBITED_ERROR);
             }
             removeById(orderId);
         }, () -> {
@@ -156,7 +179,8 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, OrderDO> implemen
 
     @Override
     public Result deleteOrderBatch(OrderDeleteBatchDTO deleteBatchDTO) {
-        List<OrderDO> list = lambdaQuery().in(OrderDO::getId, deleteBatchDTO.getOrderIds()).list();
+        List<OrderDO> list = lambdaQuery().in(OrderDO::getId, deleteBatchDTO.getOrderIds())
+                .eq(OrderDO::getUserId, loginInfoService.getLoginId()).list();
         if (CollectionUtils.isEmpty(list))
             throw new ServiceException(MessageConstants.NO_FOUND_ORDER_ERROR);
 
@@ -165,26 +189,44 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, OrderDO> implemen
     }
 
     @Override
+    public Result<OrderVO> getOrderById(Long orderId) {
+        OrderDO orderDO = getById(orderId);
+        if (orderDO == null) throw new ServiceException(MessageConstants.NO_FOUND_ORDER_ERROR);
+        loginInfoService.CheckLoginUserObject(orderDO.getUserId());
+
+        GoodVO goodVO = (GoodVO) goodService.getGoodInfoById(orderDO.getGoodId()).getData();
+        DeliveryVO deliveryVO = (DeliveryVO) deliveryService.getDeliveryById(orderDO.getDeliveryId()).getData();
+
+        return Result.success(new OrderVO(orderDO)
+                .setUsername(userService.getUserNameById(orderDO.getUserId()))
+                .setGoodName(goodVO.getGoodName()).setPrice(goodVO.getPrice())
+                .setConsigneeName(deliveryVO.getConsigneeName()).setPhone(deliveryVO.getPhone())
+                .setProvince(deliveryVO.getProvince()).setCity(deliveryVO.getCity()).setCounty(deliveryVO.getCounty())
+                .setDetailAddress(deliveryVO.getAddress()));
+    }
+
+    @Override
+    public Result getMyOrderListPage(OrderQuery orderQuery) {
+        orderQuery.setUserId(loginInfoService.getLoginId());
+        return pageOrderListByUserId(orderQuery);
+    }
+
+    @Override
     public Result pageOrderListByUserId(OrderQuery orderQuery) {
         Long userId = orderQuery.getUserId();
         Optional<UserDO> userDoOptional = Optional.ofNullable(Db.getById(userId, UserDO.class));
+        if (userDoOptional.isEmpty()) return Result.error(MessageConstants.NO_FOUND_ORDER_ERROR);
         Page<OrderDO> page = orderQuery.toMpPageDefaultSortByUpdateTime();
-
-        if (userDoOptional.isEmpty()) {
-            return Result.error(MessageConstants.NO_FOUND_ORDER_ERROR);
-        }
 
         userDoOptional.ifPresent(aLong -> log.info("userId:{}", aLong));
 
         Page<OrderDO> pageDO = lambdaQuery().eq(OrderDO::getUserId, userId)
                 .eq(orderQuery.getStatus() != null, OrderDO::getStatus, orderQuery.getStatus()).page(page);
 
-        if (CollectionUtils.isEmpty(pageDO.getRecords())) {
-            return Result.error(MessageConstants.NO_FOUND_ORDER_ERROR);
-        }
+        if (CollectionUtils.isEmpty(pageDO.getRecords())) return Result.error(MessageConstants.NO_FOUND_ORDER_ERROR);
 
         return Result.success(PageVO.of(pageDO, OrderDO -> {
-            GoodVO goodVO = (GoodVO) goodService.getGoodById(OrderDO.getGoodId()).getData();
+            GoodVO goodVO = (GoodVO) goodService.getGoodInfoById(OrderDO.getGoodId()).getData();
             DeliveryVO deliveryVO = (DeliveryVO) deliveryService.getDeliveryById(OrderDO.getDeliveryId()).getData();
             return BeanUtil.copyProperties(OrderDO, OrderVO.class)
                     .setUsername(userDoOptional.get().getUsername())

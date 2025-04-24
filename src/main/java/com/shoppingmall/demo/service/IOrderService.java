@@ -17,7 +17,7 @@ import com.shoppingmall.demo.utils.Result;
  */
 public interface IOrderService extends IService<OrderDO> {
 
-    Result<OrderVO> selectOrderById(Long orderId);
+    Result<OrderVO> getOrderById(Long orderId);
 
     Result saveOrder(OrderSaveDTO orderSaveDTO);
 
@@ -27,11 +27,17 @@ public interface IOrderService extends IService<OrderDO> {
 
     Result deleteOrderBatch(OrderDeleteBatchDTO deleteBatchDTO);
 
+    Result getMyOrderListPage(OrderQuery orderQuery);
+
     Result pageOrderListByUserId(OrderQuery orderQuery);
 
-    Result updateToBeShipping(OrderUpdateDTO orderUpdateDTO);
+    Result updateToBeShipping(Long orderId);
 
-    Result updateToBeCompleted(OrderUpdateDTO orderUpdateDTO);
+    Result updateToBeReceiving(Long orderId);
 
-    Result updateToBeCancelled(OrderUpdateDTO orderUpdateDTO);
+    Result updateToBeCompleted(Long orderId);
+
+    Result updateToBeCancelled(Long orderId);
+
+    Result updateDelivery(Long orderId, Long deliveryId);
 }

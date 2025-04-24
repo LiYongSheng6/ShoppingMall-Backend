@@ -11,7 +11,9 @@ import com.shoppingmall.demo.mapper.DeliveryMapper;
 import com.shoppingmall.demo.model.DO.DeliveryDO;
 import com.shoppingmall.demo.model.DTO.DeliveryDeleteBatchDTO;
 import com.shoppingmall.demo.model.DTO.DeliverySaveDTO;
+import com.shoppingmall.demo.model.DTO.DeliverySaveIdDTO;
 import com.shoppingmall.demo.model.DTO.DeliveryUpdateDTO;
+import com.shoppingmall.demo.model.DTO.DeliveryUpdateIdDTO;
 import com.shoppingmall.demo.model.VO.DeliveryVO;
 import com.shoppingmall.demo.service.IAddressService;
 import com.shoppingmall.demo.service.IDeliveryService;
@@ -50,12 +52,50 @@ public class DeliveryServiceImpl extends ServiceImpl<DeliveryMapper, DeliveryDO>
 
     @Override
     public Result updateDelivery(DeliveryUpdateDTO deliveryUpdateDTO) {
+        loginInfoService.CheckLoginUserObject(getUserIdByDeliveryId(deliveryUpdateDTO.getId()));
         return updateById(BeanUtil.copyProperties(deliveryUpdateDTO, DeliveryDO.class)
                 .setProvinceId(addressService.getAddressIdByName(deliveryUpdateDTO.getProvince(), AddressType.PROVINCE))
                 .setCityId(addressService.getAddressIdByName(deliveryUpdateDTO.getCity(), AddressType.CITY))
                 .setCountyId(addressService.getAddressIdByName(deliveryUpdateDTO.getCounty(), AddressType.COUNTY))
                 .setUpdateTime(LocalDateTime.now())) ?
                 Result.success(MessageConstants.UPDATE_SUCCESS) : Result.error(MessageConstants.UPDATE_ERROR);
+    }
+
+    @Override
+    public Result saveIdDelivery(DeliverySaveIdDTO deliverySaveDTO) {
+        return save(BeanUtil.copyProperties(deliverySaveDTO, DeliveryDO.class)
+                .setId(redisIdWorker.nextId(CacheConstants.DELIVERY_ID_PREFIX))
+                .setUserId(loginInfoService.getLoginId())) ?
+                Result.success(MessageConstants.SAVE_SUCCESS) : Result.error(MessageConstants.SAVE_ERROR);
+    }
+
+    @Override
+    public Result updateIdDelivery(DeliveryUpdateIdDTO deliveryUpdateDTO) {
+        loginInfoService.CheckLoginUserObject(getUserIdByDeliveryId(deliveryUpdateDTO.getId()));
+        return updateById(BeanUtil.copyProperties(deliveryUpdateDTO, DeliveryDO.class).setUpdateTime(LocalDateTime.now())) ?
+                Result.success(MessageConstants.UPDATE_SUCCESS) : Result.error(MessageConstants.UPDATE_ERROR);
+    }
+
+    @Override
+    public Result deleteDeliveryById(Long id) {
+        loginInfoService.CheckLoginUserObject(getUserIdByDeliveryId(id));
+        return removeById(id) ? Result.success(MessageConstants.DELETE_SUCCESS) : Result.error(MessageConstants.DELETE_ERROR);
+    }
+
+    @Override
+    public Result deleteDeliveryBatch(DeliveryDeleteBatchDTO deleteBatchDTO) {
+        List<DeliveryDO> deliveryDOList = lambdaQuery().eq(DeliveryDO::getUserId, loginInfoService.getLoginId())
+                .in(DeliveryDO::getId, deleteBatchDTO.getDeliveryIds()).list();
+        if (CollectionUtils.isEmpty(deliveryDOList))
+            throw new ServiceException(MessageConstants.NO_FOUND_DELIVERY_ERROR);
+
+        return Db.removeByIds(deliveryDOList, DeliveryDO.class) ?
+                Result.success(MessageConstants.OPERATION_SUCCESS) : Result.error(MessageConstants.OPERATION_ERROR);
+    }
+
+    private Long getUserIdByDeliveryId(Long id) {
+        DeliveryDO deliveryDO = getById(id);
+        return deliveryDO != null ? deliveryDO.getUserId() : null;
     }
 
     @Override
@@ -71,7 +111,7 @@ public class DeliveryServiceImpl extends ServiceImpl<DeliveryMapper, DeliveryDO>
 
     @Override
     public Result getDeliveryList() {
-       return getDeliveryListByUserId(loginInfoService.getLoginId());
+        return getDeliveryListByUserId(loginInfoService.getLoginId());
     }
 
     @Override
@@ -85,21 +125,6 @@ public class DeliveryServiceImpl extends ServiceImpl<DeliveryMapper, DeliveryDO>
                         .setCity(addressService.getAddressNameById(deliveryDO.getCityId()))
                         .setCounty(addressService.getAddressNameById(deliveryDO.getCountyId()))))
                 .toList().stream().map(CompletableFuture::join).toList());
-    }
-
-    @Override
-    public Result deleteDeliveryById(Long id) {
-        return removeById(id) ? Result.success(MessageConstants.DELETE_SUCCESS) : Result.error(MessageConstants.DELETE_ERROR);
-    }
-
-    @Override
-    public Result deleteDeliveryBatch(DeliveryDeleteBatchDTO deleteBatchDTO) {
-        List<DeliveryDO> deliveryDOList = lambdaQuery().in(DeliveryDO::getId, deleteBatchDTO.getDeliveryIds()).list();
-        if (CollectionUtils.isEmpty(deliveryDOList))
-            throw new ServiceException(MessageConstants.NO_FOUND_DELIVERY_ERROR);
-
-        return Db.removeByIds(deliveryDOList, DeliveryDO.class) ?
-                Result.success(MessageConstants.OPERATION_SUCCESS) : Result.error(MessageConstants.OPERATION_ERROR);
     }
 
 }

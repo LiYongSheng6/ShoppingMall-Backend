@@ -1,10 +1,13 @@
 package com.shoppingmall.demo.service.common;
 
 import com.shoppingmall.demo.constant.CacheConstants;
+import com.shoppingmall.demo.constant.MessageConstants;
+import com.shoppingmall.demo.exception.ServiceException;
 import com.shoppingmall.demo.utils.ThreadLocalUtil;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;
+import java.util.Objects;
 
 @Component
 public class LoginInfoService {
@@ -32,6 +35,11 @@ public class LoginInfoService {
 
     public Map<String, Object> getClaims() {
         return ThreadLocalUtil.get();
+    }
+
+    public void CheckLoginUserObject(Long userId) {
+        if (!Objects.equals(getLoginId(), userId))
+            throw new ServiceException(MessageConstants.PERMISSION_PROHIBITED_ERROR);
     }
 
 }

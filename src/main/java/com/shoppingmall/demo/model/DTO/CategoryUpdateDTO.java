@@ -42,6 +42,13 @@ public class CategoryUpdateDTO implements Serializable {
     private String categoryName;
 
     /**
+     * 父级分类id
+     */
+    @NotNull(message = "[父级分类id]不能为空")
+    @ApiModelProperty("父级分类id")
+    private Long parentId;
+
+    /**
      * 分类所属商品类型
      */
     @CategoryTypePattern

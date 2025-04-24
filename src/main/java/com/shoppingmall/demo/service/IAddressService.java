@@ -15,7 +15,7 @@ public interface IAddressService extends IService<AddressDO> {
 
     Result updateAddress(AddressUpdateDTO addressUpdateDTO);
 
-    Result getAddressListByIdAndType(Long parentId, AddressType type);
+    Result getAddressListByIdAndType(Long parentId, Integer type);
 
     String getAddressNameById(Long id);
 
@@ -26,4 +26,7 @@ public interface IAddressService extends IService<AddressDO> {
     Result saveOrUpdateAddressBatch(AddressSaveBatchDTO addressSaveBatchDTO);
 
     Result deleteAddressBatch(AddressDeleteBatchDTO addressDeleteBatchDTO);
+
+    Result getAddressTreeInfo();
+
 }

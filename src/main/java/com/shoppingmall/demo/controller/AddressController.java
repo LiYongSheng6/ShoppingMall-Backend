@@ -2,7 +2,6 @@ package com.shoppingmall.demo.controller;
 
 import com.shoppingmall.demo.annotation.Log;
 import com.shoppingmall.demo.annotation.PreAuthorize;
-import com.shoppingmall.demo.enums.AddressType;
 import com.shoppingmall.demo.model.DTO.AddressDeleteBatchDTO;
 import com.shoppingmall.demo.model.DTO.AddressSaveBatchDTO;
 import com.shoppingmall.demo.model.DTO.AddressSaveDTO;
@@ -63,7 +62,7 @@ public class AddressController {
     @Operation(summary = "获取收货地名信息接口")
     @GetMapping("/list/parentId")
     public Result getAddressListByParentId(@RequestParam @NotNull Long parentId,
-                                           @RequestParam @NotNull AddressType type) {
+                                           @RequestParam @NotNull Integer type) {
         return addressService.getAddressListByIdAndType(parentId, type);
     }
 
@@ -71,8 +70,16 @@ public class AddressController {
     @Operation(summary = "根据类型获取所属地名信息接口")
     @GetMapping("/list/type")
     @PreAuthorize("sys:address:getAddressListByIdAndType")
-    public Result getAddressListByIdAndType(Long parentId, AddressType type) {
+    public Result getAddressListByIdAndType(Long parentId, Integer type) {
         return addressService.getAddressListByIdAndType(parentId, type);
+    }
+
+    @Log
+    @Operation(summary = "获取树形地名信息接口")
+    @GetMapping("/tree")
+    @PreAuthorize("sys:address:getAddressTreeInfo")
+    public Result getAddressTreeInfo() {
+        return addressService.getAddressTreeInfo();
     }
 
     @Log

@@ -37,7 +37,6 @@ public class AddressUpdateDTO implements Serializable {
     /**
      * 父级地名id
      */
-    @NotNull(message="[父级地名id]不能为空")
     @ApiModelProperty("父级地名id")
     private Long parentId;
 

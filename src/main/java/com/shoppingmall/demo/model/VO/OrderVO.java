@@ -1,6 +1,7 @@
 package com.shoppingmall.demo.model.VO;
 
 import cn.hutool.core.bean.BeanUtil;
+import com.shoppingmall.demo.enums.OrderStatus;
 import com.shoppingmall.demo.model.DO.OrderDO;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -38,7 +39,7 @@ public class OrderVO implements Serializable {
     private Integer purchaseNum;
 
     @ApiModelProperty("订单总价")
-    private Integer totalPrice;
+    private Integer total;
 
     @ApiModelProperty("收货人姓名")
     private String consigneeName;
@@ -59,7 +60,7 @@ public class OrderVO implements Serializable {
     private String detailAddress;
 
     @ApiModelProperty("订单状态（0待支付  1待发货  2待收货  3已完成  4已取消）")
-    private Integer status;
+    private OrderStatus status;
 
     public OrderVO(OrderDO orderDO){
         BeanUtil.copyProperties(orderDO,this);

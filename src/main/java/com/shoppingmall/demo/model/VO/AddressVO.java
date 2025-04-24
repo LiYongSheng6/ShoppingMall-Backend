@@ -2,6 +2,8 @@ package com.shoppingmall.demo.model.VO;
 
 
 import cn.hutool.core.bean.BeanUtil;
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.shoppingmall.demo.enums.AddressType;
 import com.shoppingmall.demo.model.DO.AddressDO;
 import io.swagger.annotations.ApiModelProperty;
@@ -12,6 +14,8 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 @Data
 @Builder
@@ -39,10 +43,24 @@ public class AddressVO implements Serializable {
     private String addressName;
 
     /**
+     * 父级地名名称
+     */
+    @ApiModelProperty("父级地名名称")
+    private String parentName;
+
+    /**
      * 地名类型
      */
     @ApiModelProperty("地名类型")
     private AddressType type;
+
+    /**
+     * 子分类
+     */
+    @TableField(exist = false)
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private List<AddressVO> children = new ArrayList<AddressVO>();
+
 
     public AddressVO(AddressDO addressDO){
         BeanUtil.copyProperties(addressDO,this);

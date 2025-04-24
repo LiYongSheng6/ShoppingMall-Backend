@@ -41,6 +41,13 @@ public class CategoryDO implements Serializable {
     private Long id;
 
     /**
+     * 父级分类id
+     */
+    @NotNull(message = "[父级分类id]不能为空")
+    @ApiModelProperty("父级分类id")
+    private Long parentId;
+
+    /**
     * 分类名称
     */
     @Length(max= 255,message="编码长度不能超过255")

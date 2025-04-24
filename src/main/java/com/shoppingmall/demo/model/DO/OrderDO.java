@@ -28,7 +28,7 @@ import java.time.LocalDateTime;
 @Accessors(chain = true)
 @AllArgsConstructor
 @NoArgsConstructor
-@TableName("order")
+@TableName("orders")
 public class OrderDO implements Serializable {
 
     /**
@@ -70,7 +70,7 @@ public class OrderDO implements Serializable {
      * 订单总价
      */
     @ApiModelProperty("订单总价")
-    private Integer totalPrice;
+    private Integer total;
 
     /**
      * 订单状态
