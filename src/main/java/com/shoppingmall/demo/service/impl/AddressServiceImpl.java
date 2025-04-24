@@ -88,11 +88,6 @@ public class AddressServiceImpl extends ServiceImpl<AddressMapper, AddressDO> im
         return addressDO.getId();
     }
 
-    @Override
-    public Result deleteAddressById(Long id) {
-        return removeById(id) ? Result.success(MessageConstants.DELETE_SUCCESS) : Result.error(MessageConstants.DELETE_ERROR);
-    }
-
     public Result getAddressListByIdAndType(Long parentId, Integer type) {
         List<AddressDO> addressDOList = lambdaQuery()
                 .eq(parentId != null, AddressDO::getParentId, parentId)
@@ -102,18 +97,6 @@ public class AddressServiceImpl extends ServiceImpl<AddressMapper, AddressDO> im
 
         return Result.success(addressDOList.stream().map(addressDO -> CompletableFuture.supplyAsync(() -> new AddressVO(addressDO))).toList()
                 .stream().map(CompletableFuture::join).toList());
-    }
-
-    @Override
-    public Result deleteAddressBatch(AddressDeleteBatchDTO addressDeleteBatchDTO) {
-        if (CollectionUtils.isEmpty(addressDeleteBatchDTO.getAddressNameList()))
-            throw new ServiceException(MessageConstants.NO_FOUND_ADDRESS_NAME_ERROR);
-
-        List<AddressDO> addressDOList = addressDeleteBatchDTO.getAddressNameList()
-                .stream().map(addressName -> lambdaQuery().eq(AddressDO::getAddressName, addressName).one()).toList();
-
-        return Db.removeByIds(addressDOList, AddressDO.class) ?
-                Result.success(MessageConstants.OPERATION_SUCCESS) : Result.error(MessageConstants.OPERATION_ERROR);
     }
 
     @Override
@@ -147,6 +130,23 @@ public class AddressServiceImpl extends ServiceImpl<AddressMapper, AddressDO> im
                 .map(item -> CompletableFuture.supplyAsync(() -> new AddressVO(item).setParentName(getAddressNameById(item.getParentId())))).toList()
                 .stream().map(CompletableFuture::join).toList();
         return Result.success(makeAddressTree(addressVOList, 0L));
+    }
+
+    @Override
+    public Result deleteAddressById(Long id) {
+        return removeById(id) ? Result.success(MessageConstants.DELETE_SUCCESS) : Result.error(MessageConstants.DELETE_ERROR);
+    }
+
+    @Override
+    public Result deleteAddressBatch(AddressDeleteBatchDTO addressDeleteBatchDTO) {
+        if (CollectionUtils.isEmpty(addressDeleteBatchDTO.getAddressNameList()))
+            throw new ServiceException(MessageConstants.NO_FOUND_ADDRESS_NAME_ERROR);
+
+        List<AddressDO> addressDOList = addressDeleteBatchDTO.getAddressNameList()
+                .stream().map(addressName -> lambdaQuery().eq(AddressDO::getAddressName, addressName).one()).toList();
+
+        return Db.removeByIds(addressDOList, AddressDO.class) ?
+                Result.success(MessageConstants.OPERATION_SUCCESS) : Result.error(MessageConstants.OPERATION_ERROR);
     }
 
 }

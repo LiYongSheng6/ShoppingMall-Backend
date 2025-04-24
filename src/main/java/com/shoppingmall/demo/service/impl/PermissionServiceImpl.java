@@ -61,6 +61,13 @@ public class PermissionServiceImpl extends ServiceImpl<PermissionMapper, Permiss
     }
 
     @Override
+    public Result getPermissionById(Long id) {
+        PermissionDO permissionDO = getById(id);
+        Optional.ofNullable(permissionDO).orElseThrow(() -> new ServiceException(MessageConstants.NO_FOUND_PERMISSION_ERROR));
+        return Result.success(BeanUtil.copyProperties(permissionDO, PermissionVO.class));
+    }
+
+    @Override
     public Result getPermissionList(Integer type) {
         List<PermissionDO> permissionDOList;
 

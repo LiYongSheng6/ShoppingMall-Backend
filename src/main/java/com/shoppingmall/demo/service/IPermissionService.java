@@ -17,10 +17,11 @@ public interface IPermissionService extends IService<PermissionDO> {
 
     Result updatePermission(PermissionUpdateDTO permissionUpdateDTO);
 
+    Result getPermissionById(Long id);
+
     Result getPermissionList(Integer type);
 
     Result deletePermission(Long id);
 
     Result deletePermissionBatch(PermissionDeleteBatchDTO deleteBatchDTO);
-
 }

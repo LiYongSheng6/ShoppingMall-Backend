@@ -86,6 +86,7 @@ public class MessageConstants {
     public static final String NO_FOUND_ADDRESS_ERROR = "没有找到相关地址信息";
     public static final String NO_FOUND_GOOD_ERROR = "没有找到相关商品信息";
     public static final String NO_FOUND_ORDER_ERROR = "没有找到相关订单信息";
+    public static final String NO_FOUND_ROLE_ERROR = "没有找到相关角色信息";
     public static final String NO_FOUND_ADDRESS_NAME_ERROR = "没有要操作的相关地名信息";
     public static final String NO_FOUND_CATEGORY_NAME_ERROR = "没有要操作的相关分类信息";
     public static final String NO_FOUND_TAG_NAME_ERROR = "没有要操作的相关标签信息";
@@ -96,6 +97,6 @@ public class MessageConstants {
     public static final String ADDRESS_NAME_EXIST = "地名名称已存在";
     public static final String CATEGORY_NAME_EXIST = "分类名称已存在";
     public static final String TAG_NAME_EXIST = "标签名称已存在";
-
+    public static final String ROLE_CODE_EXIST = "角色编码已存在";
 }
 

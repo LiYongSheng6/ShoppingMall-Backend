@@ -104,11 +104,6 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, CategoryDO>
     }
 
     @Override
-    public Result deleteCategoryById(Long id) {
-        return removeById(id) ? Result.success(MessageConstants.DELETE_SUCCESS) : Result.error(MessageConstants.DELETE_ERROR);
-    }
-
-    @Override
     public Result saveOrUpdateCategoryBatch(CategorySaveBatchDTO categorySaveBatchDTO) {
         CategoryType type = categorySaveBatchDTO.getType();
 
@@ -125,6 +120,11 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, CategoryDO>
 
         return Db.saveOrUpdateBatch(addressDOList, addressDOList.size()) ?
                 Result.success(MessageConstants.OPERATION_SUCCESS) : Result.error(MessageConstants.OPERATION_ERROR);
+    }
+
+    @Override
+    public Result deleteCategoryById(Long id) {
+        return removeById(id) ? Result.success(MessageConstants.DELETE_SUCCESS) : Result.error(MessageConstants.DELETE_ERROR);
     }
 
     @Override

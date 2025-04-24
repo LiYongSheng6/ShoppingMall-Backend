@@ -132,6 +132,11 @@ public class CacheConstants {
     public static final String ORDER_ID_PREFIX = "orderId";
 
     /**
+     * 角色ID前缀
+     */
+    public static final String ROLE_ID = "roleId";
+
+    /**
      * 分类ID前缀
      */
     public static String CATEGORY_ID_PREFIX = "categoryId";

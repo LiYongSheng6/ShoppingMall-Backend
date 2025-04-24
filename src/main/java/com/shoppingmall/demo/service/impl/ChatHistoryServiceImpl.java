@@ -5,7 +5,6 @@ import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.baomidou.mybatisplus.extension.toolkit.Db;
-
 import com.shoppingmall.demo.constant.CacheConstants;
 import com.shoppingmall.demo.constant.MessageConstants;
 import com.shoppingmall.demo.enums.MessageStatus;
@@ -51,16 +50,16 @@ public class ChatHistoryServiceImpl extends ServiceImpl<ChatHistoryMapper, ChatH
         Long toUserId = loginInfoService.getLoginId();
         Page<ChatHistoryDO> page = chatHistoryQuery.toMpPageDefaultSortByCreateTime();
         Page<ChatHistoryDO> pageDO = lambdaQuery()
-                .eq(ChatHistoryDO::getFromUserId, fromUserId)
-                .eq(ChatHistoryDO::getToUserId, toUserId)
+                .eq(ChatHistoryDO::getSenderId, fromUserId)
+                .eq(ChatHistoryDO::getReceiverId, toUserId)
                 .or()
-                .eq(ChatHistoryDO::getFromUserId, toUserId)
-                .eq(ChatHistoryDO::getToUserId, fromUserId)
+                .eq(ChatHistoryDO::getSenderId, toUserId)
+                .eq(ChatHistoryDO::getReceiverId, fromUserId)
                 .page(page);
         //将未读消息设置成已读
         lambdaUpdate()
-                .eq(ChatHistoryDO::getFromUserId, fromUserId)
-                .eq(ChatHistoryDO::getToUserId, toUserId)
+                .eq(ChatHistoryDO::getSenderId, fromUserId)
+                .eq(ChatHistoryDO::getReceiverId, toUserId)
                 .eq(ChatHistoryDO::getStatus, MessageStatus.UNREAD)
                 .set(ChatHistoryDO::getStatus, MessageStatus.READ)
                 .update();
@@ -98,8 +97,8 @@ public class ChatHistoryServiceImpl extends ServiceImpl<ChatHistoryMapper, ChatH
                     new ChatHistoryDO().setId(redisIdWorker.nextId(CacheConstants.CHAT_HISTORY_ID))
                             .setContent(content)
                             .setCreateTime(LocalDateTime.now())
-                            .setToUserId(toUserId)
-                            .setFromUserId(fromUserId)
+                            .setReceiverId(toUserId)
+                            .setSenderId(fromUserId)
                             .setStatus(MessageStatus.UNREAD)
             );
             redisCacheService.incrementHash(CacheConstants.NO_READ_CHAT_HISTORY_SEPARATE_NUM_KEY, toUserId + "::" + fromUserId, 1);
@@ -115,7 +114,7 @@ public class ChatHistoryServiceImpl extends ServiceImpl<ChatHistoryMapper, ChatH
         if (hashValue != null) {
             return Long.parseLong(hashValue.toString());
         } else {
-            count = lambdaQuery().eq(ChatHistoryDO::getToUserId, toUserId).eq(ChatHistoryDO::getStatus, MessageStatus.UNREAD).count();
+            count = lambdaQuery().eq(ChatHistoryDO::getReceiverId, toUserId).eq(ChatHistoryDO::getStatus, MessageStatus.UNREAD).count();
             redisCacheService.incrementHash(key, toUserId, count);
             return count;
         }
@@ -136,8 +135,8 @@ public class ChatHistoryServiceImpl extends ServiceImpl<ChatHistoryMapper, ChatH
         Page<UserDO> page = pageQuery.toMpPageDefaultSortByUpdateTime();
 
         Long loginUserId = loginInfoService.getLoginId();
-        List<Long> fromUserIds = Db.lambdaQuery(ChatHistoryDO.class).eq(ChatHistoryDO::getToUserId, loginUserId).list()
-                .stream().map(ChatHistoryDO::getFromUserId).toList();
+        List<Long> fromUserIds = Db.lambdaQuery(ChatHistoryDO.class).eq(ChatHistoryDO::getReceiverId, loginUserId).list()
+                .stream().map(ChatHistoryDO::getSenderId).toList();
 
         Page<UserDO> page1 = Db.lambdaQuery(UserDO.class).in(UserDO::getId, fromUserIds).page(page);
         if (CollectionUtils.isEmpty(page1.getRecords()))

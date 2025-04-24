@@ -1,4 +1,4 @@
-package com.shoppingmall.demo.service.common;
+package com.shoppingmall.demo.model.BO;
 
 import lombok.Data;
 

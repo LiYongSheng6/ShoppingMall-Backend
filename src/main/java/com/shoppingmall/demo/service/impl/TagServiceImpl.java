@@ -48,6 +48,25 @@ public class TagServiceImpl extends ServiceImpl<TagMapper, TagDO> implements ITa
                 Result.success(MessageConstants.UPDATE_SUCCESS) : Result.error(MessageConstants.UPDATE_ERROR);
     }
 
+    @Override
+    public Result saveOrUpdateTagBatch(TagSaveBatchDTO TagSaveBatchDTO) {
+        TagType type = TagSaveBatchDTO.getType();
+
+        List<String> tagNameList = TagSaveBatchDTO.getTagNameList();
+        if (CollectionUtils.isEmpty(tagNameList))
+            throw new ServiceException(MessageConstants.NO_FOUND_TAG_NAME_ERROR);
+
+        List<TagDO> addressDOList = tagNameList.stream().map(tagName -> {
+            TagDO tagDO = lambdaQuery().eq(TagDO::getTagName, tagName).one();
+            if (tagDO == null)
+                tagDO = new TagDO().setId(redisIdWorker.nextId(CacheConstants.TAG_ID_PREFIX)).setTagName(tagName);
+            return tagDO.setType(type).setUpdateTime(LocalDateTime.now());
+        }).toList();
+
+        return Db.saveOrUpdateBatch(addressDOList, addressDOList.size()) ?
+                Result.success(MessageConstants.OPERATION_SUCCESS) : Result.error(MessageConstants.OPERATION_ERROR);
+    }
+
     private void checkDuplicationColumn(Long id, String tagName) {
         Optional.ofNullable(lambdaQuery().ne(id != null, TagDO::getId, id).eq(TagDO::getTagName, tagName).one()).ifPresent(tag -> {
             throw new ServiceException(MessageConstants.TAG_NAME_EXIST);
@@ -72,25 +91,6 @@ public class TagServiceImpl extends ServiceImpl<TagMapper, TagDO> implements ITa
     @Override
     public Result deleteTagById(Long id) {
         return removeById(id) ? Result.success(MessageConstants.DELETE_SUCCESS) : Result.error(MessageConstants.DELETE_ERROR);
-    }
-
-    @Override
-    public Result saveOrUpdateTagBatch(TagSaveBatchDTO TagSaveBatchDTO) {
-        TagType type = TagSaveBatchDTO.getType();
-
-        List<String> tagNameList = TagSaveBatchDTO.getTagNameList();
-        if (CollectionUtils.isEmpty(tagNameList))
-            throw new ServiceException(MessageConstants.NO_FOUND_TAG_NAME_ERROR);
-
-        List<TagDO> addressDOList = tagNameList.stream().map(tagName -> {
-            TagDO tagDO = lambdaQuery().eq(TagDO::getTagName, tagName).one();
-            if (tagDO == null)
-                tagDO = new TagDO().setId(redisIdWorker.nextId(CacheConstants.TAG_ID_PREFIX)).setTagName(tagName);
-            return tagDO.setType(type).setUpdateTime(LocalDateTime.now());
-        }).toList();
-
-        return Db.saveOrUpdateBatch(addressDOList, addressDOList.size()) ?
-                Result.success(MessageConstants.OPERATION_SUCCESS) : Result.error(MessageConstants.OPERATION_ERROR);
     }
 
     @Override

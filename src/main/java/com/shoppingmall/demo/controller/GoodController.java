@@ -80,7 +80,7 @@ public class GoodController {
 
     @Log
     @Operation(summary = "获取当前用户商品信息分页列表")
-    @GetMapping("/list/own")
+    @PostMapping("/list/own")
     public Result getDeliveryList(@RequestBody @Validated GoodQuery goodQuery) {
         return goodService.getMyGoodListPage(goodQuery);
     }

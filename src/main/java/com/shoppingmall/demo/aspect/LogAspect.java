@@ -2,7 +2,7 @@ package com.shoppingmall.demo.aspect;
 
 import com.alibaba.fastjson2.JSON;
 import com.shoppingmall.demo.annotation.Log;
-import com.shoppingmall.demo.service.common.SystemLog;
+import com.shoppingmall.demo.model.BO.SystemLog;
 import com.shoppingmall.demo.utils.IPUtils;
 import com.shoppingmall.demo.utils.ServletUtils;
 import jakarta.servlet.http.HttpServletRequest;

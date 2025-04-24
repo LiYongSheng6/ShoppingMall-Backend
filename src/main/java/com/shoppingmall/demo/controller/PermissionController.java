@@ -25,7 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
  * @author redmi k50 ultra
  * * @date 2024/10/9
  */
-@Api(tags = "权限资源管理接口")
+@Api(tags = "权限信息管理接口")
 @Validated
 @RestController
 @RequiredArgsConstructor
@@ -36,7 +36,7 @@ public class PermissionController {
     private final IPermissionService permissionService;
 
     @Log
-    @Operation(summary = "添加权限资源接口")
+    @Operation(summary = "添加权限信息接口")
     @PostMapping("/save")
     @PreAuthorize("sys:permission:save")
     public Result save(@RequestBody @Validated PermissionSaveDTO permissionSaveDTO) {
@@ -44,7 +44,7 @@ public class PermissionController {
     }
 
     @Log
-    @Operation(summary = "修改权限资源接口")
+    @Operation(summary = "修改权限信息接口")
     @PutMapping("/update")
     @PreAuthorize("sys:permission:update")
     public Result update(@RequestBody @Validated PermissionUpdateDTO permissionUpdateDTO) {
@@ -52,7 +52,7 @@ public class PermissionController {
     }
 
     @Log
-    @Operation(summary = "删除权限资源接口")
+    @Operation(summary = "删除权限信息接口")
     @DeleteMapping("/delete")
     @PreAuthorize("sys:permission:delete")
     public Result delete(@RequestParam @NotNull Long id) {
@@ -60,7 +60,14 @@ public class PermissionController {
     }
 
     @Log
-    @Operation(summary = "获取权限资源接口")
+    @Operation(summary = "获取单一权限信息详情接口")
+    @GetMapping("/detail")
+    public Result getDelivery(@RequestParam @NotNull Long id) {
+        return permissionService.getPermissionById(id);
+    }
+
+    @Log
+    @Operation(summary = "获取权限信息列表接口")
     @GetMapping("/list")
     @PreAuthorize("sys:permission:list")
     public Result getPermissionList(@RequestParam @NotNull Integer type) {
