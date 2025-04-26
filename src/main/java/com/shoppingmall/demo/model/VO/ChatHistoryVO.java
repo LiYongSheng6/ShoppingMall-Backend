@@ -3,6 +3,7 @@ package com.shoppingmall.demo.model.VO;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 import io.swagger.annotations.ApiModelProperty;
@@ -23,8 +24,9 @@ public class ChatHistoryVO {
     /**
      * 聊天记录id
      */
+    @JsonSerialize(using = ToStringSerializer.class)
     @ApiModelProperty("聊天记录id")
-    private String id;
+    private Long id;
 
     /**
      * 内容
@@ -36,13 +38,14 @@ public class ChatHistoryVO {
      * 发送者id
      */
     @ApiModelProperty("发送者id")
-    private String fromUserId;
+    private String senderId;
 
     /**
      * 接受者id
      */
+    @JsonSerialize(using = ToStringSerializer.class)
     @ApiModelProperty("接收者id")
-    private String toUserId;
+    private Long receiverId;
 
     /**
      * 发送时间

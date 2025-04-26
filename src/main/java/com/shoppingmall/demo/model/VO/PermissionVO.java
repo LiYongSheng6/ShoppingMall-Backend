@@ -1,6 +1,12 @@
 package com.shoppingmall.demo.model.VO;
 
 import cn.hutool.core.bean.BeanUtil;
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
+import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
 import com.shoppingmall.demo.annotation.UserTypePattern;
 import com.shoppingmall.demo.enums.UserType;
 import com.shoppingmall.demo.model.DO.PermissionDO;
@@ -12,6 +18,9 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 import org.hibernate.validator.constraints.Length;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Data
 @Builder
 @Accessors(chain = true)
@@ -22,6 +31,7 @@ public class PermissionVO {
     /**
      * 权限id
      */
+    @JsonSerialize(using = ToStringSerializer.class)
     @ApiModelProperty("权限id")
     private Long id;
 
@@ -31,7 +41,7 @@ public class PermissionVO {
      */
     @Length(max= 255, message="权限标签名称长度不能超过255")
     @ApiModelProperty("权限标签名称")
-    private String label;
+    private String name;
 
     /**
      * 授权标识符
@@ -75,11 +85,38 @@ public class PermissionVO {
     private String component;
 
     /**
-     * 权限类型(0-普通权限,1-管理权限)
+     * 权限类型(0-后端,1-前端)
      */
-    @ApiModelProperty("权限类型(0-普通权限,1-管理权限)")
+    @ApiModelProperty("权限类型(0-后端,1-前端)")
     @UserTypePattern
     private UserType type;
+
+    /**
+     * 父类名称
+     */
+    @ApiModelProperty("父类名称")
+    private String parentName;
+
+    /**
+     * 父类id
+     */
+    @JsonDeserialize(using = LocalDateDeserializer.class)
+    @ApiModelProperty("父类id")
+    private Long parentId;
+
+    /**
+     * 是否拥有
+     */
+    @TableField(exist = false)
+    @ApiModelProperty("是否拥有")
+    private Boolean isHave;
+
+    /**
+     * 子分类
+     */
+    @TableField(exist = false)
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private List<PermissionVO> children = new ArrayList<PermissionVO>();
 
     public PermissionVO(PermissionDO permissionDO){
         BeanUtil.copyProperties(permissionDO,this);

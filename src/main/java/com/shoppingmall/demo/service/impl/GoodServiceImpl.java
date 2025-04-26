@@ -31,9 +31,11 @@ import com.shoppingmall.demo.utils.Result;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
-import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -59,7 +61,7 @@ public class GoodServiceImpl extends ServiceImpl<GoodMapper, GoodDO> implements 
     public Result saveGood(GoodSaveDTO goodSaveDTO) {
         return save(BeanUtil.copyProperties(goodSaveDTO, GoodDO.class)
                 .setId(redisIdWorker.nextId(CacheConstants.GOOD_ID_PREFIX))
-                .setCreatorId(loginInfoService.getLoginId())) ?
+                .setCreatorId((loginInfoService.getLoginId()))) ?
                 Result.success(MessageConstants.SAVE_SUCCESS) : Result.error(MessageConstants.SAVE_ERROR);
     }
 
@@ -71,25 +73,23 @@ public class GoodServiceImpl extends ServiceImpl<GoodMapper, GoodDO> implements 
     }
 
     @Override
+    @Retryable(value = ServiceException.class, maxAttempts = 3, backoff = @Backoff(delay = 1000))
     public Result updateGoodStockNum(GoodUpdateStockNumDTO updateDTO) {
         GoodDO goodDO = getById(updateDTO.getId());
         if (goodDO == null) throw new ServiceException(MessageConstants.NO_FOUND_GOOD_ERROR);
-        Integer stockNum = goodDO.getStockNum();
 
-        loginInfoService.CheckLoginUserObject(goodDO.getCreatorId());
+        loginInfoService.CheckLoginUserObject((goodDO.getCreatorId()));
+
+        if (!GoodStatus.REMOVE.equals(goodDO.getStatus()))
+            throw new ServiceException(MessageConstants.GOOD_NOT_REMOVE_ERROR);
+
         if (goodDO.getStockNum() + updateDTO.getStockNum() < 0)
-            throw new ServiceException(MessageConstants.OPERATION_ERROR);
+            throw new ServiceException(MessageConstants.NUMBER_NEGATIVE_ERROR);
 
-        RLock lock = redissonClient.getLock(CacheConstants.GOOD_STOCK_UPDATE_LOCK + updateDTO.getId());
-        if (!lock.tryLock()) throw new ServiceException(MessageConstants.OPERATION_ERROR);
-        try {
-            return lambdaUpdate().setSql("stock_num=stock_num+(" + updateDTO.getStockNum() + ")")
-                    .eq(GoodDO::getId, updateDTO.getId())
-                    .eq(GoodDO::getStockNum, stockNum).update() ?
-                    Result.success(MessageConstants.UPDATE_SUCCESS) : Result.error(MessageConstants.UPDATE_ERROR);
-        } finally {
-            lock.unlock();
-        }
+        return Db.lambdaUpdate(GoodDO.class).setSql("stock_num=stock_num+(" + updateDTO.getStockNum() + ")")
+                .set(GoodDO::getUpdateTime, LocalDateTime.now())
+                .eq(GoodDO::getId, updateDTO.getId()).update() ?
+                Result.success(MessageConstants.UPDATE_SUCCESS) : Result.error(MessageConstants.UPDATE_ERROR);
     }
 
     @Override
@@ -121,8 +121,8 @@ public class GoodServiceImpl extends ServiceImpl<GoodMapper, GoodDO> implements 
 
         return Result.success(new GoodVO(getById(id))
                 .setCreatorName(creator.getUsername()).setCreatorAvatar(creator.getAvatar())
-                .setTagName(tagService.getTagNameById(goodDO.getTagId()))
-                .setCategoryName(categoryService.getCategoryNameById(goodDO.getCategoryId())));
+                .setTagName(tagService.getTagNameById((goodDO.getTagId())))
+                .setCategoryName(categoryService.getCategoryNameById(String.valueOf(goodDO.getCategoryId()))));
     }
 
     @Override
@@ -142,25 +142,28 @@ public class GoodServiceImpl extends ServiceImpl<GoodMapper, GoodDO> implements 
         Integer maximizePrice = goodQuery.getMaximizePrice();
         GoodStatus status = goodQuery.getStatus();
         GoodType type = goodQuery.getType();
+        String goodName = goodQuery.getGoodName();
         //GoodRankType rankType = goodQuery.getRankType();
 
         Page<GoodDO> pageDO = lambdaQuery()
                 .eq(creatorId != null, GoodDO::getCreatorId, creatorId)
                 .in(CollectionUtils.isNotEmpty(tagId), GoodDO::getTagId, tagId)
                 .in(CollectionUtils.isNotEmpty(categoryIds), GoodDO::getCategoryId, categoryIds)
-                .ge(minimizePrice != null, GoodDO::getPrice, minimizePrice)
-                .le(maximizePrice != null, GoodDO::getPrice, maximizePrice)
+                .ge(minimizePrice != null && minimizePrice > 0, GoodDO::getPrice, minimizePrice)
+                .le(maximizePrice != null && maximizePrice > 0, GoodDO::getPrice, maximizePrice)
                 .eq(status != null, GoodDO::getStatus, status)
                 .eq(type != null, GoodDO::getType, type)
+                .like(StringUtils.hasLength(goodName), GoodDO::getGoodName, goodName)
                 .page(page);
 
-        if (CollectionUtils.isEmpty(pageDO.getRecords())) return Result.error(MessageConstants.NO_FOUND_GOOD_ERROR);
+        if (CollectionUtils.isEmpty(pageDO.getRecords()))
+            return Result.success(new PageVO<>(0L, 0L, 0L, new ArrayList<GoodVO>()));
 
         return Result.success(PageVO.of(pageDO, GoodDO -> new GoodVO(GoodDO)
-                .setCreatorName(userService.getUserNameById(GoodDO.getCreatorId()))
-                .setCreatorAvatar(userService.getUserAvatarById(GoodDO.getCreatorId()))
-                .setTagName(tagService.getTagNameById(GoodDO.getTagId()))
-                .setCategoryName(categoryService.getCategoryNameById(GoodDO.getCategoryId()))));
+                .setCreatorName(userService.getUserNameById((GoodDO.getCreatorId())))
+                .setCreatorAvatar(userService.getUserAvatarById((GoodDO.getCreatorId())))
+                .setTagName(tagService.getTagNameById((GoodDO.getTagId())))
+                .setCategoryName(categoryService.getCategoryNameById(String.valueOf(GoodDO.getCategoryId())))));
     }
 
     @Override

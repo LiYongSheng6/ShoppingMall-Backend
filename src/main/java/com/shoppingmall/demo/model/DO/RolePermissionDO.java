@@ -27,7 +27,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @TableName("role_permission")
-public class RolePermission {
+public class RolePermissionDO {
     /**
      * 主键id
      */

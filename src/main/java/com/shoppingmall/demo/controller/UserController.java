@@ -1,7 +1,9 @@
 package com.shoppingmall.demo.controller;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.shoppingmall.demo.annotation.Log;
 import com.shoppingmall.demo.annotation.PreAuthorize;
+import com.shoppingmall.demo.config.deserializer.StringToLongDeserializer;
 import com.shoppingmall.demo.model.DTO.UserInfoDTO;
 import com.shoppingmall.demo.model.DTO.UserLoginDTO;
 import com.shoppingmall.demo.model.DTO.UserResetDTO;
@@ -94,7 +96,7 @@ public class UserController {
     @ApiImplicitParam(name = "id", value = "用户id", required = true)
     @GetMapping("/detail/admin")
     @PreAuthorize("sys:user:getUserInfoById")
-    public Result getUserInfoById(@RequestParam @NotNull Long id) {
+    public Result getUserInfoById(@RequestParam @NotNull @JsonDeserialize(using = StringToLongDeserializer.class) Long id) {
         return userService.getUserInfoById(id);
     }
 
@@ -139,7 +141,7 @@ public class UserController {
     @Operation(summary = "根据ID封禁用户账号")
     @PatchMapping("/forbidden")
     @PreAuthorize("sys:user:forbidden")
-    public Result forbiddenUserById(@RequestParam @NotNull Long id) {
+    public Result forbiddenUserById(@RequestParam @NotNull @JsonDeserialize(using = StringToLongDeserializer.class) Long id) {
         return userService.forbiddenUserById(id);
     }
 
@@ -147,7 +149,7 @@ public class UserController {
     @Operation(summary = "根据ID解封用户账号")
     @PatchMapping("/unblocking")
     @PreAuthorize("sys:user:unblocking")
-    public Result unblockingUserById(@RequestParam @NotNull Long id) {
+    public Result unblockingUserById(@RequestParam @NotNull @JsonDeserialize(using = StringToLongDeserializer.class) Long id) {
         return userService.unblockingUserById(id);
     }
 
@@ -155,9 +157,8 @@ public class UserController {
     @Operation(summary = "根据ID删除用户信息")
     @DeleteMapping("/delete")
     @PreAuthorize("sys:user:delete")
-    public Result deleteUserById(@RequestParam @NotNull Long id) {
+    public Result deleteUserById(@RequestParam @NotNull @JsonDeserialize(using = StringToLongDeserializer.class) Long id) {
         return userService.deleteUserById(id);
     }
-
 
 }

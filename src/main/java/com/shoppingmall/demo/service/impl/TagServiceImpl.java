@@ -1,6 +1,7 @@
 package com.shoppingmall.demo.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.baomidou.mybatisplus.extension.toolkit.Db;
 import com.shoppingmall.demo.constant.CacheConstants;
@@ -13,6 +14,8 @@ import com.shoppingmall.demo.model.DTO.TagDeleteBatchDTO;
 import com.shoppingmall.demo.model.DTO.TagSaveBatchDTO;
 import com.shoppingmall.demo.model.DTO.TagSaveDTO;
 import com.shoppingmall.demo.model.DTO.TagUpdateDTO;
+import com.shoppingmall.demo.model.Query.TagQuery;
+import com.shoppingmall.demo.model.VO.PageVO;
 import com.shoppingmall.demo.model.VO.TagVO;
 import com.shoppingmall.demo.service.ITagService;
 import com.shoppingmall.demo.utils.RedisIdWorker;
@@ -21,8 +24,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -86,6 +91,23 @@ public class TagServiceImpl extends ServiceImpl<TagMapper, TagDO> implements ITa
 
         return Result.success(tagDOList.stream().map(tagDO -> CompletableFuture.supplyAsync(() -> new TagVO(tagDO))).toList()
                 .stream().map(CompletableFuture::join).toList());
+    }
+
+    @Override
+    public Result pageTagListByCondition(TagQuery tagQuery) {
+        Page<TagDO> page = tagQuery.toMpPageDefaultSortByUpdateTime();
+        String tagName = tagQuery.getTagName();
+        TagType type = tagQuery.getType();
+
+        Page<TagDO> pageDO = lambdaQuery()
+                .like(StringUtils.hasLength(tagName), TagDO::getTagName, tagName)
+                .eq(type != null, TagDO::getType, type)
+                .page(page);
+
+        if (CollectionUtils.isEmpty(pageDO.getRecords()))
+            return Result.success(new PageVO<>(0L, 0L, 0L, new ArrayList<TagVO>()));
+
+        return Result.success(PageVO.of(pageDO, TagVO::new));
     }
 
     @Override

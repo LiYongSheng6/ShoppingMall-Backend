@@ -7,6 +7,7 @@ import com.shoppingmall.demo.model.DTO.AddressDeleteBatchDTO;
 import com.shoppingmall.demo.model.DTO.AddressSaveBatchDTO;
 import com.shoppingmall.demo.model.DTO.AddressSaveDTO;
 import com.shoppingmall.demo.model.DTO.AddressUpdateDTO;
+import com.shoppingmall.demo.model.Query.AddressQuery;
 import com.shoppingmall.demo.utils.Result;
 
 public interface IAddressService extends IService<AddressDO> {
@@ -15,18 +16,20 @@ public interface IAddressService extends IService<AddressDO> {
 
     Result updateAddress(AddressUpdateDTO addressUpdateDTO);
 
+    Result saveOrUpdateAddressBatch(AddressSaveBatchDTO addressSaveBatchDTO);
+
     Result getAddressListByIdAndType(Long parentId, Integer type);
 
     String getAddressNameById(Long id);
 
     Long getAddressIdByName(String province, AddressType type);
 
+    Result getAddressTreeInfo();
+
+    Result pageAddressListByCondition(AddressQuery addressQuery);
+
     Result deleteAddressById(Long id);
 
-    Result saveOrUpdateAddressBatch(AddressSaveBatchDTO addressSaveBatchDTO);
-
     Result deleteAddressBatch(AddressDeleteBatchDTO addressDeleteBatchDTO);
-
-    Result getAddressTreeInfo();
 
 }

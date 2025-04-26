@@ -1,11 +1,7 @@
 package com.shoppingmall.demo.model.VO;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
-import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
-
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import com.shoppingmall.demo.enums.GenderType;
 import com.shoppingmall.demo.enums.UserType;
 import com.shoppingmall.demo.model.DO.UserDO;
@@ -15,10 +11,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
-import net.bytebuddy.dynamic.TargetType;
 import org.springframework.beans.BeanUtils;
-
-import java.time.LocalDateTime;
 
 @Data
 @Builder
@@ -29,6 +22,7 @@ public class UserVO {
     /**
      * 用户id
      */
+    @JsonSerialize(using = ToStringSerializer.class)
     @ApiModelProperty("用户id")
     private Long id;
 

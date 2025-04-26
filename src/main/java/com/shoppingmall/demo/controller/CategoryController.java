@@ -1,11 +1,14 @@
 package com.shoppingmall.demo.controller;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.shoppingmall.demo.annotation.Log;
 import com.shoppingmall.demo.annotation.PreAuthorize;
+import com.shoppingmall.demo.config.deserializer.StringToLongDeserializer;
 import com.shoppingmall.demo.model.DTO.CategoryDeleteBatchDTO;
 import com.shoppingmall.demo.model.DTO.CategorySaveBatchDTO;
 import com.shoppingmall.demo.model.DTO.CategorySaveDTO;
 import com.shoppingmall.demo.model.DTO.CategoryUpdateDTO;
+import com.shoppingmall.demo.model.Query.CategoryQuery;
 import com.shoppingmall.demo.service.ICategoryService;
 import com.shoppingmall.demo.utils.Result;
 import io.swagger.annotations.Api;
@@ -49,11 +52,10 @@ public class CategoryController {
     }
 
     @Log
-    @Operation(summary = "删除分类信息接口")
-    @DeleteMapping("/delete")
-    @PreAuthorize("sys:Category:delete")
-    public Result delete(@RequestParam @NotNull Long id) {
-        return categoryService.deleteCategoryById(id);
+    @Operation(summary = "批量添加修改分类信息")
+    @PostMapping("/saveOrUpdate/batch")
+    public Result saveOrUpdateBatch(@RequestBody @Validated CategorySaveBatchDTO categorySaveBatchDTO) {
+        return categoryService.saveOrUpdateCategoryBatch(categorySaveBatchDTO);
     }
 
     @Log
@@ -66,16 +68,23 @@ public class CategoryController {
     @Log
     @Operation(summary = "获取树形分类信息接口")
     @GetMapping("/tree")
-    @PreAuthorize("sys:address:getCategoryTreeInfo")
     public Result getCategoryTreeInfo() {
         return categoryService.getCategoryTreeInfo();
     }
 
     @Log
-    @Operation(summary = "批量添加修改分类信息")
-    @PostMapping("/saveOrUpdate/batch")
-    public Result saveOrUpdateBatch(@RequestBody @Validated CategorySaveBatchDTO categorySaveBatchDTO) {
-        return categoryService.saveOrUpdateCategoryBatch(categorySaveBatchDTO);
+    @Operation(summary = "分页查询分类信息列表")
+    @PostMapping("/list/page")
+    public Result listByCondition(@RequestBody @Validated CategoryQuery query) {
+        return categoryService.pageCategoryListByCondition(query);
+    }
+
+    @Log
+    @Operation(summary = "删除分类信息接口")
+    @DeleteMapping("/delete")
+    @PreAuthorize("sys:Category:delete")
+    public Result delete(@RequestParam @NotNull @JsonDeserialize(using = StringToLongDeserializer.class) Long id) {
+        return categoryService.deleteCategoryById(id);
     }
 
     @Log

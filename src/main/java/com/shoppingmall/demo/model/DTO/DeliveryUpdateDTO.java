@@ -1,6 +1,8 @@
 package com.shoppingmall.demo.model.DTO;
 
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.shoppingmall.demo.config.deserializer.StringToLongDeserializer;
 import com.shoppingmall.demo.constant.MessageConstants;
 import com.shoppingmall.demo.constant.RegexConstants;
 import io.swagger.annotations.ApiModelProperty;
@@ -31,6 +33,7 @@ public class DeliveryUpdateDTO implements Serializable {
     /**
      * 收货地址id
      */
+    @JsonDeserialize(using = StringToLongDeserializer.class)
     @NotNull(message="[收货地址id]不能为空")
     @ApiModelProperty("收货地址id")
     private Long id;

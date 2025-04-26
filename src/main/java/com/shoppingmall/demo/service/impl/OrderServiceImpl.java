@@ -1,13 +1,13 @@
 package com.shoppingmall.demo.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
-import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.baomidou.mybatisplus.extension.toolkit.Db;
 import com.shoppingmall.demo.constant.CacheConstants;
 import com.shoppingmall.demo.constant.HttpStatus;
 import com.shoppingmall.demo.constant.MessageConstants;
+import com.shoppingmall.demo.enums.GoodStatus;
 import com.shoppingmall.demo.enums.OrderStatus;
 import com.shoppingmall.demo.exception.ServiceException;
 import com.shoppingmall.demo.mapper.OrderMapper;
@@ -62,29 +62,38 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, OrderDO> implemen
         Long userId = loginInfoService.getLoginId();
         Long goodId = orderSaveDTO.getGoodId();
 
-        RLock lock = redissonClient.getLock(CacheConstants.ORDER_SAVE_LOCK + JSON.toJSONString(userId));
+        RLock lock = redissonClient.getLock(CacheConstants.ORDER_SAVE_LOCK + goodId);
         boolean isLock = lock.tryLock();
 
         try {
-            if (!isLock) throw new ServiceException(MessageConstants.OPERATION_ERROR);
+            if (!isLock) throw new ServiceException(MessageConstants.GET_LOCK_ERROR);
 
             GoodDO goodDO = Db.lambdaQuery(GoodDO.class).eq(GoodDO::getId, goodId).one();
             if (goodDO == null) throw new ServiceException(MessageConstants.NO_FOUND_GOOD_ERROR);
 
+            if (userId.equals((goodDO.getCategoryId())))
+                throw new ServiceException(MessageConstants.PURCHASE_OWN_ERROR);
+            if (GoodStatus.REMOVE.equals(goodDO.getStatus()))
+                throw new ServiceException(MessageConstants.GOOD_REMOVE_ERROR);
+
             Integer purchaseNum = orderSaveDTO.getPurchaseNum();
             if (purchaseNum > goodDO.getStockNum()) throw new ServiceException(MessageConstants.NO_ENOUGH_GOOD_ERROR);
 
-            OrderDO orderDO = BeanUtil.copyProperties(orderSaveDTO, OrderDO.class);
-
-            orderDO.setUserId(userId)
+            OrderDO orderDO = BeanUtil.copyProperties(orderSaveDTO, OrderDO.class)
+                    .setUserId((userId))
                     .setId(redisIdWorker.nextId(CacheConstants.ORDER_ID_PREFIX))
-                    .setTotal(orderDO.getPurchaseNum() * goodDO.getPrice())
+                    .setTotal(purchaseNum * goodDO.getPrice())
                     .setStatus(OrderStatus.PAYING)
                     .setCreateTime(LocalDateTime.now())
                     .setUpdateTime(LocalDateTime.now());
 
-            boolean isSuccess = Db.lambdaUpdate(GoodDO.class).set(GoodDO::getStockNum, goodDO.getStockNum() - purchaseNum).eq(GoodDO::getId, goodId).update();
-            if (!isSuccess) throw new ServiceException(MessageConstants.OPERATION_ERROR);
+            boolean isSuccess = Db.lambdaUpdate(GoodDO.class)
+                    .setSql("stock_num = stock_num - " + purchaseNum)
+                    .set(GoodDO::getUpdateTime, LocalDateTime.now())
+                    .eq(GoodDO::getId, goodId)
+                    .update();
+            if (!isSuccess) throw new ServiceException(MessageConstants.UPDATE_ERROR);
+
             return save(orderDO) ? Result.success(MessageConstants.OPERATION_SUCCESS) : Result.error(MessageConstants.OPERATION_ERROR);
         } finally {
             if (isLock) { // 是否还是锁定状态
@@ -96,28 +105,28 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, OrderDO> implemen
     }
 
     @Override
-    public Result updateToBeShipping(Long orderId) {
-        return updateOrder(new OrderUpdateDTO(orderId, null, OrderStatus.Shipping), OrderStatus.PAYING);
+    public Result updateToBeShipping(Long id) {
+        return updateOrder(new OrderUpdateDTO(id, null, OrderStatus.Shipping), OrderStatus.PAYING);
     }
 
     @Override
-    public Result updateToBeReceiving(Long orderId) {
-        return updateOrder(new OrderUpdateDTO(orderId, null, OrderStatus.Receiving), OrderStatus.Shipping);
+    public Result updateToBeReceiving(Long id) {
+        return updateOrder(new OrderUpdateDTO(id, null, OrderStatus.Receiving), OrderStatus.Shipping);
     }
 
     @Override
-    public Result updateToBeCompleted(Long orderId) {
-        return updateOrder(new OrderUpdateDTO(orderId, null, OrderStatus.COMPLETED), OrderStatus.Receiving);
+    public Result updateToBeCompleted(Long id) {
+        return updateOrder(new OrderUpdateDTO(id, null, OrderStatus.COMPLETED), OrderStatus.Receiving);
     }
 
     @Override
-    public Result updateToBeCancelled(Long orderId) {
-        return updateOrder(new OrderUpdateDTO(orderId, null, OrderStatus.CANCELLED), OrderStatus.CANCELLED);
+    public Result updateToBeCancelled(Long id) {
+        return updateOrder(new OrderUpdateDTO(id, null, OrderStatus.CANCELLED), OrderStatus.CANCELLED);
     }
 
     @Override
-    public Result updateDelivery(Long orderId, Long deliveryId) {
-        OrderDO orderDO = getById(orderId);
+    public Result updateDelivery(Long id, Long deliveryId) {
+        OrderDO orderDO = getById(id);
         if (orderDO == null) throw new ServiceException(MessageConstants.NO_FOUND_ORDER_ERROR);
         DeliveryDO deliveryDO = Db.getById(deliveryId, DeliveryDO.class);
         if (deliveryDO == null) throw new ServiceException(MessageConstants.NO_FOUND_DELIVERY_ERROR);
@@ -133,7 +142,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, OrderDO> implemen
         }
 
         //更新订单信息
-        OrderDO OrderDO = orderDO.setDeliveryId(deliveryId).setUpdateTime(LocalDateTime.now());
+        OrderDO OrderDO = orderDO.setDeliveryId((deliveryId)).setUpdateTime(LocalDateTime.now());
         return updateById(OrderDO) ? Result.success(MessageConstants.UPDATE_SUCCESS) : Result.error(MessageConstants.UPDATE_ERROR);
     }
 
@@ -163,14 +172,14 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, OrderDO> implemen
     }
 
     @Override
-    public Result deleteOrderById(Long orderId) {
-        Optional.ofNullable(getById(orderId)).ifPresentOrElse(OrderDO -> {
+    public Result deleteOrderById(Long id) {
+        Optional.ofNullable(getById(id)).ifPresentOrElse(OrderDO -> {
             Long userId = loginInfoService.getLoginId();
             //查询是否为创建者
             if (!OrderDO.getUserId().equals(userId)) {
                 throw new ServiceException(HttpStatus.ACCESS_RESTRICTED, MessageConstants.PERMISSION_PROHIBITED_ERROR);
             }
-            removeById(orderId);
+            removeById(id);
         }, () -> {
             throw new ServiceException(MessageConstants.NO_FOUND_ORDER_ERROR);
         });
@@ -189,16 +198,16 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, OrderDO> implemen
     }
 
     @Override
-    public Result<OrderVO> getOrderById(Long orderId) {
-        OrderDO orderDO = getById(orderId);
+    public Result<OrderVO> getOrderById(Long id) {
+        OrderDO orderDO = getById(id);
         if (orderDO == null) throw new ServiceException(MessageConstants.NO_FOUND_ORDER_ERROR);
-        loginInfoService.CheckLoginUserObject(orderDO.getUserId());
+        loginInfoService.CheckLoginUserObject((orderDO.getUserId()));
 
-        GoodVO goodVO = (GoodVO) goodService.getGoodInfoById(orderDO.getGoodId()).getData();
-        DeliveryVO deliveryVO = (DeliveryVO) deliveryService.getDeliveryById(orderDO.getDeliveryId()).getData();
+        GoodVO goodVO = (GoodVO) goodService.getGoodInfoById((orderDO.getGoodId())).getData();
+        DeliveryVO deliveryVO = (DeliveryVO) deliveryService.getDeliveryById((orderDO.getDeliveryId())).getData();
 
         return Result.success(new OrderVO(orderDO)
-                .setUsername(userService.getUserNameById(orderDO.getUserId()))
+                .setUsername(userService.getUserNameById((orderDO.getUserId())))
                 .setGoodName(goodVO.getGoodName()).setPrice(goodVO.getPrice())
                 .setConsigneeName(deliveryVO.getConsigneeName()).setPhone(deliveryVO.getPhone())
                 .setProvince(deliveryVO.getProvince()).setCity(deliveryVO.getCity()).setCounty(deliveryVO.getCounty())
@@ -226,8 +235,8 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, OrderDO> implemen
         if (CollectionUtils.isEmpty(pageDO.getRecords())) return Result.error(MessageConstants.NO_FOUND_ORDER_ERROR);
 
         return Result.success(PageVO.of(pageDO, OrderDO -> {
-            GoodVO goodVO = (GoodVO) goodService.getGoodInfoById(OrderDO.getGoodId()).getData();
-            DeliveryVO deliveryVO = (DeliveryVO) deliveryService.getDeliveryById(OrderDO.getDeliveryId()).getData();
+            GoodVO goodVO = (GoodVO) goodService.getGoodInfoById((OrderDO.getGoodId())).getData();
+            DeliveryVO deliveryVO = (DeliveryVO) deliveryService.getDeliveryById((OrderDO.getDeliveryId())).getData();
             return BeanUtil.copyProperties(OrderDO, OrderVO.class)
                     .setUsername(userDoOptional.get().getUsername())
                     .setGoodName(goodVO.getGoodName()).setPrice(goodVO.getPrice())

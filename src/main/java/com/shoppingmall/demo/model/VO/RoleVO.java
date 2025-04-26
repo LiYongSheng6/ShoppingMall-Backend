@@ -3,6 +3,8 @@ package com.shoppingmall.demo.model.VO;
 import cn.hutool.core.bean.BeanUtil;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import com.shoppingmall.demo.model.DO.RoleDO;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -23,6 +25,7 @@ public class RoleVO {
     /**
      * 主键id
      */
+    @JsonSerialize(using = ToStringSerializer.class)
     @ApiModelProperty("主键id")
     private Long id;
 
@@ -59,12 +62,14 @@ public class RoleVO {
     /**
      * 父类id
      */
+    @JsonSerialize(using = ToStringSerializer.class)
     @ApiModelProperty("父类id")
     private Long parentId;
 
     /**
      * 创建者id
      */
+    @JsonSerialize(using = ToStringSerializer.class)
     @ApiModelProperty("创建者id")
     private Long creatorId;
 
@@ -73,6 +78,13 @@ public class RoleVO {
      */
     @ApiModelProperty("启用状态")
     private Integer status;
+
+    /**
+     * 是否拥有
+     */
+    @TableField(exist = false)
+    @ApiModelProperty("是否拥有")
+    private Boolean isHave;
 
     /**
      * 子分类

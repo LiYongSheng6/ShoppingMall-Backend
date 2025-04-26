@@ -137,6 +137,16 @@ public class CacheConstants {
     public static final String ROLE_ID = "roleId";
 
     /**
+     * 角色权限ID前缀
+     */
+    public static final String ROLE_PERMISSION_ID = "rolePermissionId";
+
+    /**
+     * 用户角色ID前缀
+     */
+    public static final String USER_ROLE_ID = "userRoleId";
+
+    /**
      * 分类ID前缀
      */
     public static String CATEGORY_ID_PREFIX = "categoryId";

@@ -2,6 +2,8 @@ package com.shoppingmall.demo.model.VO;
 
 
 import cn.hutool.core.bean.BeanUtil;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import com.shoppingmall.demo.enums.GoodStatus;
 import com.shoppingmall.demo.enums.GoodType;
 import com.shoppingmall.demo.model.DO.GoodDO;
@@ -24,6 +26,7 @@ public class GoodVO implements Serializable {
     /**
      * 商品id
      */
+    @JsonSerialize(using = ToStringSerializer.class)
     @ApiModelProperty("商品id")
     private Long id;
 
@@ -72,6 +75,7 @@ public class GoodVO implements Serializable {
     /**
      * 创建人id
      */
+    @JsonSerialize(using = ToStringSerializer.class)
     @ApiModelProperty("创建人id")
     private Long creatorId;
 

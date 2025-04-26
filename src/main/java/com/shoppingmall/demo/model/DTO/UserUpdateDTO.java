@@ -1,7 +1,9 @@
 package com.shoppingmall.demo.model.DTO;
 
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.shoppingmall.demo.annotation.GenderPattern;
+import com.shoppingmall.demo.config.deserializer.StringToLongDeserializer;
 import com.shoppingmall.demo.constant.MessageConstants;
 import com.shoppingmall.demo.constant.RegexConstants;
 import com.shoppingmall.demo.enums.GenderType;
@@ -26,6 +28,7 @@ public class UserUpdateDTO {
     /**
      * 用户id
      */
+    @JsonDeserialize(using = StringToLongDeserializer.class)
     @ApiModelProperty("用户id")
     private Long id;
 

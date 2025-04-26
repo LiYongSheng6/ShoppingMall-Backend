@@ -1,6 +1,8 @@
 package com.shoppingmall.demo.model.VO;
 
 import cn.hutool.core.bean.BeanUtil;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import com.shoppingmall.demo.enums.OrderStatus;
 import com.shoppingmall.demo.model.DO.OrderDO;
 import io.swagger.annotations.ApiModelProperty;
@@ -23,8 +25,9 @@ import java.io.Serializable;
 @NoArgsConstructor
 public class OrderVO implements Serializable {
 
+    @JsonSerialize(using = ToStringSerializer.class)
     @ApiModelProperty("订单id")
-    private String id;
+    private Long id;
 
     @ApiModelProperty("用户名称")
     private String username;

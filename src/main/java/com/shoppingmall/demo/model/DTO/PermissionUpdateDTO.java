@@ -1,6 +1,8 @@
 package com.shoppingmall.demo.model.DTO;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.shoppingmall.demo.annotation.UserTypePattern;
+import com.shoppingmall.demo.config.deserializer.StringToLongDeserializer;
 import com.shoppingmall.demo.enums.UserType;
 import io.swagger.annotations.ApiModelProperty;
 import jakarta.validation.constraints.NotNull;
@@ -29,9 +31,18 @@ public class PermissionUpdateDTO {
     /**
      * 权限id
      */
+    @JsonDeserialize(using = StringToLongDeserializer.class)
     @ApiModelProperty("权限id")
     @NotNull(message="[权限id]不能为空")
     private Long id;
+
+    /**
+     * 父类id
+     */
+    @JsonDeserialize(using = StringToLongDeserializer.class)
+    @NotNull(message = "[父类id]不能为空")
+    @ApiModelProperty("父类id")
+    private Long parentId;
 
     /**
      *
@@ -39,7 +50,7 @@ public class PermissionUpdateDTO {
      */
     @Length(max= 255, message="权限标签名称长度不能超过255")
     @ApiModelProperty("权限标签名称")
-    private String label;
+    private String name;
 
     /**
      * 授权标识符
@@ -83,10 +94,9 @@ public class PermissionUpdateDTO {
     private String component;
 
     /**
-     * 权限类型(0-普通权限,1-管理权限)
+     * 权限类型(0-后端,1-前端)
      */
-    @ApiModelProperty("权限类型(0-普通权限,1-管理权限)")
+    @ApiModelProperty("权限类型(0-后端,1-前端)")
     @UserTypePattern
     private UserType type;
-
 }

@@ -1,12 +1,15 @@
 package com.shoppingmall.demo.controller;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.shoppingmall.demo.annotation.Log;
 import com.shoppingmall.demo.annotation.PreAuthorize;
+import com.shoppingmall.demo.config.deserializer.StringToLongDeserializer;
 import com.shoppingmall.demo.model.DTO.DeliveryDeleteBatchDTO;
 import com.shoppingmall.demo.model.DTO.DeliverySaveDTO;
 import com.shoppingmall.demo.model.DTO.DeliverySaveIdDTO;
 import com.shoppingmall.demo.model.DTO.DeliveryUpdateDTO;
 import com.shoppingmall.demo.model.DTO.DeliveryUpdateIdDTO;
+import com.shoppingmall.demo.model.Query.DeliveryQuery;
 import com.shoppingmall.demo.service.IDeliveryService;
 import com.shoppingmall.demo.utils.Result;
 import io.swagger.annotations.Api;
@@ -68,14 +71,14 @@ public class DeliveryController {
     @Log
     @Operation(summary = "删除收货信息接口")
     @DeleteMapping("/delete")
-    public Result delete(@RequestParam @NotNull Long id) {
+    public Result delete(@RequestParam @NotNull @JsonDeserialize(using = StringToLongDeserializer.class) Long id) {
         return deliveryService.deleteDeliveryById(id);
     }
 
     @Log
     @Operation(summary = "获取单一收货信息详情接口")
     @GetMapping("/detail")
-    public Result getDelivery(@RequestParam @NotNull Long id) {
+    public Result getDelivery(@RequestParam @NotNull @JsonDeserialize(using = StringToLongDeserializer.class) Long id) {
         return deliveryService.getDeliveryById(id);
     }
 
@@ -90,8 +93,22 @@ public class DeliveryController {
     @Operation(summary = "获取用户收货信息列表接口")
     @GetMapping("/list/admin")
     @PreAuthorize("sys:Delivery:getDeliveryListByUserId")
-    public Result getDeliveryListByUserId(@RequestParam @NotNull Long userId) {
+    public Result getDeliveryListByUserId(@RequestParam @NotNull @JsonDeserialize(using = StringToLongDeserializer.class) Long userId) {
         return deliveryService.getDeliveryListByUserId(userId);
+    }
+
+    @Log
+    @Operation(summary = "分页查询当前用户收货信息列表")
+    @PostMapping("/list/page")
+    public Result listByLoginUser(@RequestBody @Validated DeliveryQuery query) {
+        return deliveryService.pageDeliveryList(query);
+    }
+
+    @Log
+    @Operation(summary = "分页查询收货信息列表")
+    @PostMapping("/list/page/admin")
+    public Result listByCondition(@RequestBody @Validated DeliveryQuery query) {
+        return deliveryService.pageDeliveryListByCondition(query);
     }
 
     @Log

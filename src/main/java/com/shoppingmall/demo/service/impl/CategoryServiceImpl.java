@@ -1,6 +1,7 @@
 package com.shoppingmall.demo.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.baomidou.mybatisplus.extension.toolkit.Db;
 import com.shoppingmall.demo.constant.CacheConstants;
@@ -13,7 +14,9 @@ import com.shoppingmall.demo.model.DTO.CategoryDeleteBatchDTO;
 import com.shoppingmall.demo.model.DTO.CategorySaveBatchDTO;
 import com.shoppingmall.demo.model.DTO.CategorySaveDTO;
 import com.shoppingmall.demo.model.DTO.CategoryUpdateDTO;
+import com.shoppingmall.demo.model.Query.CategoryQuery;
 import com.shoppingmall.demo.model.VO.CategoryVO;
+import com.shoppingmall.demo.model.VO.PageVO;
 import com.shoppingmall.demo.service.ICategoryService;
 import com.shoppingmall.demo.utils.RedisIdWorker;
 import com.shoppingmall.demo.utils.Result;
@@ -21,6 +24,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -75,7 +79,7 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, CategoryDO>
     }
 
     @Override
-    public String getCategoryNameById(Long id) {
+    public String getCategoryNameById(String id) {
         CategoryDO categoryDO = getById(id);
         return categoryDO != null ? categoryDO.getCategoryName() : "NULL";
     }
@@ -98,9 +102,28 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, CategoryDO>
             throw new ServiceException(MessageConstants.NO_FOUND_CATEGORY_ERROR);
 
         List<CategoryVO> categoryVOList = categoryDOList.stream()
-                .map(item -> CompletableFuture.supplyAsync(() -> new CategoryVO(item).setParentName(getCategoryNameById(item.getParentId())))).toList()
+                .map(item -> CompletableFuture.supplyAsync(() -> new CategoryVO(item)
+                        .setParentName(getCategoryNameById(item.getParentId().toString())))).toList()
                 .stream().map(CompletableFuture::join).toList();
         return Result.success(makeCategoryTree(categoryVOList, 0L));
+    }
+
+    @Override
+    public Result pageCategoryListByCondition(CategoryQuery categoryQuery) {
+        Page<CategoryDO> page = categoryQuery.toMpPageDefaultSortByUpdateTime();
+        String categoryName = categoryQuery.getCategoryName();
+        CategoryType type = categoryQuery.getType();
+
+        Page<CategoryDO> pageDO = lambdaQuery()
+                .like(StringUtils.hasLength(categoryName), CategoryDO::getCategoryName, categoryName)
+                .eq(type != null, CategoryDO::getType, type)
+                .page(page);
+
+        if (CollectionUtils.isEmpty(pageDO.getRecords()))
+            return Result.success(new PageVO<>(0L, 0L, 0L, new ArrayList<CategoryVO>()));
+
+        return Result.success(PageVO.of(pageDO, categoryDO -> new CategoryVO(categoryDO)
+                .setParentName(getCategoryNameById(categoryDO.getParentId().toString()))));
     }
 
     @Override

@@ -1,8 +1,10 @@
 package com.shoppingmall.demo.model.DTO;
 
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.shoppingmall.demo.annotation.GoodStatusPattern;
 import com.shoppingmall.demo.annotation.GoodTypePattern;
+import com.shoppingmall.demo.config.deserializer.StringToLongDeserializer;
 import com.shoppingmall.demo.enums.GoodStatus;
 import com.shoppingmall.demo.enums.GoodType;
 import io.swagger.annotations.ApiModelProperty;
@@ -74,6 +76,7 @@ public class GoodSaveDTO implements Serializable {
     /**
      * 分类id
      */
+    @JsonDeserialize(using = StringToLongDeserializer.class)
     @NotNull(message="[分类id]不能为空")
     @ApiModelProperty("分类id")
     private Long categoryId;
@@ -81,6 +84,7 @@ public class GoodSaveDTO implements Serializable {
     /**
      * 标签id
      */
+    @JsonDeserialize(using = StringToLongDeserializer.class)
     @NotNull(message="[标签id]不能为空")
     @ApiModelProperty("标签id")
     private Long tagId;

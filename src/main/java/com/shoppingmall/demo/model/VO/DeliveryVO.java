@@ -2,6 +2,8 @@ package com.shoppingmall.demo.model.VO;
 
 
 import cn.hutool.core.bean.BeanUtil;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import com.shoppingmall.demo.model.DO.DeliveryDO;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -22,6 +24,7 @@ public class DeliveryVO implements Serializable {
     /**
      * 收货地址id
      */
+    @JsonSerialize(using = ToStringSerializer.class)
     @ApiModelProperty("收货地址id")
     private Long id;
 

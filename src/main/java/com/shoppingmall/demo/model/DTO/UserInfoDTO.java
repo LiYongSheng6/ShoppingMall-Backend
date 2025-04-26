@@ -1,9 +1,11 @@
 package com.shoppingmall.demo.model.DTO;
 
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.shoppingmall.demo.annotation.ForbiddenPattern;
 import com.shoppingmall.demo.annotation.GenderPattern;
 import com.shoppingmall.demo.annotation.UserTypePattern;
+import com.shoppingmall.demo.config.deserializer.StringToLongDeserializer;
 import com.shoppingmall.demo.constant.MessageConstants;
 import com.shoppingmall.demo.constant.RegexConstants;
 import com.shoppingmall.demo.enums.ForbiddenType;
@@ -30,6 +32,7 @@ public class UserInfoDTO {
     /**
      * 用户id
      */
+    @JsonDeserialize(using = StringToLongDeserializer.class)
     @ApiModelProperty("用户id")
     private Long id;
 

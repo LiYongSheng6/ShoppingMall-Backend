@@ -1,6 +1,8 @@
 package com.shoppingmall.demo.model.DTO;
 
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.shoppingmall.demo.config.deserializer.StringToLongDeserializer;
 import com.shoppingmall.demo.constant.MessageConstants;
 import com.shoppingmall.demo.constant.RegexConstants;
 import io.swagger.annotations.ApiModelProperty;
@@ -44,6 +46,7 @@ public class DeliverySaveIdDTO implements Serializable {
     /**
      * 省份Id
      */
+    @JsonDeserialize(using = StringToLongDeserializer.class)
     @NotNull(message = "[省份Id]不能为空")
     @ApiModelProperty("省份Id")
     private Long provinceId;
@@ -51,6 +54,7 @@ public class DeliverySaveIdDTO implements Serializable {
     /**
      * 城市Id
      */
+    @JsonDeserialize(using = StringToLongDeserializer.class)
     @NotNull(message = "[城市Id]不能为空")
     @ApiModelProperty("城市Id")
     private Long cityId;
@@ -58,6 +62,7 @@ public class DeliverySaveIdDTO implements Serializable {
     /**
      * 区县Id
      */
+    @JsonDeserialize(using = StringToLongDeserializer.class)
     @NotNull(message = "[区县Id]不能为空")
     @ApiModelProperty("区县Id")
     private Long countyId;

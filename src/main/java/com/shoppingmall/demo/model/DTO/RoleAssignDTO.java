@@ -24,14 +24,14 @@ import java.util.List;
 @Builder
 @Validated
 @Accessors(chain = true)
-public class PermissionDeleteBatchDTO implements Serializable {
+public class RoleAssignDTO implements Serializable {
 
     /**
-     * 权限id列表
+     * 角色id列表
      */
     @JsonDeserialize(using = StringListToLongListDeserializer.class)
-    @NotNull(message = "[权限id列表]不能为空")
-    @ApiModelProperty("权限id列表")
-    private List<Long> permissionIds;
+    @NotNull(message = "[角色id列表]不能为空")
+    @ApiModelProperty("角色id列表")
+    private List<Long> roleIds;
 
 }

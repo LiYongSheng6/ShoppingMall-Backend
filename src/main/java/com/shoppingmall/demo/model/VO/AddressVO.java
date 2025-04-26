@@ -4,6 +4,8 @@ package com.shoppingmall.demo.model.VO;
 import cn.hutool.core.bean.BeanUtil;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import com.shoppingmall.demo.enums.AddressType;
 import com.shoppingmall.demo.model.DO.AddressDO;
 import io.swagger.annotations.ApiModelProperty;
@@ -27,12 +29,14 @@ public class AddressVO implements Serializable {
     /**
      * 地名id
      */
+    @JsonSerialize(using = ToStringSerializer.class)
     @ApiModelProperty("地名id")
     private Long id;
 
     /**
      * 父级地名id
      */
+    @JsonSerialize(using = ToStringSerializer.class)
     @ApiModelProperty("父级地名id")
     private Long parentId;
 

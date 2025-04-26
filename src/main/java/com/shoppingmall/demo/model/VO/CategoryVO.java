@@ -4,6 +4,8 @@ package com.shoppingmall.demo.model.VO;
 import cn.hutool.core.bean.BeanUtil;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import com.shoppingmall.demo.enums.CategoryType;
 import com.shoppingmall.demo.model.DO.CategoryDO;
 import io.swagger.annotations.ApiModelProperty;
@@ -27,12 +29,14 @@ public class CategoryVO implements Serializable {
     /**
     * 分类id
     */
+    @JsonSerialize(using = ToStringSerializer.class)
     @ApiModelProperty("分类id")
     private Long id;
 
     /**
      * 父级分类id
      */
+    @JsonSerialize(using = ToStringSerializer.class)
     @ApiModelProperty("父级分类id")
     private Long parentId;
 

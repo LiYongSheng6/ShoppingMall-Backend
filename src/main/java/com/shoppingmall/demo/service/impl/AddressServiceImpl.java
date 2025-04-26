@@ -1,6 +1,7 @@
 package com.shoppingmall.demo.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.baomidou.mybatisplus.extension.toolkit.Db;
 import com.shoppingmall.demo.constant.CacheConstants;
@@ -13,7 +14,9 @@ import com.shoppingmall.demo.model.DTO.AddressDeleteBatchDTO;
 import com.shoppingmall.demo.model.DTO.AddressSaveBatchDTO;
 import com.shoppingmall.demo.model.DTO.AddressSaveDTO;
 import com.shoppingmall.demo.model.DTO.AddressUpdateDTO;
+import com.shoppingmall.demo.model.Query.AddressQuery;
 import com.shoppingmall.demo.model.VO.AddressVO;
+import com.shoppingmall.demo.model.VO.PageVO;
 import com.shoppingmall.demo.service.IAddressService;
 import com.shoppingmall.demo.utils.RedisIdWorker;
 import com.shoppingmall.demo.utils.Result;
@@ -21,6 +24,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -101,7 +105,7 @@ public class AddressServiceImpl extends ServiceImpl<AddressMapper, AddressDO> im
 
     @Override
     public Result saveOrUpdateAddressBatch(AddressSaveBatchDTO addressSaveBatchDTO) {
-        Long parentId = addressSaveBatchDTO.getParentId();
+        Long parentId = (addressSaveBatchDTO.getParentId());
         AddressType type = addressSaveBatchDTO.getType();
 
         List<String> addressNameList = addressSaveBatchDTO.getAddressNameList();
@@ -127,9 +131,28 @@ public class AddressServiceImpl extends ServiceImpl<AddressMapper, AddressDO> im
             throw new ServiceException(MessageConstants.NO_FOUND_ADDRESS_ERROR);
 
         List<AddressVO> addressVOList = addressDOList.stream()
-                .map(item -> CompletableFuture.supplyAsync(() -> new AddressVO(item).setParentName(getAddressNameById(item.getParentId())))).toList()
+                .map(item -> CompletableFuture.supplyAsync(() -> new AddressVO(item)
+                        .setParentName(getAddressNameById(item.getParentId())))).toList()
                 .stream().map(CompletableFuture::join).toList();
         return Result.success(makeAddressTree(addressVOList, 0L));
+    }
+
+    @Override
+    public Result pageAddressListByCondition(AddressQuery addressQuery) {
+        Page<AddressDO> page = addressQuery.toMpPageDefaultSortByUpdateTime();
+        String addressName = addressQuery.getAddressName();
+        AddressType type = addressQuery.getType();
+
+        Page<AddressDO> pageDO = lambdaQuery()
+                .like(StringUtils.hasLength(addressName), AddressDO::getAddressName, addressName)
+                .eq(type != null, AddressDO::getType, type)
+                .page(page);
+
+        if (CollectionUtils.isEmpty(pageDO.getRecords()))
+            return Result.success(new PageVO<>(0L, 0L, 0L, new ArrayList<AddressVO>()));
+
+        return Result.success(PageVO.of(pageDO, addressDO -> new AddressVO(addressDO)
+                .setParentName(getAddressNameById(addressDO.getParentId()))));
     }
 
     @Override

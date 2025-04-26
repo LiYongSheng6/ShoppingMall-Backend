@@ -6,6 +6,7 @@ import com.shoppingmall.demo.model.DTO.RoleDeleteBatchDTO;
 import com.shoppingmall.demo.model.DTO.RolePermissionDTO;
 import com.shoppingmall.demo.model.DTO.RoleSaveDTO;
 import com.shoppingmall.demo.model.DTO.RoleUpdateDTO;
+import com.shoppingmall.demo.model.DTO.UserRoleDTO;
 import com.shoppingmall.demo.utils.Result;
 
 
@@ -18,19 +19,24 @@ public interface IRoleService extends IService<RoleDO> {
 
     Result updateRole(RoleUpdateDTO RoleUpdateDTO);
 
-    String getRoleNameById(Long id);
-
-    Result getRoleById(Long id);
-
-    Result getRoleList();
-
-    Result getRolePermissionTree(Long roleId);
-
     Result deleteRole(Long id);
 
     Result deleteRoleBatch(RoleDeleteBatchDTO deleteBatchDTO);
 
+    String getRoleNameById(Long id);
+
+    Result getRoleById(Long id);
+
+    Result getRoleIdListByUserId(Long userId);
+
+    Result getHaveSignRoleList(Long userId);
+
+    Result getAllRoleList();
+
+    Result getRoleTree();
+
+    Result assignRoleToUser(UserRoleDTO userRoleDTO);
+
     Result assignPermissionToRole(RolePermissionDTO rolePermissionDTO);
 
-    Result removePermissionFromRole(RolePermissionDTO rolePermissionDTO);
 }

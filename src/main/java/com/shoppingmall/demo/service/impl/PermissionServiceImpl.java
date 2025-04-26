@@ -5,10 +5,10 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.baomidou.mybatisplus.extension.toolkit.Db;
 import com.shoppingmall.demo.constant.CacheConstants;
 import com.shoppingmall.demo.constant.MessageConstants;
-import com.shoppingmall.demo.enums.UserType;
 import com.shoppingmall.demo.exception.ServiceException;
 import com.shoppingmall.demo.mapper.PermissionMapper;
 import com.shoppingmall.demo.model.DO.PermissionDO;
+import com.shoppingmall.demo.model.DO.RolePermissionDO;
 import com.shoppingmall.demo.model.DTO.PermissionDeleteBatchDTO;
 import com.shoppingmall.demo.model.DTO.PermissionSaveDTO;
 import com.shoppingmall.demo.model.DTO.PermissionUpdateDTO;
@@ -22,6 +22,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -60,6 +61,24 @@ public class PermissionServiceImpl extends ServiceImpl<PermissionMapper, Permiss
         });
     }
 
+    private static List<PermissionVO> makePermissionTree(List<PermissionVO> permissionVOS, Long pid) {
+        //创建集合保存分类数据
+        List<PermissionVO> PermissionVOList = new ArrayList<PermissionVO>();
+        //判断分类列表是否为空，如果不为空则使用分类列表，否则创建集合对象
+        Optional.ofNullable(permissionVOS).orElse(new ArrayList<PermissionVO>())
+                .stream().filter(item -> item != null && item.getParentId().equals(pid))
+                .forEach(item -> {
+                    //获取每一个item对象的子分类，递归生成分类树
+                    List<PermissionVO> children = makePermissionTree(permissionVOS, item.getId());
+                    //设置子分类
+                    item.setChildren(children);
+                    //将分类对象添加到集合
+                    PermissionVOList.add(item);
+                });
+        //返回分类信息
+        return PermissionVOList;
+    }
+
     @Override
     public Result getPermissionById(Long id) {
         PermissionDO permissionDO = getById(id);
@@ -67,18 +86,63 @@ public class PermissionServiceImpl extends ServiceImpl<PermissionMapper, Permiss
         return Result.success(BeanUtil.copyProperties(permissionDO, PermissionVO.class));
     }
 
+    private String getPermissionNameById(Long id) {
+        PermissionDO permissionDO = getById(id);
+        return permissionDO != null ? permissionDO.getName() : "NULL";
+    }
+
     @Override
-    public Result getPermissionList(Integer type) {
-        List<PermissionDO> permissionDOList;
+    public Result<List<Long>> getPermissionIdListByUserId(Long roleId, Integer type) {
+        //List<PermissionDO> permissionDOList = lambdaQuery()
+        //        .eq(roleId != null, PermissionDO::getRoleId, roleId)
+        //        .eq(PermissionDO::getType, type).list();
+        //
+        //if (CollectionUtils.isEmpty(permissionDOList))
+        //    throw new ServiceException(MessageConstants.NO_FOUND_PERMISSION_ERROR);
+        //
+        //return Result.success(permissionDOList
+        //        .stream().map(permissionDO -> CompletableFuture.supplyAsync(() -> new PermissionVO(permissionDO))).toList()
+        //        .stream().map(CompletableFuture::join).toList());
 
-        if (UserType.ADMIN.getValue().equals(type)) permissionDOList = lambdaQuery().list();
-        else permissionDOList = lambdaQuery().eq(PermissionDO::getType, type).list();
+        List<Long> havePermissionIds = Db.lambdaQuery(RolePermissionDO.class).eq(roleId != null, RolePermissionDO::getRoleId, roleId).list()
+                .stream().map(rolePermissionDO -> CompletableFuture.supplyAsync(rolePermissionDO::getPermissionId)).toList()
+                .stream().map(CompletableFuture::join).toList();
+        return Result.success(havePermissionIds);
+    }
 
-        if (CollectionUtils.isEmpty(permissionDOList)) throw new ServiceException(MessageConstants.NO_FOUND_PERMISSION_ERROR);
+    @Override
+    public Result getHaveSignPermissionList(Long roleId, Integer type) {
+        List<PermissionDO> permissionDOList = lambdaQuery().eq(type != null, PermissionDO::getType, type).list();
+        if (CollectionUtils.isEmpty(permissionDOList))
+            throw new ServiceException(MessageConstants.NO_FOUND_PERMISSION_ERROR);
 
-        return Result.success(permissionDOList
+        List<PermissionVO> permissionVOList = permissionDOList
                 .stream().map(permissionDO -> CompletableFuture.supplyAsync(() -> new PermissionVO(permissionDO))).toList()
-                .stream().map(CompletableFuture::join).toList());
+                .stream().map(CompletableFuture::join).toList();
+
+        if (roleId != null) {
+            List<Long> havePermissionIds = getPermissionIdListByUserId(roleId, type).getData();
+            permissionVOList = permissionVOList.stream().peek(permissionVO -> permissionVO.setIsHave(havePermissionIds.contains(permissionVO.getId()))).toList();
+        }
+        return Result.success(permissionVOList);
+    }
+
+    @Override
+    public Result getAllPermissionList(Integer type) {
+        return getHaveSignPermissionList(null, type);
+    }
+
+    @Override
+    public Result getPermissionTree() {
+        List<PermissionDO> permissionDOList = lambdaQuery().list();
+        if (CollectionUtils.isEmpty(permissionDOList))
+            throw new ServiceException(MessageConstants.NO_FOUND_PERMISSION_ERROR);
+
+        List<PermissionVO> permissionVOList = permissionDOList.stream()
+                .map(item -> CompletableFuture.supplyAsync(() -> new PermissionVO(item)
+                        .setParentName(getPermissionNameById((item.getParentId()))))).toList()
+                .stream().map(CompletableFuture::join).toList();
+        return Result.success(makePermissionTree(permissionVOList, 0L));
     }
 
     @Override

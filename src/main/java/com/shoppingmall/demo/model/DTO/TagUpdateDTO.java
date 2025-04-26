@@ -1,7 +1,9 @@
 package com.shoppingmall.demo.model.DTO;
 
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.shoppingmall.demo.annotation.TagTypePattern;
+import com.shoppingmall.demo.config.deserializer.StringToLongDeserializer;
 import com.shoppingmall.demo.enums.TagType;
 import io.swagger.annotations.ApiModelProperty;
 import jakarta.validation.constraints.NotNull;
@@ -30,6 +32,7 @@ public class TagUpdateDTO implements Serializable {
     /**
      * 标签id
      */
+    @JsonDeserialize(using = StringToLongDeserializer.class)
     @NotNull(message="[标签id]不能为空")
     @ApiModelProperty("标签id")
     private Long id;

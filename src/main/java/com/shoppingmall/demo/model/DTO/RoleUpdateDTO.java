@@ -1,5 +1,7 @@
 package com.shoppingmall.demo.model.DTO;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.shoppingmall.demo.config.deserializer.StringToLongDeserializer;
 import io.swagger.annotations.ApiModelProperty;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -24,6 +26,7 @@ public class RoleUpdateDTO {
     /**
      * 主键id
      */
+    @JsonDeserialize(using = StringToLongDeserializer.class)
     @NotNull(message = "[主键id]不能为空")
     @ApiModelProperty("主键id")
     private Long id;
@@ -59,6 +62,7 @@ public class RoleUpdateDTO {
     /**
      * 父类id
      */
+    @JsonDeserialize(using = StringToLongDeserializer.class)
     @NotNull(message = "[父类id]不能为空")
     @ApiModelProperty("父类id")
     private Long parentId;
@@ -66,6 +70,7 @@ public class RoleUpdateDTO {
     /**
      * 创建者id
      */
+    @JsonDeserialize(using = StringToLongDeserializer.class)
     @NotNull(message = "[创建者id]不能为空")
     @ApiModelProperty("创建者id")
     private Long creatorId;

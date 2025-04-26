@@ -1,11 +1,14 @@
 package com.shoppingmall.demo.controller;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.shoppingmall.demo.annotation.Log;
 import com.shoppingmall.demo.annotation.PreAuthorize;
+import com.shoppingmall.demo.config.deserializer.StringToLongDeserializer;
 import com.shoppingmall.demo.model.DTO.TagDeleteBatchDTO;
 import com.shoppingmall.demo.model.DTO.TagSaveBatchDTO;
 import com.shoppingmall.demo.model.DTO.TagSaveDTO;
 import com.shoppingmall.demo.model.DTO.TagUpdateDTO;
+import com.shoppingmall.demo.model.Query.TagQuery;
 import com.shoppingmall.demo.service.ITagService;
 import com.shoppingmall.demo.utils.Result;
 import io.swagger.annotations.Api;
@@ -49,11 +52,10 @@ public class TagController {
     }
 
     @Log
-    @Operation(summary = "删除标签信息接口")
-    @DeleteMapping("/delete")
-    @PreAuthorize("sys:tag:delete")
-    public Result delete(@RequestParam @NotNull Long id) {
-        return tagService.deleteTagById(id);
+    @Operation(summary = "批量添加修改标签信息")
+    @PostMapping("/saveOrUpdate/batch")
+    public Result saveOrUpdateBatch(@RequestBody @Validated TagSaveBatchDTO tagSaveBatchDTO) {
+        return tagService.saveOrUpdateTagBatch(tagSaveBatchDTO);
     }
 
     @Log
@@ -64,10 +66,18 @@ public class TagController {
     }
 
     @Log
-    @Operation(summary = "批量添加修改标签信息")
-    @PostMapping("/saveOrUpdate/batch")
-    public Result saveOrUpdateBatch(@RequestBody @Validated TagSaveBatchDTO tagSaveBatchDTO) {
-        return tagService.saveOrUpdateTagBatch(tagSaveBatchDTO);
+    @Operation(summary = "分页查询标签信息列表")
+    @PostMapping("/list/page")
+    public Result listByCondition(@RequestBody @Validated TagQuery query) {
+        return tagService.pageTagListByCondition(query);
+    }
+
+    @Log
+    @Operation(summary = "删除标签信息接口")
+    @DeleteMapping("/delete")
+    @PreAuthorize("sys:tag:delete")
+    public Result delete(@RequestParam @NotNull @JsonDeserialize(using = StringToLongDeserializer.class) Long id) {
+        return tagService.deleteTagById(id);
     }
 
     @Log

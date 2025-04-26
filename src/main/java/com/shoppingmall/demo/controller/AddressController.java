@@ -1,11 +1,14 @@
 package com.shoppingmall.demo.controller;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.shoppingmall.demo.annotation.Log;
 import com.shoppingmall.demo.annotation.PreAuthorize;
+import com.shoppingmall.demo.config.deserializer.StringToLongDeserializer;
 import com.shoppingmall.demo.model.DTO.AddressDeleteBatchDTO;
 import com.shoppingmall.demo.model.DTO.AddressSaveBatchDTO;
 import com.shoppingmall.demo.model.DTO.AddressSaveDTO;
 import com.shoppingmall.demo.model.DTO.AddressUpdateDTO;
+import com.shoppingmall.demo.model.Query.AddressQuery;
 import com.shoppingmall.demo.service.IAddressService;
 import com.shoppingmall.demo.utils.Result;
 import io.swagger.annotations.Api;
@@ -52,16 +55,16 @@ public class AddressController {
     }
 
     @Log
-    @Operation(summary = "删除地名信息接口")
-    @DeleteMapping("/delete")
-    public Result delete(@RequestParam @NotNull Long id) {
-        return addressService.deleteAddressById(id);
+    @Operation(summary = "批量添加修改地名信息")
+    @PostMapping("/saveOrUpdate/batch")
+    public Result saveOrUpdateBatch(@RequestBody @Validated AddressSaveBatchDTO addressSaveBatchDTO) {
+        return addressService.saveOrUpdateAddressBatch(addressSaveBatchDTO);
     }
 
     @Log
     @Operation(summary = "获取收货地名信息接口")
     @GetMapping("/list/parentId")
-    public Result getAddressListByParentId(@RequestParam @NotNull Long parentId,
+    public Result getAddressListByParentId(@JsonDeserialize(using = StringToLongDeserializer.class) Long parentId,
                                            @RequestParam @NotNull Integer type) {
         return addressService.getAddressListByIdAndType(parentId, type);
     }
@@ -70,23 +73,29 @@ public class AddressController {
     @Operation(summary = "根据类型获取所属地名信息接口")
     @GetMapping("/list/type")
     @PreAuthorize("sys:address:getAddressListByIdAndType")
-    public Result getAddressListByIdAndType(Long parentId, Integer type) {
+    public Result getAddressListByIdAndType(@JsonDeserialize(using = StringToLongDeserializer.class) Long parentId, Integer type) {
         return addressService.getAddressListByIdAndType(parentId, type);
     }
 
     @Log
     @Operation(summary = "获取树形地名信息接口")
     @GetMapping("/tree")
-    @PreAuthorize("sys:address:getAddressTreeInfo")
     public Result getAddressTreeInfo() {
         return addressService.getAddressTreeInfo();
     }
 
     @Log
-    @Operation(summary = "批量添加修改地名信息")
-    @PostMapping("/saveOrUpdate/batch")
-    public Result saveOrUpdateBatch(@RequestBody @Validated AddressSaveBatchDTO addressSaveBatchDTO) {
-        return addressService.saveOrUpdateAddressBatch(addressSaveBatchDTO);
+    @Operation(summary = "分页查询地名信息列表")
+    @PostMapping("/list/page")
+    public Result listByCondition(@RequestBody @Validated AddressQuery query) {
+        return addressService.pageAddressListByCondition(query);
+    }
+
+    @Log
+    @Operation(summary = "删除地名信息接口")
+    @DeleteMapping("/delete")
+    public Result delete(@RequestParam @NotNull @JsonDeserialize(using = StringToLongDeserializer.class) Long id) {
+        return addressService.deleteAddressById(id);
     }
 
     @Log

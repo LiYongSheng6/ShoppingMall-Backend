@@ -1,5 +1,7 @@
 package com.shoppingmall.demo.model.VO;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import io.swagger.annotations.ApiModelProperty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -19,9 +21,10 @@ public class UserChatVO {
     /**
      * 用户id
      */
+    @JsonSerialize(using = ToStringSerializer.class)
     @NotNull(message="[用户id]不能为空")
     @ApiModelProperty("用户id")
-    private String id;
+    private Long id;
 
     /**
      * 用户名称

@@ -6,6 +6,7 @@ import com.shoppingmall.demo.model.DTO.CategoryDeleteBatchDTO;
 import com.shoppingmall.demo.model.DTO.CategorySaveBatchDTO;
 import com.shoppingmall.demo.model.DTO.CategorySaveDTO;
 import com.shoppingmall.demo.model.DTO.CategoryUpdateDTO;
+import com.shoppingmall.demo.model.Query.CategoryQuery;
 import com.shoppingmall.demo.utils.Result;
 
 public interface ICategoryService extends IService<CategoryDO> {
@@ -14,15 +15,17 @@ public interface ICategoryService extends IService<CategoryDO> {
 
     Result updateCategory(CategoryUpdateDTO categoryUpdateDTO);
 
-    String getCategoryNameById(Long id);
+    Result saveOrUpdateCategoryBatch(CategorySaveBatchDTO categorySaveBatchDTO);
 
     Result getCategoryListByType(Integer type);
 
+    String getCategoryNameById(String id);
+
     Result getCategoryTreeInfo();
 
-    Result deleteCategoryById(Long id);
+    Result pageCategoryListByCondition(CategoryQuery categoryQuery);
 
-    Result saveOrUpdateCategoryBatch(CategorySaveBatchDTO categorySaveBatchDTO);
+    Result deleteCategoryById(Long id);
 
     Result deleteCategoryBatch(CategoryDeleteBatchDTO categoryDeleteBatchDTO);
 }

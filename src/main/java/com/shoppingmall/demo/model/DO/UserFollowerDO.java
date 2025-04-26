@@ -11,13 +11,15 @@ import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 
 /**
- * 用户商品浏览关系实体类
+ * 用户关注关系实体类
  *
  * @author redmi k50 ultra
  * * @date 2024/7/19
@@ -27,8 +29,9 @@ import java.time.LocalDateTime;
 @Accessors(chain = true)
 @AllArgsConstructor
 @NoArgsConstructor
-@TableName("good_browse")
-public class GoodBrowse {
+@EqualsAndHashCode(callSuper = false)
+@TableName("user_follower")
+public class UserFollowerDO implements Serializable {
     /**
      * 主键id
      */
@@ -44,11 +47,18 @@ public class GoodBrowse {
     private Long userId;
 
     /**
-     * 商品id
+     * 关注用户id
      */
-    @NotNull(message = "[商品id]不能为空")
-    @ApiModelProperty("商品id")
-    private Long goodId;
+    @NotNull(message = "[关联的用户id]不能为空")
+    @ApiModelProperty("关联的用户id")
+    private Long followerId;
+
+    /**
+     * 关注状态  0-普通关注 1-特别关注
+     */
+    @NotNull(message = "[关注状态]不能为空")
+    @ApiModelProperty("关注状态  0-普通关注 1-特别关注")
+    private Integer state;
 
     /**
      * 创建时间
@@ -69,3 +79,5 @@ public class GoodBrowse {
     private LocalDateTime updateTime;
 
 }
+
+

@@ -1,6 +1,8 @@
 package com.shoppingmall.demo.model.DTO;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.shoppingmall.demo.annotation.OrderStatusPattern;
+import com.shoppingmall.demo.config.deserializer.StringToLongDeserializer;
 import com.shoppingmall.demo.enums.OrderStatus;
 import io.swagger.annotations.ApiModelProperty;
 import jakarta.validation.constraints.NotNull;
@@ -25,10 +27,12 @@ import java.io.Serializable;
 @Accessors(chain = true)
 public class OrderUpdateDTO implements Serializable {
 
+    @JsonDeserialize(using = StringToLongDeserializer.class)
     @NotNull(message="[订单id]不能为空")
     @ApiModelProperty("订单id")
     private Long id;
 
+    @JsonDeserialize(using = StringToLongDeserializer.class)
     @ApiModelProperty("收货信息id")
     private Long deliveryId;
 

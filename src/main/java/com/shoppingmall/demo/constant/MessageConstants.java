@@ -90,13 +90,20 @@ public class MessageConstants {
     public static final String NO_FOUND_ADDRESS_NAME_ERROR = "没有要操作的相关地名信息";
     public static final String NO_FOUND_CATEGORY_NAME_ERROR = "没有要操作的相关分类信息";
     public static final String NO_FOUND_TAG_NAME_ERROR = "没有要操作的相关标签信息";
+    public static final String NUMBER_NEGATIVE_ERROR = "操作结果不能为负数";
+    public static final String GET_LOCK_ERROR = "获取锁失败";
 
-    public static final String PERMISSION_PROHIBITED_ERROR = "禁止操作";
+    public static final String PERMISSION_PROHIBITED_ERROR = "禁止操作不属于自己的事物";
+    public static final String PURCHASE_OWN_ERROR = "禁止购买自己的商品";
+    public static final String GOOD_NOT_REMOVE_ERROR = "商品未下架，无法操作";
+    public static final String GOOD_REMOVE_ERROR = "商品已下架";
+
     public static final String PERMISSION_CODE_EXIST = "资源编码已存在";
     public static final String PERMISSION_PATH_EXIST = "资源路径已存在";
     public static final String ADDRESS_NAME_EXIST = "地名名称已存在";
     public static final String CATEGORY_NAME_EXIST = "分类名称已存在";
     public static final String TAG_NAME_EXIST = "标签名称已存在";
     public static final String ROLE_CODE_EXIST = "角色编码已存在";
+
 }
 

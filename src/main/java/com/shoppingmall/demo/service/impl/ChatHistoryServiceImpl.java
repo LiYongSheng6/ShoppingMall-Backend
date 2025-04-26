@@ -46,20 +46,20 @@ public class ChatHistoryServiceImpl extends ServiceImpl<ChatHistoryMapper, ChatH
 
     @Override
     public Result<PageVO<ChatHistoryVO>> getChatHistory(ChatHistoryQuery chatHistoryQuery) {
-        Long fromUserId = chatHistoryQuery.getToUserId();
-        Long toUserId = loginInfoService.getLoginId();
+        Long senderId = chatHistoryQuery.getReceiverId();
+        Long receiverId = loginInfoService.getLoginId();
         Page<ChatHistoryDO> page = chatHistoryQuery.toMpPageDefaultSortByCreateTime();
         Page<ChatHistoryDO> pageDO = lambdaQuery()
-                .eq(ChatHistoryDO::getSenderId, fromUserId)
-                .eq(ChatHistoryDO::getReceiverId, toUserId)
+                .eq(ChatHistoryDO::getSenderId, senderId)
+                .eq(ChatHistoryDO::getReceiverId, receiverId)
                 .or()
-                .eq(ChatHistoryDO::getSenderId, toUserId)
-                .eq(ChatHistoryDO::getReceiverId, fromUserId)
+                .eq(ChatHistoryDO::getSenderId, receiverId)
+                .eq(ChatHistoryDO::getReceiverId, senderId)
                 .page(page);
         //将未读消息设置成已读
         lambdaUpdate()
-                .eq(ChatHistoryDO::getSenderId, fromUserId)
-                .eq(ChatHistoryDO::getReceiverId, toUserId)
+                .eq(ChatHistoryDO::getSenderId, senderId)
+                .eq(ChatHistoryDO::getReceiverId, receiverId)
                 .eq(ChatHistoryDO::getStatus, MessageStatus.UNREAD)
                 .set(ChatHistoryDO::getStatus, MessageStatus.READ)
                 .update();
@@ -69,10 +69,10 @@ public class ChatHistoryServiceImpl extends ServiceImpl<ChatHistoryMapper, ChatH
             throw new ServiceException(MessageConstants.OPERATION_ERROR);
         }
         try {
-            String hashKey = toUserId + "::" + fromUserId;
+            String hashKey = receiverId + "::" + senderId;
             long count = getUnreadMessageCount(CacheConstants.NO_READ_CHAT_HISTORY_SEPARATE_NUM_KEY, hashKey);
-            redisCacheService.incrementHash(CacheConstants.NO_READ_CHAT_HISTORY_TOTAL_NUM_KEY, JSON.toJSONString(toUserId), -1L * count);
-            redisCacheService.incrementHash(CacheConstants.NO_READ_TOTAL_NUM_KEY, JSON.toJSONString(toUserId), -1L * count);
+            redisCacheService.incrementHash(CacheConstants.NO_READ_CHAT_HISTORY_TOTAL_NUM_KEY, JSON.toJSONString(receiverId), -1L * count);
+            redisCacheService.incrementHash(CacheConstants.NO_READ_TOTAL_NUM_KEY, JSON.toJSONString(receiverId), -1L * count);
 
             redisCacheService.removeHashKey(CacheConstants.NO_READ_CHAT_HISTORY_SEPARATE_NUM_KEY, hashKey);
         } finally {
@@ -84,45 +84,45 @@ public class ChatHistoryServiceImpl extends ServiceImpl<ChatHistoryMapper, ChatH
     @Transactional
     @Override
     public Result sendMessage(ChatHistoryDTO chatHistoryDTO) {
-        List<Long> toUserIds = chatHistoryDTO.getToUserIds();
+        List<Long> receiverIds = chatHistoryDTO.getReceiverIds();
         String content = chatHistoryDTO.getContent();
-        List<UserDO> userDOList = Db.listByIds(toUserIds, UserDO.class);
-        if (userDOList.size() != toUserIds.size()) {
+        List<UserDO> userDOList = Db.listByIds(receiverIds, UserDO.class);
+        if (userDOList.size() != receiverIds.size()) {
             throw new ServiceException(MessageConstants.NO_FOUND_USER_ERROR);
         }
-        Long fromUserId = loginInfoService.getLoginId();
+        Long senderId = loginInfoService.getLoginId();
         ArrayList<ChatHistoryDO> chatHistoryDoList = new ArrayList<>();
-        toUserIds.forEach(toUserId -> {
+        receiverIds.forEach(receiverId -> {
             chatHistoryDoList.add(
                     new ChatHistoryDO().setId(redisIdWorker.nextId(CacheConstants.CHAT_HISTORY_ID))
                             .setContent(content)
                             .setCreateTime(LocalDateTime.now())
-                            .setReceiverId(toUserId)
-                            .setSenderId(fromUserId)
+                            .setReceiverId((receiverId))
+                            .setSenderId((senderId))
                             .setStatus(MessageStatus.UNREAD)
             );
-            redisCacheService.incrementHash(CacheConstants.NO_READ_CHAT_HISTORY_SEPARATE_NUM_KEY, toUserId + "::" + fromUserId, 1);
-            redisCacheService.incrementHash(CacheConstants.NO_READ_CHAT_HISTORY_TOTAL_NUM_KEY, JSON.toJSONString(toUserId), 1);
-            redisCacheService.incrementHash(CacheConstants.NO_READ_TOTAL_NUM_KEY, JSON.toJSONString(toUserId), 1);
+            redisCacheService.incrementHash(CacheConstants.NO_READ_CHAT_HISTORY_SEPARATE_NUM_KEY, receiverId + "::" + senderId, 1);
+            redisCacheService.incrementHash(CacheConstants.NO_READ_CHAT_HISTORY_TOTAL_NUM_KEY, JSON.toJSONString(receiverId), 1);
+            redisCacheService.incrementHash(CacheConstants.NO_READ_TOTAL_NUM_KEY, JSON.toJSONString(receiverId), 1);
         });
         return saveBatch(chatHistoryDoList) ? Result.success() : Result.error();
     }
 
-    private long getUnreadMessageCount(String key, String toUserId) {
-        Object hashValue = redisCacheService.getHashValue(key, toUserId);
+    private long getUnreadMessageCount(String key, String receiverId) {
+        Object hashValue = redisCacheService.getHashValue(key, receiverId);
         Long count;
         if (hashValue != null) {
             return Long.parseLong(hashValue.toString());
         } else {
-            count = lambdaQuery().eq(ChatHistoryDO::getReceiverId, toUserId).eq(ChatHistoryDO::getStatus, MessageStatus.UNREAD).count();
-            redisCacheService.incrementHash(key, toUserId, count);
+            count = lambdaQuery().eq(ChatHistoryDO::getReceiverId, receiverId).eq(ChatHistoryDO::getStatus, MessageStatus.UNREAD).count();
+            redisCacheService.incrementHash(key, receiverId, count);
             return count;
         }
     }
 
     @Override
-    public Long countTotalUnreadMessage(Long toUserId) {
-        return getUnreadMessageCount(CacheConstants.NO_READ_TOTAL_NUM_KEY, JSON.toJSONString(toUserId));
+    public Long countTotalUnreadMessage(Long receiverId) {
+        return getUnreadMessageCount(CacheConstants.NO_READ_TOTAL_NUM_KEY, JSON.toJSONString(receiverId));
     }
 
     @Override
@@ -135,10 +135,10 @@ public class ChatHistoryServiceImpl extends ServiceImpl<ChatHistoryMapper, ChatH
         Page<UserDO> page = pageQuery.toMpPageDefaultSortByUpdateTime();
 
         Long loginUserId = loginInfoService.getLoginId();
-        List<Long> fromUserIds = Db.lambdaQuery(ChatHistoryDO.class).eq(ChatHistoryDO::getReceiverId, loginUserId).list()
-                .stream().map(ChatHistoryDO::getSenderId).toList();
+        List<String> senderIds = Db.lambdaQuery(ChatHistoryDO.class).eq(ChatHistoryDO::getReceiverId, loginUserId).list()
+                .stream().map(ChatHistoryDO::getSenderId).map(String::valueOf).toList();
 
-        Page<UserDO> page1 = Db.lambdaQuery(UserDO.class).in(UserDO::getId, fromUserIds).page(page);
+        Page<UserDO> page1 = Db.lambdaQuery(UserDO.class).in(UserDO::getId, senderIds).page(page);
         if (CollectionUtils.isEmpty(page1.getRecords()))
             throw new ServiceException(MessageConstants.NO_FOUND_USER_ERROR);
 
@@ -147,14 +147,14 @@ public class ChatHistoryServiceImpl extends ServiceImpl<ChatHistoryMapper, ChatH
 
             redisCacheService.getHashAll(CacheConstants.NO_READ_CHAT_HISTORY_SEPARATE_NUM_KEY).forEach((key, value) -> {
                 String[] split = key.toString().split(":");
-                Long toUserId = Long.parseLong(split[0]);
-                if (!toUserId.equals(loginUserId)) return;
+                Long receiverId = Long.valueOf(split[0]);
+                if (!receiverId.equals(loginUserId)) return;
 
-                Long fromUserId = Long.parseLong(split[1]);
-                if ((Db.getById(fromUserId, UserDO.class)) == null) {
-                    log.error("用户id:{}不存在或已被删除", fromUserId);
+                String senderId = (split[1]);
+                if ((Db.getById(senderId, UserDO.class)) == null) {
+                    log.error("用户id:{}不存在或已被删除", senderId);
                 } else {
-                    if (userDO.getId().equals(fromUserId)) {
+                    if (userDO.getId().toString().equals(senderId)) {
                         userChatVO.setCount(Long.parseLong(value.toString()));
                     }
                 }

@@ -1,7 +1,9 @@
 package com.shoppingmall.demo.model.DTO;
 
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.shoppingmall.demo.annotation.CategoryTypePattern;
+import com.shoppingmall.demo.config.deserializer.StringToLongDeserializer;
 import com.shoppingmall.demo.enums.CategoryType;
 import io.swagger.annotations.ApiModelProperty;
 import jakarta.validation.constraints.NotNull;
@@ -37,6 +39,7 @@ public class CategorySaveDTO implements Serializable {
     /**
      * 父级分类id
      */
+    @JsonDeserialize(using = StringToLongDeserializer.class)
     @NotNull(message = "[父级分类id]不能为空")
     @ApiModelProperty("父级分类id")
     private Long parentId;

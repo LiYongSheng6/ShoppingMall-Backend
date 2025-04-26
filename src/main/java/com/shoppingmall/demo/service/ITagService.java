@@ -6,6 +6,7 @@ import com.shoppingmall.demo.model.DTO.TagDeleteBatchDTO;
 import com.shoppingmall.demo.model.DTO.TagSaveBatchDTO;
 import com.shoppingmall.demo.model.DTO.TagSaveDTO;
 import com.shoppingmall.demo.model.DTO.TagUpdateDTO;
+import com.shoppingmall.demo.model.Query.TagQuery;
 import com.shoppingmall.demo.utils.Result;
 
 public interface ITagService extends IService<TagDO> {
@@ -14,13 +15,15 @@ public interface ITagService extends IService<TagDO> {
 
     Result updateTag(TagUpdateDTO tagUpdateDTO);
 
+    Result saveOrUpdateTagBatch(TagSaveBatchDTO tagSaveBatchDTO);
+
     String getTagNameById(Long id);
 
     Result getTagListByType(Integer type);
 
-    Result deleteTagById(Long id);
+    Result pageTagListByCondition(TagQuery tagQuery);
 
-    Result saveOrUpdateTagBatch(TagSaveBatchDTO tagSaveBatchDTO);
+    Result deleteTagById(Long id);
 
     Result deleteTagBatch(TagDeleteBatchDTO tagDeleteBatchDTO);
 }

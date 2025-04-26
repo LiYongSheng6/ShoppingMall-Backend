@@ -1,6 +1,8 @@
 package com.shoppingmall.demo.model.DTO;
 
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.shoppingmall.demo.config.deserializer.StringListToLongListDeserializer;
 import io.swagger.annotations.ApiModelProperty;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -27,6 +29,7 @@ public class GoodDeleteBatchDTO implements Serializable {
     /**
      * 商品id列表
      */
+    @JsonDeserialize(using = StringListToLongListDeserializer.class)
     @NotNull(message = "[商品id列表]不能为空")
     @ApiModelProperty("商品id列表")
     private List<Long> goodIds;

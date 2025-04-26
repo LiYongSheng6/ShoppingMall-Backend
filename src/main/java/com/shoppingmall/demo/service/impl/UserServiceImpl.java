@@ -7,6 +7,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.shoppingmall.demo.constant.CacheConstants;
 import com.shoppingmall.demo.constant.MessageConstants;
 import com.shoppingmall.demo.enums.ForbiddenType;
+import com.shoppingmall.demo.enums.PermissionType;
 import com.shoppingmall.demo.enums.UserType;
 import com.shoppingmall.demo.exception.ServiceException;
 import com.shoppingmall.demo.mapper.UserMapper;
@@ -32,7 +33,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -65,17 +65,15 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements 
     @Override
     public Result getFrontPermission() {
         UserDO userDO = getUserDO(loginInfoService.getLoginId());
-        return Result.success(permissionService.getPermissionList(userDO.getType().getValue()));
+        return Result.success(permissionService.getAllPermissionList(PermissionType.FRONT.getValue()));
     }
 
     private String getToken(UserDO userDO) {
         Map<String, Object> claims = new HashMap<>();
         claims.put(CacheConstants.TOKEN_USER_ID_KEY, userDO.getId());
-        claims.put(CacheConstants.TOKEN_USERNAME_KEY, userDO.getUsername());
 
         String token = JwtUtil.genToken(claims, 1000 * 60 * 60 * 24);
-        ValueOperations<String, String> operations = stringRedisTemplate.opsForValue();
-        operations.set(CacheConstants.LOGIN_USER_TOKEN_KEY + userDO.getId(), token, 1, TimeUnit.DAYS);
+        stringRedisTemplate.opsForValue().set(CacheConstants.LOGIN_USER_TOKEN_KEY + userDO.getId(), token, 1, TimeUnit.DAYS);
 
         ThreadLocalUtil.set(claims);
         return token;
@@ -173,7 +171,15 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements 
         // 登录成功，生成token
         String token = getToken(userDO);
         log.info("用户登录信息：{}", userDO);
-        return Result.success(MessageConstants.LOGIN_SUCCESS, token);
+
+        // 生成重定向路径
+        //String redirectPath = switch (userDO.getType()) {
+        //    case ADMIN -> "/admin/dashboard";
+        //    case USER -> "/user/dashboard";
+        //};
+        //String redirectPath = Db.lambdaQuery(PermissionDO.class).eq(PermissionDO::getCode, userDO.getType().getDesc()).one().getPath();
+
+        return Result.success(MessageConstants.LOGIN_SUCCESS, token, userDO.getType().getValue());
     }
 
     @Override

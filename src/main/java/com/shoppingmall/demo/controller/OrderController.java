@@ -1,6 +1,8 @@
 package com.shoppingmall.demo.controller;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.shoppingmall.demo.annotation.Log;
+import com.shoppingmall.demo.config.deserializer.StringToLongDeserializer;
 import com.shoppingmall.demo.model.DTO.OrderDeleteBatchDTO;
 import com.shoppingmall.demo.model.DTO.OrderSaveDTO;
 import com.shoppingmall.demo.model.Query.OrderQuery;
@@ -46,43 +48,43 @@ public class OrderController {
     @Log
     @Operation(summary = "修改订单状态为待发货")
     @PutMapping("/update/shipping")
-    public Result updateToBeShipping(@RequestParam @NotNull Long id) {
+    public Result updateToBeShipping(@RequestParam @NotNull @JsonDeserialize(using = StringToLongDeserializer.class) Long id) {
         return orderService.updateToBeShipping(id);
     }
 
     @Log
     @Operation(summary = "修改订单状态为待收货")
     @PutMapping("/update/receiving")
-    public Result updateToBeReceiving(@RequestParam @NotNull Long id) {
+    public Result updateToBeReceiving(@RequestParam @NotNull @JsonDeserialize(using = StringToLongDeserializer.class) Long id) {
         return orderService.updateToBeReceiving(id);
     }
 
     @Log
     @Operation(summary = "修改订单状态为已完成")
     @PutMapping("/update/completed")
-    public Result updateToBeCompleted(@RequestParam @NotNull Long id) {
+    public Result updateToBeCompleted(@RequestParam @NotNull @JsonDeserialize(using = StringToLongDeserializer.class) Long id) {
         return orderService.updateToBeCompleted(id);
     }
 
     @Log
     @Operation(summary = "修改订单状态为已取消")
     @PutMapping("/update/canceled")
-    public Result updateToBeCanceled(@RequestParam @NotNull Long id) {
+    public Result updateToBeCanceled(@RequestParam @NotNull @JsonDeserialize(using = StringToLongDeserializer.class) Long id) {
         return orderService.updateToBeCancelled(id);
     }
 
     @Log
     @Operation(summary = "修改订单收货地址信息")
     @PutMapping("/update/delivery")
-    public Result updateDelivery(@RequestParam @NotNull Long id,
-                                 @RequestParam @NotNull Long deliveryId) {
+    public Result updateDelivery(@RequestParam @NotNull @JsonDeserialize(using = StringToLongDeserializer.class) Long id,
+                                 @RequestParam @NotNull @JsonDeserialize(using = StringToLongDeserializer.class) Long deliveryId) {
         return orderService.updateDelivery(id, deliveryId);
     }
 
     @Log
     @Operation(summary = "删除订单信息接口")
     @DeleteMapping("/delete")
-    public Result delete(@RequestParam @NotNull Long id) {
+    public Result delete(@RequestParam @NotNull @JsonDeserialize(using = StringToLongDeserializer.class) Long id) {
         return orderService.deleteOrderById(id);
     }
 
@@ -96,21 +98,21 @@ public class OrderController {
     @Log
     @Operation(summary = "查询单个订单信息")
     @GetMapping("/detail")
-    public Result<OrderVO> detail(@RequestParam @NotNull Long id) {
+    public Result<OrderVO> detail(@RequestParam @NotNull @JsonDeserialize(using = StringToLongDeserializer.class) Long id) {
         return orderService.getOrderById(id);
     }
 
     @Log
     @Operation(summary = "获取当前用户订单信息分页列表")
-    @GetMapping("/list/own")
+    @PostMapping("/list/own")
     public Result getDeliveryList(@RequestBody @Validated OrderQuery orderQuery) {
         return orderService.getMyOrderListPage(orderQuery);
     }
 
     @Log
     @Operation(summary = "分页查询订单信息列表")
-    @GetMapping("/list/page")
-    public Result listByPlaylistId(@Validated OrderQuery orderQuery) {
+    @PostMapping("/list/page")
+    public Result listByPlaylistId(@RequestBody @Validated OrderQuery orderQuery) {
         return orderService.pageOrderListByUserId(orderQuery);
     }
 

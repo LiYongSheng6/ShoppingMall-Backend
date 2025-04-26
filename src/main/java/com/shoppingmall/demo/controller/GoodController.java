@@ -1,6 +1,8 @@
 package com.shoppingmall.demo.controller;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.shoppingmall.demo.annotation.Log;
+import com.shoppingmall.demo.config.deserializer.StringToLongDeserializer;
 import com.shoppingmall.demo.model.DTO.GoodDeleteBatchDTO;
 import com.shoppingmall.demo.model.DTO.GoodSaveDTO;
 import com.shoppingmall.demo.model.DTO.GoodUpdateDTO;
@@ -60,8 +62,8 @@ public class GoodController {
     @Log
     @Operation(summary = "删除商品信息接口")
     @DeleteMapping("/delete")
-    public Result delete(@RequestParam @NotNull Long GoodId) {
-        return goodService.deleteGoodById(GoodId);
+    public Result delete(@RequestParam @NotNull @JsonDeserialize(using = StringToLongDeserializer.class) Long id) {
+        return goodService.deleteGoodById(id);
     }
 
     @Log
@@ -74,7 +76,7 @@ public class GoodController {
     @Log
     @Operation(summary = "获取单个商品信息接口")
     @GetMapping("/detail")
-    public Result getGoodById(@RequestParam @NotNull Long id) {
+    public Result getGoodById(@RequestParam @NotNull @JsonDeserialize(using = StringToLongDeserializer.class) Long id) {
         return goodService.getGoodInfoById(id);
     }
 

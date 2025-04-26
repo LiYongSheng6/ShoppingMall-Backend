@@ -7,6 +7,7 @@ import com.shoppingmall.demo.model.DTO.DeliverySaveDTO;
 import com.shoppingmall.demo.model.DTO.DeliverySaveIdDTO;
 import com.shoppingmall.demo.model.DTO.DeliveryUpdateDTO;
 import com.shoppingmall.demo.model.DTO.DeliveryUpdateIdDTO;
+import com.shoppingmall.demo.model.Query.DeliveryQuery;
 import com.shoppingmall.demo.utils.Result;
 
 public interface IDeliveryService extends IService<DeliveryDO> {
@@ -25,7 +26,12 @@ public interface IDeliveryService extends IService<DeliveryDO> {
 
     Result getDeliveryListByUserId(Long userId);
 
+    Result pageDeliveryList(DeliveryQuery query);
+
+    Result pageDeliveryListByCondition(DeliveryQuery query);
+
     Result deleteDeliveryById(Long id);
 
     Result deleteDeliveryBatch(DeliveryDeleteBatchDTO deleteBatchDTO);
+
 }

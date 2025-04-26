@@ -2,6 +2,8 @@ package com.shoppingmall.demo.model.VO;
 
 
 import cn.hutool.core.bean.BeanUtil;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import com.shoppingmall.demo.enums.TagType;
 import com.shoppingmall.demo.model.DO.TagDO;
 import io.swagger.annotations.ApiModelProperty;
@@ -23,8 +25,9 @@ public class TagVO implements Serializable {
     /**
     * 标签id
     */
+    @JsonSerialize(using = ToStringSerializer.class)
     @ApiModelProperty("id")
-    private String id;
+    private Long id;
 
     /**
     * 标签名
