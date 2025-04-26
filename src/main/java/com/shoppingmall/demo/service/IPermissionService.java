@@ -31,4 +31,9 @@ public interface IPermissionService extends IService<PermissionDO> {
 
     Result getPermissionTree();
 
+    Result getPermissionListByUserId(Long userId);
+
+    Result getPermissionCodeListByUserId(Long userId);
+
+
 }

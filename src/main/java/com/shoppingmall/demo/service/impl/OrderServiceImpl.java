@@ -19,10 +19,9 @@ import com.shoppingmall.demo.model.DTO.OrderDeleteBatchDTO;
 import com.shoppingmall.demo.model.DTO.OrderSaveDTO;
 import com.shoppingmall.demo.model.DTO.OrderUpdateDTO;
 import com.shoppingmall.demo.model.Query.OrderQuery;
-import com.shoppingmall.demo.model.VO.DeliveryVO;
-import com.shoppingmall.demo.model.VO.GoodVO;
 import com.shoppingmall.demo.model.VO.OrderVO;
 import com.shoppingmall.demo.model.VO.PageVO;
+import com.shoppingmall.demo.service.IAddressService;
 import com.shoppingmall.demo.service.IDeliveryService;
 import com.shoppingmall.demo.service.IGoodService;
 import com.shoppingmall.demo.service.IOrderService;
@@ -56,11 +55,13 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, OrderDO> implemen
     private final IDeliveryService deliveryService;
     private final IGoodService goodService;
     private final IUserService userService;
+    private final IAddressService addressService;
 
     @Override
     public Result saveOrder(OrderSaveDTO orderSaveDTO) {
         Long userId = loginInfoService.getLoginId();
         Long goodId = orderSaveDTO.getGoodId();
+        Long deliveryId = orderSaveDTO.getDeliveryId();
 
         RLock lock = redissonClient.getLock(CacheConstants.ORDER_SAVE_LOCK + goodId);
         boolean isLock = lock.tryLock();
@@ -71,18 +72,32 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, OrderDO> implemen
             GoodDO goodDO = Db.lambdaQuery(GoodDO.class).eq(GoodDO::getId, goodId).one();
             if (goodDO == null) throw new ServiceException(MessageConstants.NO_FOUND_GOOD_ERROR);
 
-            if (userId.equals((goodDO.getCategoryId())))
+            if (userId.equals((goodDO.getCategoryId()))) {
                 throw new ServiceException(MessageConstants.PURCHASE_OWN_ERROR);
-            if (GoodStatus.REMOVE.equals(goodDO.getStatus()))
+            }
+            if (GoodStatus.REMOVE.equals(goodDO.getStatus())) {
                 throw new ServiceException(MessageConstants.GOOD_REMOVE_ERROR);
+            }
 
             Integer purchaseNum = orderSaveDTO.getPurchaseNum();
             if (purchaseNum > goodDO.getStockNum()) throw new ServiceException(MessageConstants.NO_ENOUGH_GOOD_ERROR);
 
+            DeliveryDO deliveryDO = Db.lambdaQuery(DeliveryDO.class).eq(DeliveryDO::getId, deliveryId).eq(DeliveryDO::getId, deliveryId).one();
+            if (deliveryDO == null) throw new ServiceException(MessageConstants.NO_FOUND_DELIVERY_ERROR);
+
             OrderDO orderDO = BeanUtil.copyProperties(orderSaveDTO, OrderDO.class)
-                    .setUserId((userId))
                     .setId(redisIdWorker.nextId(CacheConstants.ORDER_ID_PREFIX))
+                    .setUserId((userId))
+                    .setGoodName(goodDO.getGoodName())
+                    .setCoverUrl(goodDO.getCoverUrl())
+                    .setPrice(goodDO.getPrice())
                     .setTotal(purchaseNum * goodDO.getPrice())
+                    .setConsigneeName(deliveryDO.getConsigneeName())
+                    .setPhone(deliveryDO.getPhone())
+                    .setProvince(addressService.getAddressNameById(deliveryDO.getProvinceId()))
+                    .setCity(addressService.getAddressNameById(deliveryDO.getCityId()))
+                    .setCounty(addressService.getAddressNameById(deliveryDO.getCountyId()))
+                    .setAddress(deliveryDO.getAddress())
                     .setStatus(OrderStatus.PAYING)
                     .setCreateTime(LocalDateTime.now())
                     .setUpdateTime(LocalDateTime.now());
@@ -202,16 +217,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, OrderDO> implemen
         OrderDO orderDO = getById(id);
         if (orderDO == null) throw new ServiceException(MessageConstants.NO_FOUND_ORDER_ERROR);
         loginInfoService.CheckLoginUserObject((orderDO.getUserId()));
-
-        GoodVO goodVO = (GoodVO) goodService.getGoodInfoById((orderDO.getGoodId())).getData();
-        DeliveryVO deliveryVO = (DeliveryVO) deliveryService.getDeliveryById((orderDO.getDeliveryId())).getData();
-
-        return Result.success(new OrderVO(orderDO)
-                .setUsername(userService.getUserNameById((orderDO.getUserId())))
-                .setGoodName(goodVO.getGoodName()).setPrice(goodVO.getPrice())
-                .setConsigneeName(deliveryVO.getConsigneeName()).setPhone(deliveryVO.getPhone())
-                .setProvince(deliveryVO.getProvince()).setCity(deliveryVO.getCity()).setCounty(deliveryVO.getCounty())
-                .setDetailAddress(deliveryVO.getAddress()));
+        return Result.success(new OrderVO(orderDO).setUsername(userService.getUserNameById((orderDO.getUserId()))));
     }
 
     @Override
@@ -234,16 +240,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, OrderDO> implemen
 
         if (CollectionUtils.isEmpty(pageDO.getRecords())) return Result.error(MessageConstants.NO_FOUND_ORDER_ERROR);
 
-        return Result.success(PageVO.of(pageDO, OrderDO -> {
-            GoodVO goodVO = (GoodVO) goodService.getGoodInfoById((OrderDO.getGoodId())).getData();
-            DeliveryVO deliveryVO = (DeliveryVO) deliveryService.getDeliveryById((OrderDO.getDeliveryId())).getData();
-            return BeanUtil.copyProperties(OrderDO, OrderVO.class)
-                    .setUsername(userDoOptional.get().getUsername())
-                    .setGoodName(goodVO.getGoodName()).setPrice(goodVO.getPrice())
-                    .setConsigneeName(deliveryVO.getConsigneeName()).setPhone(deliveryVO.getPhone())
-                    .setProvince(deliveryVO.getProvince()).setCity(deliveryVO.getCity()).setCounty(deliveryVO.getCounty())
-                    .setDetailAddress(deliveryVO.getAddress());
-        }));
+        return Result.success(PageVO.of(pageDO, orderDO -> new OrderVO(orderDO).setUsername(userDoOptional.get().getUsername())));
     }
 
 

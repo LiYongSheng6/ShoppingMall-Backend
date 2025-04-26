@@ -90,6 +90,12 @@ public class MessageConstants {
     public static final String NO_FOUND_ADDRESS_NAME_ERROR = "没有要操作的相关地名信息";
     public static final String NO_FOUND_CATEGORY_NAME_ERROR = "没有要操作的相关分类信息";
     public static final String NO_FOUND_TAG_NAME_ERROR = "没有要操作的相关标签信息";
+    public static final String NO_FOUND_AUTHENTICATION_ERROR = "没有找到相关认证信息";
+    public static final String NO_FOUND_STUDENT_ID_NAME_MAP_ERROR = "没有要操作的相关学号和实名信息Map";
+    public static final String AUTHENTICATION_MATCH_ERROR = "实名认证信息比对失败";
+    public static final String AUTHENTICATION_APPLIED_EXIST = "实名认证信息已被使用";
+
+
     public static final String NUMBER_NEGATIVE_ERROR = "操作结果不能为负数";
     public static final String GET_LOCK_ERROR = "获取锁失败";
 

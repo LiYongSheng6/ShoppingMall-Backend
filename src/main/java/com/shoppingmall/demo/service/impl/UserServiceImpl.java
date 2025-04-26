@@ -168,18 +168,14 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements 
             checkVerifyCode(CacheConstants.LOGIN_EMAIL_CODE_KEY, account, userLoginDTO.getCode());
         }
 
-        // 登录成功，生成token
-        String token = getToken(userDO);
         log.info("用户登录信息：{}", userDO);
 
-        // 生成重定向路径
-        //String redirectPath = switch (userDO.getType()) {
-        //    case ADMIN -> "/admin/dashboard";
-        //    case USER -> "/user/dashboard";
-        //};
-        //String redirectPath = Db.lambdaQuery(PermissionDO.class).eq(PermissionDO::getCode, userDO.getType().getDesc()).one().getPath();
-
-        return Result.success(MessageConstants.LOGIN_SUCCESS, token, userDO.getType().getValue());
+        // 登录成功，生成token
+        String token = getToken(userDO);
+        Map<String, Object> map = new HashMap<>();
+        map.put("token", token);
+        map.put("type", userDO.getType().getValue());
+        return Result.success(MessageConstants.LOGIN_SUCCESS, map);
     }
 
     @Override

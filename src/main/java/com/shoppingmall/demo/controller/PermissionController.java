@@ -71,22 +71,36 @@ public class PermissionController {
     @Log
     @Operation(summary = "获取单一权限信息详情接口")
     @GetMapping("/detail")
-    public Result getDelivery(@RequestParam @NotNull @JsonDeserialize(using = StringToLongDeserializer.class) Long id) {
+    public Result getPermissionById(@RequestParam @NotNull @JsonDeserialize(using = StringToLongDeserializer.class) Long id) {
         return permissionService.getPermissionById(id);
+    }
+
+    @Log
+    @Operation(summary = "获取用户权限信息列表接口")
+    @GetMapping("/list/own")
+    public Result getPermissionListByUserId(@RequestParam @NotNull @JsonDeserialize(using = StringToLongDeserializer.class) Long userId) {
+        return permissionService.getPermissionListByUserId(userId);
+    }
+
+    @Log
+    @Operation(summary = "获取用户权限编码资源列表接口")
+    @GetMapping("/list/code/own")
+    public Result getPermissionCodeListByUserId(@RequestParam @NotNull @JsonDeserialize(using = StringToLongDeserializer.class) Long userId) {
+        return permissionService.getPermissionCodeListByUserId(userId);
     }
 
     @Log
     @Operation(summary = "获取当前角色权限ID列表接口")
     @GetMapping("/list/id/own")
     @PreAuthorize("sys:permission:list")
-    public Result getPermissionList(@RequestParam @NotNull @JsonDeserialize(using = StringToLongDeserializer.class) Long roleId,
+    public Result getPermissionIdList(@RequestParam @NotNull @JsonDeserialize(using = StringToLongDeserializer.class) Long roleId,
                                     @RequestParam Integer type) {
         return permissionService.getPermissionIdListByUserId(roleId, type);
     }
 
     @Log
     @Operation(summary = "获取当前角色标记有的权限列表接口")
-    @GetMapping("/list/own")
+    @GetMapping("/list/all/own")
     @PreAuthorize("sys:role:list")
     public Result getHaveSignPermissionList(@RequestParam @NotNull @JsonDeserialize(using = StringToLongDeserializer.class) Long userId,
                                             @RequestParam Integer type) {
@@ -95,7 +109,7 @@ public class PermissionController {
 
     @Log
     @Operation(summary = "获取所有权限信息列表接口")
-    @GetMapping("/list")
+    @GetMapping("/list/all")
     @PreAuthorize("sys:permission:list")
     public Result getPermissionList(@RequestParam Integer type) {
         return permissionService.getAllPermissionList(type);

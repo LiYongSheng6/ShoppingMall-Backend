@@ -10,17 +10,7 @@ public class Result<T> {
     private Integer code;
     private String msg;
     private T data;
-    private Integer type;
 
-    public static <T> Result<T> success(String message, T data, Integer type) {
-        Result<T> result = new Result<>();
-        result.setCode(HttpStatus.SUCCESS);
-        result.setMsg(message);
-        result.setData(data);
-        result.setType(type);
-        return result;
-    }
-    
     public static <T> Result<T> success() {
         Result<T> result = new Result<>();
         result.code = HttpStatus.SUCCESS;

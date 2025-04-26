@@ -37,6 +37,7 @@ import java.util.concurrent.CompletableFuture;
 public class PermissionServiceImpl extends ServiceImpl<PermissionMapper, PermissionDO> implements IPermissionService {
 
     private final RedisIdWorker redisIdWorker;
+    private final PermissionMapper permissionMapper;
 
     @Override
     public Result savePermission(PermissionSaveDTO permissionSaveDTO) {
@@ -93,17 +94,6 @@ public class PermissionServiceImpl extends ServiceImpl<PermissionMapper, Permiss
 
     @Override
     public Result<List<Long>> getPermissionIdListByUserId(Long roleId, Integer type) {
-        //List<PermissionDO> permissionDOList = lambdaQuery()
-        //        .eq(roleId != null, PermissionDO::getRoleId, roleId)
-        //        .eq(PermissionDO::getType, type).list();
-        //
-        //if (CollectionUtils.isEmpty(permissionDOList))
-        //    throw new ServiceException(MessageConstants.NO_FOUND_PERMISSION_ERROR);
-        //
-        //return Result.success(permissionDOList
-        //        .stream().map(permissionDO -> CompletableFuture.supplyAsync(() -> new PermissionVO(permissionDO))).toList()
-        //        .stream().map(CompletableFuture::join).toList());
-
         List<Long> havePermissionIds = Db.lambdaQuery(RolePermissionDO.class).eq(roleId != null, RolePermissionDO::getRoleId, roleId).list()
                 .stream().map(rolePermissionDO -> CompletableFuture.supplyAsync(rolePermissionDO::getPermissionId)).toList()
                 .stream().map(CompletableFuture::join).toList();
@@ -143,6 +133,14 @@ public class PermissionServiceImpl extends ServiceImpl<PermissionMapper, Permiss
                         .setParentName(getPermissionNameById((item.getParentId()))))).toList()
                 .stream().map(CompletableFuture::join).toList();
         return Result.success(makePermissionTree(permissionVOList, 0L));
+    }
+
+    public Result getPermissionListByUserId(Long userId) {
+        return Result.success(permissionMapper.getPermissionListByUserId(userId));
+    }
+
+    public Result getPermissionCodeListByUserId(Long userId) {
+        return Result.success(permissionMapper.getPermissionCodeListByUserId(userId));
     }
 
     @Override

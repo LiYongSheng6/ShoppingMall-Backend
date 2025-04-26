@@ -72,7 +72,7 @@ public class RoleController {
     @Log
     @Operation(summary = "获取单一角色信息详情接口")
     @GetMapping("/detail")
-    public Result getDelivery(@RequestParam @NotNull @JsonDeserialize(using = StringToLongDeserializer.class) Long id) {
+    public Result getRoleById(@RequestParam @NotNull @JsonDeserialize(using = StringToLongDeserializer.class) Long id) {
         return roleService.getRoleById(id);
     }
 

@@ -35,6 +35,9 @@ public class OrderVO implements Serializable {
     @ApiModelProperty("商品名称")
     private String goodName;
 
+    @ApiModelProperty("商品封面")
+    private String coverUrl;
+
     @ApiModelProperty("商品价格")
     private Integer price;
 
@@ -60,7 +63,7 @@ public class OrderVO implements Serializable {
     private String county;
 
     @ApiModelProperty("详细地址")
-    private String detailAddress;
+    private String address;
 
     @ApiModelProperty("订单状态（0待支付  1待发货  2待收货  3已完成  4已取消）")
     private OrderStatus status;

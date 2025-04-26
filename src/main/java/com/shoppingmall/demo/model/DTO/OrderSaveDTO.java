@@ -26,11 +26,6 @@ import java.io.Serializable;
 public class OrderSaveDTO implements Serializable {
 
     @JsonDeserialize(using = StringToLongDeserializer.class)
-    @NotNull(message="[用户id]不能为空")
-    @ApiModelProperty("用户id")
-    private Long userId;
-
-    @JsonDeserialize(using = StringToLongDeserializer.class)
     @NotNull(message="[商品id]不能为空")
     @ApiModelProperty("商品id")
     private Long goodId;
