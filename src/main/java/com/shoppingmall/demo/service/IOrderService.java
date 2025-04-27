@@ -35,6 +35,8 @@ public interface IOrderService extends IService<OrderDO> {
 
     Result getMyOrderListPage(OrderQuery orderQuery);
 
+    Result getClientOrderListPage(OrderQuery orderQuery);
+
     Result pageOrderListByUserId(OrderQuery orderQuery);
 
     Result deleteOrderById(Long id);

@@ -29,8 +29,23 @@ public class OrderVO implements Serializable {
     @ApiModelProperty("订单id")
     private Long id;
 
+    @ApiModelProperty("用户id")
+    private Long userId;
+
+    @ApiModelProperty("商家id")
+    private Long businessId;
+
+    @ApiModelProperty("商品id")
+    private Long goodId;
+
+    @ApiModelProperty("收货信息id")
+    private Long deliveryId;
+
     @ApiModelProperty("用户名称")
     private String username;
+
+    @ApiModelProperty("商家名称")
+    private String businessName;
 
     @ApiModelProperty("商品名称")
     private String goodName;

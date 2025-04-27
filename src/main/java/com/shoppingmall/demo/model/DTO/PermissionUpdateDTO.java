@@ -1,9 +1,9 @@
 package com.shoppingmall.demo.model.DTO;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.shoppingmall.demo.annotation.UserTypePattern;
+import com.shoppingmall.demo.annotation.PermissionTypePattern;
 import com.shoppingmall.demo.config.deserializer.StringToLongDeserializer;
-import com.shoppingmall.demo.enums.UserType;
+import com.shoppingmall.demo.enums.PermissionType;
 import io.swagger.annotations.ApiModelProperty;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -97,6 +97,6 @@ public class PermissionUpdateDTO {
      * 权限类型(0-后端,1-前端)
      */
     @ApiModelProperty("权限类型(0-后端,1-前端)")
-    @UserTypePattern
-    private UserType type;
+    @PermissionTypePattern
+    private PermissionType type;
 }

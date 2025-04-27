@@ -5,7 +5,6 @@ import com.shoppingmall.demo.annotation.Log;
 import com.shoppingmall.demo.annotation.PreAuthorize;
 import com.shoppingmall.demo.config.deserializer.StringToLongDeserializer;
 import com.shoppingmall.demo.model.DTO.RoleDeleteBatchDTO;
-import com.shoppingmall.demo.model.DTO.RolePermissionDTO;
 import com.shoppingmall.demo.model.DTO.RoleSaveDTO;
 import com.shoppingmall.demo.model.DTO.RoleUpdateDTO;
 import com.shoppingmall.demo.model.DTO.UserRoleDTO;
@@ -41,7 +40,7 @@ public class RoleController {
     @Log
     @Operation(summary = "添加角色信息接口")
     @PostMapping("/save")
-    @PreAuthorize("sys:role:save")
+    @PreAuthorize("smb:role:save")
     public Result save(@RequestBody @Validated RoleSaveDTO saveDTO) {
         return roleService.saveRole(saveDTO);
     }
@@ -49,7 +48,7 @@ public class RoleController {
     @Log
     @Operation(summary = "修改角色信息接口")
     @PutMapping("/update")
-    @PreAuthorize("sys:role:update")
+    @PreAuthorize("smb:role:update")
     public Result update(@RequestBody @Validated RoleUpdateDTO updateDTO) {
         return roleService.updateRole(updateDTO);
     }
@@ -57,7 +56,7 @@ public class RoleController {
     @Log
     @Operation(summary = "删除角色信息接口")
     @DeleteMapping("/delete")
-    @PreAuthorize("sys:role:delete")
+    @PreAuthorize("smb:role:delete")
     public Result delete(@RequestParam @NotNull @JsonDeserialize(using = StringToLongDeserializer.class) Long id) {
         return roleService.deleteRole(id);
     }
@@ -65,6 +64,7 @@ public class RoleController {
     @Log
     @Operation(summary = "批量删除角色信息接口")
     @DeleteMapping("/delete/batch")
+    @PreAuthorize("smb:role:deleteBatch")
     public Result deleteBatch(@RequestBody @Validated RoleDeleteBatchDTO deleteBatchDTO) {
         return roleService.deleteRoleBatch(deleteBatchDTO);
     }
@@ -72,53 +72,57 @@ public class RoleController {
     @Log
     @Operation(summary = "获取单一角色信息详情接口")
     @GetMapping("/detail")
-    public Result getRoleById(@RequestParam @NotNull @JsonDeserialize(using = StringToLongDeserializer.class) Long id) {
+    @PreAuthorize("smb:role:detail")
+    public Result detail(@RequestParam @NotNull @JsonDeserialize(using = StringToLongDeserializer.class) Long id) {
         return roleService.getRoleById(id);
     }
 
     @Log
+    @Operation(summary = "获取用户拥有角色信息列表接口")
+    @GetMapping("/list/admin")
+    @PreAuthorize("smb:role:listByUserId")
+    public Result listByUserId(@RequestParam @NotNull @JsonDeserialize(using = StringToLongDeserializer.class) Long userId) {
+        return roleService.getRoleListByUserId(userId);
+    }
+
+    @Log
     @Operation(summary = "获取当前用户角色ID列表接口")
-    @GetMapping("/list/id/own")
-    @PreAuthorize("sys:role:list")
-    public Result getRoleIdListByUserId(@RequestParam @NotNull @JsonDeserialize(using = StringToLongDeserializer.class) Long userId) {
+    @GetMapping("/list/id")
+    @PreAuthorize("smb:role:listIdByUserId")
+    public Result listIdByUserId(@RequestParam @NotNull @JsonDeserialize(using = StringToLongDeserializer.class) Long userId) {
         return roleService.getRoleIdListByUserId(userId);
     }
 
     @Log
     @Operation(summary = "获取当前用户标记有的角色列表接口")
-    @GetMapping("/list/own")
-    @PreAuthorize("sys:role:list")
-    public Result getHaveSignRoleList(@RequestParam @NotNull @JsonDeserialize(using = StringToLongDeserializer.class) Long userId) {
+    @GetMapping("/list/sign")
+    @PreAuthorize("smb:role:listSignToUser")
+    public Result listSignToUser(@RequestParam @NotNull @JsonDeserialize(using = StringToLongDeserializer.class) Long userId) {
         return roleService.getHaveSignRoleList(userId);
     }
 
     @Log
     @Operation(summary = "获取所有角色信息列表接口")
-    @GetMapping("/list")
-    @PreAuthorize("sys:role:list")
-    public Result getAllRoleList() {
+    @GetMapping("/list/all")
+    @PreAuthorize("smb:role:listAll")
+    public Result listAll() {
         return roleService.getAllRoleList();
     }
 
     @Log
     @Operation(summary = "获取树形角色权限信息")
     @GetMapping("/tree")
+    @PreAuthorize("smb:role:tree")
     public Result getRoleTree() {
         return roleService.getRoleTree();
     }
 
     @Log
     @Operation(summary = "分配用户角色接口")
-    @PostMapping("/assign/roles")
-    public Result assignRoles(@RequestBody @Validated UserRoleDTO userRoleDTO) {
+    @PostMapping("/assign")
+    @PreAuthorize("smb:role:assign")
+    public Result assign(@RequestBody @Validated UserRoleDTO userRoleDTO) {
         return roleService.assignRoleToUser(userRoleDTO);
-    }
-
-    @Log
-    @Operation(summary = "分配角色权限接口")
-    @PostMapping("/assign/perms")
-    public Result assignPerms(@RequestBody @Validated RolePermissionDTO rolePermissionDTO) {
-        return roleService.assignPermissionToRole(rolePermissionDTO);
     }
 
 

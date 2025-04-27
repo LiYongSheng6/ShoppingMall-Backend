@@ -34,7 +34,6 @@ import org.springframework.web.bind.annotation.RestController;
 @Api(tags = "收货信息管理接口")
 @Validated
 @RequiredArgsConstructor
-//@CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/delivery")
 public class DeliveryController {
@@ -92,8 +91,8 @@ public class DeliveryController {
     @Log
     @Operation(summary = "获取用户收货信息列表接口")
     @GetMapping("/list/admin")
-    @PreAuthorize("sys:Delivery:getDeliveryListByUserId")
-    public Result getDeliveryListByUserId(@RequestParam @NotNull @JsonDeserialize(using = StringToLongDeserializer.class) Long userId) {
+    @PreAuthorize("smb:delivery:listByAdmin")
+    public Result listByAdmin(@RequestParam @NotNull @JsonDeserialize(using = StringToLongDeserializer.class) Long userId) {
         return deliveryService.getDeliveryListByUserId(userId);
     }
 
@@ -107,7 +106,8 @@ public class DeliveryController {
     @Log
     @Operation(summary = "分页查询收货信息列表")
     @PostMapping("/list/page/admin")
-    public Result listByCondition(@RequestBody @Validated DeliveryQuery query) {
+    @PreAuthorize("smb:delivery:listPageByAdmin")
+    public Result listPageByAdmin(@RequestBody @Validated DeliveryQuery query) {
         return deliveryService.pageDeliveryListByCondition(query);
     }
 

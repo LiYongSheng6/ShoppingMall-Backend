@@ -5,6 +5,7 @@ import com.shoppingmall.demo.model.DO.PermissionDO;
 import com.shoppingmall.demo.model.DTO.PermissionDeleteBatchDTO;
 import com.shoppingmall.demo.model.DTO.PermissionSaveDTO;
 import com.shoppingmall.demo.model.DTO.PermissionUpdateDTO;
+import com.shoppingmall.demo.model.DTO.RolePermissionDTO;
 import com.shoppingmall.demo.utils.Result;
 
 
@@ -34,6 +35,8 @@ public interface IPermissionService extends IService<PermissionDO> {
     Result getPermissionListByUserId(Long userId);
 
     Result getPermissionCodeListByUserId(Long userId);
+
+    Result assignPermissionToRole(RolePermissionDTO rolePermissionDTO);
 
 
 }

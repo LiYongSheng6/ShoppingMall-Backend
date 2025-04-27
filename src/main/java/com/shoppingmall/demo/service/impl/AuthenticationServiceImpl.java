@@ -7,10 +7,14 @@ import com.shoppingmall.demo.constant.MessageConstants;
 import com.shoppingmall.demo.enums.UserType;
 import com.shoppingmall.demo.exception.ServiceException;
 import com.shoppingmall.demo.mapper.AuthenticationMapper;
+import com.shoppingmall.demo.mapper.RoleMapper;
 import com.shoppingmall.demo.model.DO.AuthenticationDO;
+import com.shoppingmall.demo.model.DO.RoleDO;
 import com.shoppingmall.demo.model.DO.UserDO;
+import com.shoppingmall.demo.model.DO.UserRoleDO;
 import com.shoppingmall.demo.model.DTO.AuthenticationBatchDTO;
 import com.shoppingmall.demo.service.IAuthenticationService;
+import com.shoppingmall.demo.service.IUserService;
 import com.shoppingmall.demo.service.common.LoginInfoService;
 import com.shoppingmall.demo.utils.RedisIdWorker;
 import com.shoppingmall.demo.utils.Result;
@@ -24,6 +28,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 
 
 /**
@@ -37,6 +42,8 @@ public class AuthenticationServiceImpl extends ServiceImpl<AuthenticationMapper,
 
     private final RedisIdWorker redisIdWorker;
     private final LoginInfoService loginInfoService;
+    private final RoleMapper roleMapper;
+    private final IUserService userService;
 
     @Override
     public Result saveOrUpdateAuthenticationBatch(AuthenticationBatchDTO batchDTO) {
@@ -47,7 +54,8 @@ public class AuthenticationServiceImpl extends ServiceImpl<AuthenticationMapper,
         List<AuthenticationDO> authenticationDOList = map.entrySet().stream().map(item -> {
             AuthenticationDO authenticationDO = lambdaQuery().eq(AuthenticationDO::getStudentId, item.getKey()).one();
             if (authenticationDO == null)
-                authenticationDO = new AuthenticationDO().setId(redisIdWorker.nextId(CacheConstants.ADDRESS_ID_PREFIX));
+                authenticationDO = new AuthenticationDO().setStudentId(item.getKey())
+                        .setId(redisIdWorker.nextId(CacheConstants.ADDRESS_ID_PREFIX));
 
             return authenticationDO.setRealName(item.getValue()).setUpdateTime(LocalDateTime.now());
         }).toList();
@@ -72,7 +80,6 @@ public class AuthenticationServiceImpl extends ServiceImpl<AuthenticationMapper,
     @Transactional(rollbackFor = {ServiceException.class, Exception.class})
     public Result applyAuthentication(String studentId, String realName) {
         AuthenticationDO authDo = lambdaQuery().eq(AuthenticationDO::getStudentId, studentId).one();
-
         if (authDo == null)
             throw new ServiceException(MessageConstants.NO_FOUND_AUTHENTICATION_ERROR);
 
@@ -83,11 +90,21 @@ public class AuthenticationServiceImpl extends ServiceImpl<AuthenticationMapper,
             throw new ServiceException(MessageConstants.AUTHENTICATION_APPLIED_EXIST);
 
         Long userId = loginInfoService.getLoginId();
+        Optional.ofNullable(userService.getUserByStudentId(studentId)).ifPresent(userDO -> {
+            throw new ServiceException(MessageConstants.STUDENT_ID_EXIST);
+        });
         if (!Db.lambdaUpdate(UserDO.class).set(UserDO::getType, UserType.MERCHANT)
+                .set(UserDO::getStudentId, studentId)
                 .set(UserDO::getUpdateTime, LocalDateTime.now())
                 .eq(UserDO::getId, userId).eq(UserDO::getType, UserType.USER).update()) {
             throw new ServiceException(MessageConstants.UPDATE_ERROR);
         }
+
+        Long roleId = Db.lambdaQuery(RoleDO.class).eq(RoleDO::getCode, UserType.MERCHANT.getDesc()).one().getId();
+        UserRoleDO userRoleDO = Db.lambdaQuery(UserRoleDO.class).eq(UserRoleDO::getUserId, userId).eq(UserRoleDO::getRoleId, roleId).one();
+        if (userRoleDO != null) Db.saveOrUpdate(userRoleDO.setUpdateTime(LocalDateTime.now()));
+        else
+            Db.save(new UserRoleDO().setId(redisIdWorker.nextId(CacheConstants.USER_ROLE_ID)).setUserId(userId).setRoleId(roleId));
 
         return updateById(authDo.setUserId(userId).setUpdateTime(LocalDateTime.now())) ?
                 Result.success(MessageConstants.OPERATION_SUCCESS) : Result.error(MessageConstants.OPERATION_ERROR);
@@ -97,7 +114,6 @@ public class AuthenticationServiceImpl extends ServiceImpl<AuthenticationMapper,
     @Transactional(rollbackFor = {ServiceException.class, Exception.class})
     public Result cancelAuthentication(String studentId) {
         AuthenticationDO authDo = lambdaQuery().eq(AuthenticationDO::getStudentId, studentId).one();
-
         if (authDo == null)
             throw new ServiceException(MessageConstants.NO_FOUND_AUTHENTICATION_ERROR);
 
@@ -106,10 +122,14 @@ public class AuthenticationServiceImpl extends ServiceImpl<AuthenticationMapper,
 
         Long userId = loginInfoService.getLoginId();
         if (!Db.lambdaUpdate(UserDO.class).set(UserDO::getType, UserType.USER)
+                .set(UserDO::getStudentId, null)
                 .set(UserDO::getUpdateTime, LocalDateTime.now())
                 .eq(UserDO::getId, userId).eq(UserDO::getType, UserType.MERCHANT).update()) {
             throw new ServiceException(MessageConstants.UPDATE_ERROR);
         }
+
+        UserRoleDO userRoleDO = roleMapper.getUserRoleByUserIdAndUserType(userId, UserType.MERCHANT.getDesc());
+        if (userRoleDO != null) Db.removeById(userRoleDO);
 
         return updateById(authDo.setUserId(0L).setUpdateTime(LocalDateTime.now())) ?
                 Result.success(MessageConstants.OPERATION_SUCCESS) : Result.error(MessageConstants.OPERATION_ERROR);

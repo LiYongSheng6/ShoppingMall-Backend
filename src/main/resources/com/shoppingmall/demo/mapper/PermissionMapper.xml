@@ -20,7 +20,9 @@
                         p.update_time
         from permission p
                  left join role_permission rp on rp.permission_id = p.id
-                 left join user_role ur on ur.role_id = rp.role_id and ur.user_id = #{userId}
+                 left join user_role ur on ur.role_id = rp.role_id
+                 left join user u on u.id = ur.user_id
+        where u.id = #{userId}
     </select>
 
     <!--根据用户id查询权限编码资源列表-->

@@ -14,7 +14,6 @@ import com.shoppingmall.demo.mapper.OrderMapper;
 import com.shoppingmall.demo.model.DO.DeliveryDO;
 import com.shoppingmall.demo.model.DO.GoodDO;
 import com.shoppingmall.demo.model.DO.OrderDO;
-import com.shoppingmall.demo.model.DO.UserDO;
 import com.shoppingmall.demo.model.DTO.OrderDeleteBatchDTO;
 import com.shoppingmall.demo.model.DTO.OrderSaveDTO;
 import com.shoppingmall.demo.model.DTO.OrderUpdateDTO;
@@ -22,8 +21,6 @@ import com.shoppingmall.demo.model.Query.OrderQuery;
 import com.shoppingmall.demo.model.VO.OrderVO;
 import com.shoppingmall.demo.model.VO.PageVO;
 import com.shoppingmall.demo.service.IAddressService;
-import com.shoppingmall.demo.service.IDeliveryService;
-import com.shoppingmall.demo.service.IGoodService;
 import com.shoppingmall.demo.service.IOrderService;
 import com.shoppingmall.demo.service.IUserService;
 import com.shoppingmall.demo.service.common.LoginInfoService;
@@ -52,8 +49,6 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, OrderDO> implemen
     private final RedisIdWorker redisIdWorker;
     private final LoginInfoService loginInfoService;
     private final RedissonClient redissonClient;
-    private final IDeliveryService deliveryService;
-    private final IGoodService goodService;
     private final IUserService userService;
     private final IAddressService addressService;
 
@@ -88,6 +83,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, OrderDO> implemen
             OrderDO orderDO = BeanUtil.copyProperties(orderSaveDTO, OrderDO.class)
                     .setId(redisIdWorker.nextId(CacheConstants.ORDER_ID_PREFIX))
                     .setUserId((userId))
+                    .setBusinessId(goodDO.getCreatorId())
                     .setGoodName(goodDO.getGoodName())
                     .setCoverUrl(goodDO.getCoverUrl())
                     .setPrice(goodDO.getPrice())
@@ -165,6 +161,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, OrderDO> implemen
     public Result updateOrder(OrderUpdateDTO orderUpdateDTO, OrderStatus originType) {
         Optional<OrderDO> optionalOrderDO = Optional.ofNullable(getById(orderUpdateDTO.getId()));
         optionalOrderDO.ifPresentOrElse(orderDO -> {
+            //确认订单状态是否正确
             OrderStatus orderDOStatus = orderDO.getStatus();
             if (originType.equals(OrderStatus.CANCELLED)) {
                 if (OrderStatus.COMPLETED.equals(orderDOStatus) || OrderStatus.CANCELLED.equals(orderDOStatus)) {
@@ -172,11 +169,16 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, OrderDO> implemen
                 }
             } else if (!originType.equals(orderDOStatus)) throw new ServiceException(MessageConstants.OPERATION_ERROR);
 
+            //查询是否为创建者或关联商家
             Long userId = loginInfoService.getLoginId();
-            //查询是否为创建者
-            if (!orderDO.getUserId().equals(userId)) {
+            if (originType.equals(OrderStatus.Shipping)) {
+                if (!orderDO.getBusinessId().equals(userId)) {
+                    throw new ServiceException(HttpStatus.ACCESS_RESTRICTED, MessageConstants.PERMISSION_PROHIBITED_ERROR);
+                }
+            } else if (!orderDO.getUserId().equals(userId)) {
                 throw new ServiceException(HttpStatus.ACCESS_RESTRICTED, MessageConstants.PERMISSION_PROHIBITED_ERROR);
             }
+
             //更新订单信息
             OrderDO OrderDO = BeanUtil.copyProperties(orderUpdateDTO, OrderDO.class).setUpdateTime(LocalDateTime.now());
             updateById(OrderDO);
@@ -217,30 +219,38 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, OrderDO> implemen
         OrderDO orderDO = getById(id);
         if (orderDO == null) throw new ServiceException(MessageConstants.NO_FOUND_ORDER_ERROR);
         loginInfoService.CheckLoginUserObject((orderDO.getUserId()));
-        return Result.success(new OrderVO(orderDO).setUsername(userService.getUserNameById((orderDO.getUserId()))));
+        return Result.success(new OrderVO(orderDO)
+                .setUsername(userService.getUserNameById((orderDO.getUserId())))
+                .setBusinessName(userService.getUserNameById((orderDO.getBusinessId()))));
     }
 
     @Override
     public Result getMyOrderListPage(OrderQuery orderQuery) {
-        orderQuery.setUserId(loginInfoService.getLoginId());
+        orderQuery.setUserId(loginInfoService.getLoginId()).setBusinessId(null);
+        return pageOrderListByUserId(orderQuery);
+    }
+
+    @Override
+    public Result getClientOrderListPage(OrderQuery orderQuery) {
+        orderQuery.setBusinessId(loginInfoService.getLoginId()).setUserId(null);
         return pageOrderListByUserId(orderQuery);
     }
 
     @Override
     public Result pageOrderListByUserId(OrderQuery orderQuery) {
         Long userId = orderQuery.getUserId();
-        Optional<UserDO> userDoOptional = Optional.ofNullable(Db.getById(userId, UserDO.class));
-        if (userDoOptional.isEmpty()) return Result.error(MessageConstants.NO_FOUND_ORDER_ERROR);
+        Long businessId = orderQuery.getBusinessId();
+        Integer status = orderQuery.getStatus();
+
         Page<OrderDO> page = orderQuery.toMpPageDefaultSortByUpdateTime();
-
-        userDoOptional.ifPresent(aLong -> log.info("userId:{}", aLong));
-
-        Page<OrderDO> pageDO = lambdaQuery().eq(OrderDO::getUserId, userId)
-                .eq(orderQuery.getStatus() != null, OrderDO::getStatus, orderQuery.getStatus()).page(page);
+        Page<OrderDO> pageDO = lambdaQuery().eq(userId != null, OrderDO::getUserId, userId)
+                .eq(businessId != null, OrderDO::getBusinessId, businessId)
+                .eq(status != null, OrderDO::getStatus, status).page(page);
 
         if (CollectionUtils.isEmpty(pageDO.getRecords())) return Result.error(MessageConstants.NO_FOUND_ORDER_ERROR);
-
-        return Result.success(PageVO.of(pageDO, orderDO -> new OrderVO(orderDO).setUsername(userDoOptional.get().getUsername())));
+        return Result.success(PageVO.of(pageDO, orderDO -> new OrderVO(orderDO)
+                .setUsername(userService.getUserNameById(orderDO.getUserId()))
+                .setBusinessName(userService.getUserNameById((orderDO.getBusinessId())))));
     }
 
 

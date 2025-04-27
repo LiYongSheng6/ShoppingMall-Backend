@@ -28,7 +28,6 @@ import org.springframework.web.bind.annotation.RestController;
 @Api(tags = "标签信息管理接口")
 @Validated
 @RequiredArgsConstructor
-//@CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/tag")
 public class TagController {
@@ -38,7 +37,7 @@ public class TagController {
     @Log
     @Operation(summary = "添加标签信息接口")
     @PostMapping("/save")
-    @PreAuthorize("sys:tag:save")
+    @PreAuthorize("smb:tag:save")
     public Result saveTag(@RequestBody @Validated TagSaveDTO tagSaveDTO) {
         return tagService.saveTag(tagSaveDTO);
     }
@@ -46,7 +45,7 @@ public class TagController {
     @Log
     @Operation(summary = "修改标签信息接口")
     @PutMapping("/update")
-    @PreAuthorize("sys:tag:update")
+    @PreAuthorize("smb:tag:update")
     public Result update(@RequestBody @Validated TagUpdateDTO tagUpdateDTO) {
         return tagService.updateTag(tagUpdateDTO);
     }
@@ -61,21 +60,21 @@ public class TagController {
     @Log
     @Operation(summary = "获取标签名称列表接口")
     @GetMapping("/list")
-    public Result getTagList(@RequestParam @NotNull Integer type) {
+    public Result list(@RequestParam @NotNull Integer type) {
         return tagService.getTagListByType(type);
     }
 
     @Log
     @Operation(summary = "分页查询标签信息列表")
     @PostMapping("/list/page")
-    public Result listByCondition(@RequestBody @Validated TagQuery query) {
+    public Result listByPage(@RequestBody @Validated TagQuery query) {
         return tagService.pageTagListByCondition(query);
     }
 
     @Log
     @Operation(summary = "删除标签信息接口")
     @DeleteMapping("/delete")
-    @PreAuthorize("sys:tag:delete")
+    @PreAuthorize("smb:tag:delete")
     public Result delete(@RequestParam @NotNull @JsonDeserialize(using = StringToLongDeserializer.class) Long id) {
         return tagService.deleteTagById(id);
     }

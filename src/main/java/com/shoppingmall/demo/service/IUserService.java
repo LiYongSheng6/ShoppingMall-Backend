@@ -52,5 +52,5 @@ public interface IUserService extends IService<UserDO> {
 
     String getUserAvatarById(Long id);
 
-
+    UserDO getUserByStudentId(String studentId);
 }

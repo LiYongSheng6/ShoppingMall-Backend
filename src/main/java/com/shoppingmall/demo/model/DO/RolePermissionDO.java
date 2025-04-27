@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 import io.swagger.annotations.ApiModelProperty;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -31,16 +32,22 @@ public class RolePermissionDO {
     /**
      * 主键id
      */
+    @NotNull(message = "[主键id]不能为空")
+    @ApiModelProperty("主键id")
     private Long id;
 
     /**
      * 角色id
      */
+    @NotNull(message = "[角色id]不能为空")
+    @ApiModelProperty("角色id")
     private Long roleId;
 
     /**
-     * 资源id
+     * 权限id
      */
+    @NotNull(message = "[权限id]不能为空")
+    @ApiModelProperty("权限id")
     private Long permissionId;
 
     /**

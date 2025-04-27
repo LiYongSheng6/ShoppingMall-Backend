@@ -27,7 +27,6 @@ import java.io.IOException;
 @Validated
 @RestController
 @RequiredArgsConstructor
-//@CrossOrigin //支持跨域
 @RequestMapping("/email")
 public class EmailController {
     private final IEmailService emailService;

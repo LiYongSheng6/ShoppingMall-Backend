@@ -2,6 +2,7 @@ package com.shoppingmall.demo.controller;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.shoppingmall.demo.annotation.Log;
+import com.shoppingmall.demo.annotation.PreAuthorize;
 import com.shoppingmall.demo.config.deserializer.StringToLongDeserializer;
 import com.shoppingmall.demo.model.DTO.OrderDeleteBatchDTO;
 import com.shoppingmall.demo.model.DTO.OrderSaveDTO;
@@ -31,7 +32,6 @@ import org.springframework.web.bind.annotation.RestController;
 @Validated
 @RestController
 @RequiredArgsConstructor
-//@CrossOrigin(origins = "*")
 @RequestMapping("/order")
 public class OrderController {
 
@@ -104,15 +104,23 @@ public class OrderController {
 
     @Log
     @Operation(summary = "获取当前用户订单信息分页列表")
-    @PostMapping("/list/own")
-    public Result getDeliveryList(@RequestBody @Validated OrderQuery orderQuery) {
+    @PostMapping("/list/page/own")
+    public Result getMyOrderListPage(@RequestBody @Validated OrderQuery orderQuery) {
         return orderService.getMyOrderListPage(orderQuery);
     }
 
     @Log
+    @Operation(summary = "获取当前商家订单信息分页列表")
+    @PostMapping("/list/page/client")
+    public Result getClientOrderListPage(@RequestBody @Validated OrderQuery orderQuery) {
+        return orderService.getClientOrderListPage(orderQuery);
+    }
+
+    @Log
     @Operation(summary = "分页查询订单信息列表")
-    @PostMapping("/list/page")
-    public Result listByPlaylistId(@RequestBody @Validated OrderQuery orderQuery) {
+    @PostMapping("/list/page/admin")
+    @PreAuthorize("smb:order:listPageByAdmin")
+    public Result listPageByAdmin(@RequestBody @Validated OrderQuery orderQuery) {
         return orderService.pageOrderListByUserId(orderQuery);
     }
 

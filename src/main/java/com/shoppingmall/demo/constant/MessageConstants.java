@@ -60,7 +60,7 @@ public class MessageConstants {
     public static final String USERNAME_REGEX_MESSAGE = "用户名为1到20位非空字符";
     public static final String PASSWORD_REGEX_MESSAGE = "密码为1到20位非空字符";
     public static final String CODE_LENGTH_MESSAGE = "验证码长度为6位";
-    public static final String PHONE_REGEX_MESSAGE = "手机号为11位数字";
+    public static final String PHONE_REGEX_MESSAGE = "手机号码格式错误";
     public static final String EMAIL_REGEX_MESSAGE = "请输入正确的邮箱地址";
     public static final String GENDER_REGEX_MESSAGE = "用户性别值不符合要求";
     public static final String USER_TYPE_REGEX_MESSAGE = "用户类型值不符合要求";
@@ -71,8 +71,10 @@ public class MessageConstants {
     public static final String ADDRESS_TYPE_REGEX_MESSAGE = "地址类型值不符合要求";
     public static final String TAG_TYPE_REGEX_MESSAGE = "标签类型值不符合要求";
     public static final String CATEGORY_TYPE_REGEX_MESSAGE = "分类类型值不符合要求";
+    public static final String PERMISSION_TYPE_REGEX_MESSAGE = "权限类型值不符合要求";
+
     public static final String GOOD_RANK_TYPE_NULL_ERROR = "商品榜单类型不能为空!";
-    public static final String NO_ENOUGH_GOOD_ERROR = "商品存货数量不足！";
+    public static final String NO_ENOUGH_GOOD_ERROR = "商品库存数量不足！";
 
     public static final String PARAM_MISSING = "缺少必要参数";
     public static final String INFO_ERROR = "报名信息缺失";

@@ -63,11 +63,15 @@ public class RegexConstants {
     /**
      * 用户类型正则
      */
-    public static final String USER_TYPE_REGEX = "^[01]$";
+    public static final String USER_TYPE_REGEX = "^[0123]$";
 
     /**
      * 邮箱验证码正则
      */
     public static final String CODE_REGEX = "^\\w{6}$";
 
+    /**
+     * 权限类型正则
+     */
+    public static final String PERMISSION_TYPE_REGEX = "^[01]$";
 }

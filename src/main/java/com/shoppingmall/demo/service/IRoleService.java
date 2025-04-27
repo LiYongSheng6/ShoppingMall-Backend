@@ -3,7 +3,6 @@ package com.shoppingmall.demo.service;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.shoppingmall.demo.model.DO.RoleDO;
 import com.shoppingmall.demo.model.DTO.RoleDeleteBatchDTO;
-import com.shoppingmall.demo.model.DTO.RolePermissionDTO;
 import com.shoppingmall.demo.model.DTO.RoleSaveDTO;
 import com.shoppingmall.demo.model.DTO.RoleUpdateDTO;
 import com.shoppingmall.demo.model.DTO.UserRoleDTO;
@@ -27,6 +26,8 @@ public interface IRoleService extends IService<RoleDO> {
 
     Result getRoleById(Long id);
 
+    Result getRoleListByUserId(Long userId);
+
     Result getRoleIdListByUserId(Long userId);
 
     Result getHaveSignRoleList(Long userId);
@@ -37,6 +38,5 @@ public interface IRoleService extends IService<RoleDO> {
 
     Result assignRoleToUser(UserRoleDTO userRoleDTO);
 
-    Result assignPermissionToRole(RolePermissionDTO rolePermissionDTO);
 
 }

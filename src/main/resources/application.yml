@@ -48,6 +48,8 @@ oss:
   access-key-secret: ${shopping-mall.oss.access-key-secret}
 
 mybatis-plus:
+  mapper-locations: classpath:mapper/*.xml
+  type-aliases-package: com.shoppingmall.demo.model.DO
   global-config:
     db-config:
       id-type: assign_id

@@ -50,6 +50,13 @@ public class OrderDO implements Serializable {
     private Long userId;
 
     /**
+     * 商家id
+     */
+    @NotNull(message = "[商家id]不能为空")
+    @ApiModelProperty("商家id")
+    private Long businessId;
+
+    /**
      * 商品id
      */
     @NotNull(message="[商品id]不能为空")

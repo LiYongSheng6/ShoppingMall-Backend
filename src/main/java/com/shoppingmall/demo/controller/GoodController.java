@@ -2,6 +2,7 @@ package com.shoppingmall.demo.controller;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.shoppingmall.demo.annotation.Log;
+import com.shoppingmall.demo.annotation.PreAuthorize;
 import com.shoppingmall.demo.config.deserializer.StringToLongDeserializer;
 import com.shoppingmall.demo.model.DTO.GoodDeleteBatchDTO;
 import com.shoppingmall.demo.model.DTO.GoodSaveDTO;
@@ -32,7 +33,6 @@ import org.springframework.web.bind.annotation.RestController;
 @Validated
 @RestController
 @RequiredArgsConstructor
-//@CrossOrigin(origins = "*")
 @RequestMapping("/good")
 public class GoodController {
 
@@ -41,6 +41,7 @@ public class GoodController {
     @Log
     @Operation(summary = "添加商品信息接口")
     @PostMapping("/save")
+    @PreAuthorize("smb:good:save")
     public Result save(@RequestBody @Validated GoodSaveDTO saveDTO) {
         return goodService.saveGood(saveDTO);
     }
@@ -48,6 +49,7 @@ public class GoodController {
     @Log
     @Operation(summary = "修改商品信息接口")
     @PutMapping("/update")
+    @PreAuthorize("smb:good:update")
     public Result update(@RequestBody @Validated GoodUpdateDTO updateDTO) {
         return goodService.updateGood(updateDTO);
     }
@@ -55,13 +57,15 @@ public class GoodController {
     @Log
     @Operation(summary = "修改商品库存接口")
     @PutMapping("/update/stock")
-    public Result updateStockNum(@RequestBody @Validated GoodUpdateStockNumDTO updateDTO) {
+    @PreAuthorize("smb:good:updateStock")
+    public Result updateStock(@RequestBody @Validated GoodUpdateStockNumDTO updateDTO) {
         return goodService.updateGoodStockNum(updateDTO);
     }
 
     @Log
     @Operation(summary = "删除商品信息接口")
     @DeleteMapping("/delete")
+    @PreAuthorize("smb:good:delete")
     public Result delete(@RequestParam @NotNull @JsonDeserialize(using = StringToLongDeserializer.class) Long id) {
         return goodService.deleteGoodById(id);
     }
@@ -82,8 +86,9 @@ public class GoodController {
 
     @Log
     @Operation(summary = "获取当前用户商品信息分页列表")
-    @PostMapping("/list/own")
-    public Result getDeliveryList(@RequestBody @Validated GoodQuery goodQuery) {
+    @PostMapping("/list")
+    @PreAuthorize("smb:good:list")
+    public Result list(@RequestBody @Validated GoodQuery goodQuery) {
         return goodService.getMyGoodListPage(goodQuery);
     }
 

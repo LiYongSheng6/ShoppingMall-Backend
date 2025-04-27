@@ -7,6 +7,7 @@ import com.shoppingmall.demo.config.deserializer.StringToLongDeserializer;
 import com.shoppingmall.demo.model.DTO.PermissionDeleteBatchDTO;
 import com.shoppingmall.demo.model.DTO.PermissionSaveDTO;
 import com.shoppingmall.demo.model.DTO.PermissionUpdateDTO;
+import com.shoppingmall.demo.model.DTO.RolePermissionDTO;
 import com.shoppingmall.demo.service.IPermissionService;
 import com.shoppingmall.demo.utils.Result;
 import io.swagger.annotations.Api;
@@ -31,7 +32,6 @@ import org.springframework.web.bind.annotation.RestController;
 @Validated
 @RestController
 @RequiredArgsConstructor
-//@CrossOrigin(origins = "*")
 @RequestMapping("/permission")
 public class PermissionController {
 
@@ -40,7 +40,7 @@ public class PermissionController {
     @Log
     @Operation(summary = "添加权限信息接口")
     @PostMapping("/save")
-    @PreAuthorize("sys:permission:save")
+    @PreAuthorize("smb:permission:save")
     public Result save(@RequestBody @Validated PermissionSaveDTO permissionSaveDTO) {
         return permissionService.savePermission(permissionSaveDTO);
     }
@@ -48,7 +48,7 @@ public class PermissionController {
     @Log
     @Operation(summary = "修改权限信息接口")
     @PutMapping("/update")
-    @PreAuthorize("sys:permission:update")
+    @PreAuthorize("smb:permission:update")
     public Result update(@RequestBody @Validated PermissionUpdateDTO permissionUpdateDTO) {
         return permissionService.updatePermission(permissionUpdateDTO);
     }
@@ -56,7 +56,7 @@ public class PermissionController {
     @Log
     @Operation(summary = "删除权限信息接口")
     @DeleteMapping("/delete")
-    @PreAuthorize("sys:permission:delete")
+    @PreAuthorize("smb:permission:delete")
     public Result delete(@RequestParam @NotNull @JsonDeserialize(using = StringToLongDeserializer.class) Long id) {
         return permissionService.deletePermission(id);
     }
@@ -64,6 +64,7 @@ public class PermissionController {
     @Log
     @Operation(summary = "批量删除权限信息接口")
     @DeleteMapping("/delete/batch")
+    @PreAuthorize("smb:permission:deleteBatch")
     public Result deleteBatch(@RequestBody @Validated PermissionDeleteBatchDTO deleteBatchDTO) {
         return permissionService.deletePermissionBatch(deleteBatchDTO);
     }
@@ -71,38 +72,41 @@ public class PermissionController {
     @Log
     @Operation(summary = "获取单一权限信息详情接口")
     @GetMapping("/detail")
-    public Result getPermissionById(@RequestParam @NotNull @JsonDeserialize(using = StringToLongDeserializer.class) Long id) {
+    @PreAuthorize("smb:permission:detail")
+    public Result detail(@RequestParam @NotNull @JsonDeserialize(using = StringToLongDeserializer.class) Long id) {
         return permissionService.getPermissionById(id);
     }
 
     @Log
-    @Operation(summary = "获取用户权限信息列表接口")
-    @GetMapping("/list/own")
-    public Result getPermissionListByUserId(@RequestParam @NotNull @JsonDeserialize(using = StringToLongDeserializer.class) Long userId) {
+    @Operation(summary = "获取用户拥有权限信息列表接口")
+    @GetMapping("/list/admin")
+    @PreAuthorize("smb:permission:listByUserId")
+    public Result listByUserId(@RequestParam @NotNull @JsonDeserialize(using = StringToLongDeserializer.class) Long userId) {
         return permissionService.getPermissionListByUserId(userId);
     }
 
     @Log
     @Operation(summary = "获取用户权限编码资源列表接口")
-    @GetMapping("/list/code/own")
-    public Result getPermissionCodeListByUserId(@RequestParam @NotNull @JsonDeserialize(using = StringToLongDeserializer.class) Long userId) {
+    @GetMapping("/list/code")
+    @PreAuthorize("smb:permission:listCodeByUserId")
+    public Result listCodeByUserId(@RequestParam @NotNull @JsonDeserialize(using = StringToLongDeserializer.class) Long userId) {
         return permissionService.getPermissionCodeListByUserId(userId);
     }
 
     @Log
     @Operation(summary = "获取当前角色权限ID列表接口")
-    @GetMapping("/list/id/own")
-    @PreAuthorize("sys:permission:list")
-    public Result getPermissionIdList(@RequestParam @NotNull @JsonDeserialize(using = StringToLongDeserializer.class) Long roleId,
+    @GetMapping("/list/id")
+    @PreAuthorize("smb:permission:listIdByRoleId")
+    public Result listIdByRoleId(@RequestParam @NotNull @JsonDeserialize(using = StringToLongDeserializer.class) Long roleId,
                                     @RequestParam Integer type) {
         return permissionService.getPermissionIdListByUserId(roleId, type);
     }
 
     @Log
     @Operation(summary = "获取当前角色标记有的权限列表接口")
-    @GetMapping("/list/all/own")
-    @PreAuthorize("sys:role:list")
-    public Result getHaveSignPermissionList(@RequestParam @NotNull @JsonDeserialize(using = StringToLongDeserializer.class) Long userId,
+    @GetMapping("/list/sign")
+    @PreAuthorize("smb:permission:listSignToRole")
+    public Result listSignToRole(@RequestParam @NotNull @JsonDeserialize(using = StringToLongDeserializer.class) Long userId,
                                             @RequestParam Integer type) {
         return permissionService.getHaveSignPermissionList(userId, type);
     }
@@ -110,16 +114,25 @@ public class PermissionController {
     @Log
     @Operation(summary = "获取所有权限信息列表接口")
     @GetMapping("/list/all")
-    @PreAuthorize("sys:permission:list")
-    public Result getPermissionList(@RequestParam Integer type) {
+    @PreAuthorize("smb:permission:listAll")
+    public Result listAll(@RequestParam Integer type) {
         return permissionService.getAllPermissionList(type);
     }
 
     @Log
     @Operation(summary = "获取树形权限资源信息")
     @GetMapping("/tree")
+    @PreAuthorize("smb:permission:tree")
     public Result getRolePermissionTree() {
         return permissionService.getPermissionTree();
+    }
+
+    @Log
+    @Operation(summary = "分配角色权限接口")
+    @PostMapping("/assign")
+    @PreAuthorize("smb:permission:assign")
+    public Result assign(@RequestBody @Validated RolePermissionDTO rolePermissionDTO) {
+        return permissionService.assignPermissionToRole(rolePermissionDTO);
     }
 
 }

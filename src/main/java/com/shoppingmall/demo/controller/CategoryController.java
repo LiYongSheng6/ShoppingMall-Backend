@@ -28,7 +28,6 @@ import org.springframework.web.bind.annotation.RestController;
 @Api(tags = "分类信息管理接口")
 @Validated
 @RequiredArgsConstructor
-//@CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/category")
 public class CategoryController {
@@ -38,7 +37,7 @@ public class CategoryController {
     @Log
     @Operation(summary = "添加分类信息接口")
     @PostMapping("/save")
-    @PreAuthorize("sys:Category:save")
+    @PreAuthorize("smb:category:save")
     public Result save(@RequestBody @Validated CategorySaveDTO categorySaveDTO) {
         return categoryService.saveCategory(categorySaveDTO);
     }
@@ -46,7 +45,7 @@ public class CategoryController {
     @Log
     @Operation(summary = "修改分类信息接口")
     @PutMapping("/update")
-    @PreAuthorize("sys:Category:update")
+    @PreAuthorize("smb:category:update")
     public Result update(@RequestBody @Validated CategoryUpdateDTO categoryUpdateDTO) {
         return categoryService.updateCategory(categoryUpdateDTO);
     }
@@ -54,6 +53,7 @@ public class CategoryController {
     @Log
     @Operation(summary = "批量添加修改分类信息")
     @PostMapping("/saveOrUpdate/batch")
+    @PreAuthorize("smb:category:saveOrUpdateBatch")
     public Result saveOrUpdateBatch(@RequestBody @Validated CategorySaveBatchDTO categorySaveBatchDTO) {
         return categoryService.saveOrUpdateCategoryBatch(categorySaveBatchDTO);
     }
@@ -82,7 +82,7 @@ public class CategoryController {
     @Log
     @Operation(summary = "删除分类信息接口")
     @DeleteMapping("/delete")
-    @PreAuthorize("sys:Category:delete")
+    @PreAuthorize("smb:category:delete")
     public Result delete(@RequestParam @NotNull @JsonDeserialize(using = StringToLongDeserializer.class) Long id) {
         return categoryService.deleteCategoryById(id);
     }
@@ -90,6 +90,7 @@ public class CategoryController {
     @Log
     @Operation(summary = "批量删除分类信息接口")
     @DeleteMapping("/delete/batch")
+    @PreAuthorize("smb:category:deleteBatch")
     public Result deleteBatch(@RequestBody @Validated CategoryDeleteBatchDTO categoryDeleteBatchDTO) {
         return categoryService.deleteCategoryBatch(categoryDeleteBatchDTO);
     }

@@ -1,7 +1,6 @@
 package com.shoppingmall.demo.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.baomidou.mybatisplus.extension.toolkit.Db;
 import com.shoppingmall.demo.constant.CacheConstants;
@@ -10,15 +9,12 @@ import com.shoppingmall.demo.enums.UserType;
 import com.shoppingmall.demo.exception.ServiceException;
 import com.shoppingmall.demo.mapper.RoleMapper;
 import com.shoppingmall.demo.model.DO.RoleDO;
-import com.shoppingmall.demo.model.DO.RolePermissionDO;
 import com.shoppingmall.demo.model.DO.UserDO;
 import com.shoppingmall.demo.model.DO.UserRoleDO;
 import com.shoppingmall.demo.model.DTO.RoleDeleteBatchDTO;
-import com.shoppingmall.demo.model.DTO.RolePermissionDTO;
 import com.shoppingmall.demo.model.DTO.RoleSaveDTO;
 import com.shoppingmall.demo.model.DTO.RoleUpdateDTO;
 import com.shoppingmall.demo.model.DTO.UserRoleDTO;
-import com.shoppingmall.demo.model.VO.PermissionVO;
 import com.shoppingmall.demo.model.VO.RoleVO;
 import com.shoppingmall.demo.service.IRoleService;
 import com.shoppingmall.demo.service.common.LoginInfoService;
@@ -45,8 +41,8 @@ import java.util.concurrent.CompletableFuture;
 @RequiredArgsConstructor
 public class RoleServiceImpl extends ServiceImpl<RoleMapper, RoleDO> implements IRoleService {
     private final RedisIdWorker redisIdWorker;
-
     private final LoginInfoService loginInfoService;
+    private final RoleMapper roleMapper;
 
     private static List<RoleVO> makeRoleTree(List<RoleVO> roleVOS, Long pid) {
         //创建集合保存分类数据
@@ -71,7 +67,8 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, RoleDO> implements 
         checkDuplicationColumn(null, saveRoleDTO.getCode());
         return save(BeanUtil.copyProperties(saveRoleDTO, RoleDO.class)
                 .setId(redisIdWorker.nextId(CacheConstants.ROLE_ID))
-                .setCreatorId((loginInfoService.getLoginId()))) ?
+                .setCreatorId((loginInfoService.getLoginId()))
+                .setStatus(0)) ?
                 Result.success(MessageConstants.SAVE_SUCCESS) : Result.error(MessageConstants.SAVE_ERROR);
     }
 
@@ -113,7 +110,15 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, RoleDO> implements 
     public Result getRoleById(Long id) {
         RoleDO roleDO = getById(id);
         Optional.ofNullable(roleDO).orElseThrow(() -> new ServiceException(MessageConstants.NO_FOUND_ROLE_ERROR));
-        return Result.success(BeanUtil.copyProperties(roleDO, PermissionVO.class));
+        return Result.success(BeanUtil.copyProperties(roleDO, RoleVO.class).setParentName(getRoleNameById(roleDO.getParentId())));
+    }
+
+    public Result getRoleListByUserId(Long userId) {
+        List<RoleVO> roleVOList = BeanUtil.copyToList(roleMapper.getRoleListByUserId(userId), RoleVO.class)
+                .stream().map(item -> CompletableFuture.supplyAsync(() ->
+                        item.setParentName(getRoleNameById(item.getParentId())))).toList()
+                .stream().map(CompletableFuture::join).toList();
+        return Result.success(roleVOList);
     }
 
     @Override
@@ -131,7 +136,8 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, RoleDO> implements 
             throw new ServiceException(MessageConstants.NO_FOUND_ROLE_ERROR);
 
         List<RoleVO> roleVOList = roleDOList
-                .stream().map(RoleDO -> CompletableFuture.supplyAsync(() -> new RoleVO(RoleDO))).toList()
+                .stream().map(RoleDO -> CompletableFuture.supplyAsync(() -> new RoleVO(RoleDO)
+                        .setParentName(getRoleNameById(RoleDO.getParentId())))).toList()
                 .stream().map(CompletableFuture::join).toList();
 
         if (userId != null) {
@@ -163,9 +169,10 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, RoleDO> implements 
     @Transactional(rollbackFor = {ServiceException.class, Exception.class})
     public Result assignRoleToUser(UserRoleDTO userRoleDTO) {
         Long userId = userRoleDTO.getUserId();
-        if (!Db.remove(new LambdaQueryWrapper<UserRoleDO>().eq(UserRoleDO::getUserId, userId))) {
-            throw new ServiceException(MessageConstants.DELETE_ERROR);
-        }
+        List<UserRoleDO> list = Db.lambdaQuery(UserRoleDO.class).eq(UserRoleDO::getUserId, userId).list();
+        if (CollectionUtils.isNotEmpty(list))
+            if (!Db.lambdaUpdate(UserRoleDO.class).eq(UserRoleDO::getUserId, userId).remove())
+                throw new ServiceException(MessageConstants.DELETE_ERROR);
 
         UserType type = UserType.USER;
         List<Long> roleIds = userRoleDTO.getRoleIds();
@@ -190,28 +197,6 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, RoleDO> implements 
 
         if (!Db.lambdaUpdate(UserDO.class).set(UserDO::getType, type).eq(UserDO::getId, userId).update())
             throw new ServiceException(MessageConstants.UPDATE_ERROR);
-
-        return Result.success(MessageConstants.OPERATION_SUCCESS);
-    }
-
-    @Override
-    @Transactional(rollbackFor = {ServiceException.class, Exception.class})
-    public Result assignPermissionToRole(RolePermissionDTO rolePermissionDTO) {
-        Long roleId = rolePermissionDTO.getRoleId();
-        if (!Db.remove(new LambdaQueryWrapper<RolePermissionDO>().eq(RolePermissionDO::getRoleId, roleId)))
-            throw new ServiceException(MessageConstants.DELETE_ERROR);
-
-        List<Long> permissionIds = rolePermissionDTO.getPermissionIds();
-        if (CollectionUtils.isNotEmpty(permissionIds)) {
-            List<RolePermissionDO> rolePermissionDOList = permissionIds
-                    .stream().map(permissionId -> CompletableFuture.supplyAsync(() -> new RolePermissionDO()
-                            .setId(redisIdWorker.nextId(CacheConstants.ROLE_PERMISSION_ID))
-                            .setRoleId(roleId).setPermissionId(permissionId))).toList()
-                    .stream().map(CompletableFuture::join).toList();
-
-            if (!Db.saveBatch(rolePermissionDOList, rolePermissionDOList.size()))
-                throw new ServiceException(MessageConstants.SAVE_ERROR);
-        }
 
         return Result.success(MessageConstants.OPERATION_SUCCESS);
     }

@@ -12,6 +12,7 @@ import com.shoppingmall.demo.model.DO.RolePermissionDO;
 import com.shoppingmall.demo.model.DTO.PermissionDeleteBatchDTO;
 import com.shoppingmall.demo.model.DTO.PermissionSaveDTO;
 import com.shoppingmall.demo.model.DTO.PermissionUpdateDTO;
+import com.shoppingmall.demo.model.DTO.RolePermissionDTO;
 import com.shoppingmall.demo.model.VO.PermissionVO;
 import com.shoppingmall.demo.service.IPermissionService;
 import com.shoppingmall.demo.utils.RedisIdWorker;
@@ -20,6 +21,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -84,7 +86,8 @@ public class PermissionServiceImpl extends ServiceImpl<PermissionMapper, Permiss
     public Result getPermissionById(Long id) {
         PermissionDO permissionDO = getById(id);
         Optional.ofNullable(permissionDO).orElseThrow(() -> new ServiceException(MessageConstants.NO_FOUND_PERMISSION_ERROR));
-        return Result.success(BeanUtil.copyProperties(permissionDO, PermissionVO.class));
+        return Result.success(BeanUtil.copyProperties(permissionDO, PermissionVO.class)
+                .setParentName(getPermissionNameById(permissionDO.getParentId())));
     }
 
     private String getPermissionNameById(Long id) {
@@ -107,7 +110,8 @@ public class PermissionServiceImpl extends ServiceImpl<PermissionMapper, Permiss
             throw new ServiceException(MessageConstants.NO_FOUND_PERMISSION_ERROR);
 
         List<PermissionVO> permissionVOList = permissionDOList
-                .stream().map(permissionDO -> CompletableFuture.supplyAsync(() -> new PermissionVO(permissionDO))).toList()
+                .stream().map(permissionDO -> CompletableFuture.supplyAsync(() -> new PermissionVO(permissionDO)
+                        .setParentName(getPermissionNameById(permissionDO.getParentId())))).toList()
                 .stream().map(CompletableFuture::join).toList();
 
         if (roleId != null) {
@@ -157,5 +161,31 @@ public class PermissionServiceImpl extends ServiceImpl<PermissionMapper, Permiss
         return Db.removeByIds(list, PermissionDO.class) ?
                 Result.success(MessageConstants.OPERATION_SUCCESS) : Result.error(MessageConstants.OPERATION_ERROR);
     }
+
+    @Override
+    @Transactional(rollbackFor = {ServiceException.class, Exception.class})
+    public Result assignPermissionToRole(RolePermissionDTO rolePermissionDTO) {
+        Long roleId = rolePermissionDTO.getRoleId();
+        List<RolePermissionDO> list = Db.lambdaQuery(RolePermissionDO.class).eq(RolePermissionDO::getRoleId, roleId).list();
+        if (CollectionUtils.isNotEmpty(list))
+            if (!Db.lambdaUpdate(RolePermissionDO.class).eq(RolePermissionDO::getRoleId, roleId).remove())
+                throw new ServiceException(MessageConstants.DELETE_ERROR);
+
+        List<Long> permissionIds = rolePermissionDTO.getPermissionIds();
+        if (CollectionUtils.isNotEmpty(permissionIds)) {
+            List<RolePermissionDO> rolePermissionDOList = permissionIds
+                    .stream().map(permissionId -> CompletableFuture.supplyAsync(() -> new RolePermissionDO()
+                            .setId(redisIdWorker.nextId(CacheConstants.ROLE_PERMISSION_ID))
+                            .setRoleId(roleId).setPermissionId(permissionId))).toList()
+                    .stream().map(CompletableFuture::join).toList();
+
+            if (!Db.saveBatch(rolePermissionDOList, rolePermissionDOList.size()))
+                throw new ServiceException(MessageConstants.SAVE_ERROR);
+        }
+
+        return Result.success(MessageConstants.OPERATION_SUCCESS);
+    }
+
+
 
 }

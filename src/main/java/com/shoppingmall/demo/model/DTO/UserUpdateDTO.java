@@ -33,14 +33,6 @@ public class UserUpdateDTO {
     private Long id;
 
     /**
-     * 用户学号
-     */
-    @Length(min = 10, max= 10, message="学号长度为10位数字")
-    @ApiModelProperty("用户学号")
-    @Pattern(regexp = RegexConstants.STUDENT_ID_REGEX, message = MessageConstants.STUDENT_ID_REGEX_MESSAGE)
-    private String studentId;
-
-    /**
      * 用户名称
      */
     @Length(max= 20,message="用户名称长度不能超过20")

@@ -7,8 +7,8 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
-import com.shoppingmall.demo.annotation.UserTypePattern;
-import com.shoppingmall.demo.enums.UserType;
+import com.shoppingmall.demo.annotation.PermissionTypePattern;
+import com.shoppingmall.demo.enums.PermissionType;
 import com.shoppingmall.demo.model.DO.PermissionDO;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -88,8 +88,8 @@ public class PermissionVO {
      * 权限类型(0-后端,1-前端)
      */
     @ApiModelProperty("权限类型(0-后端,1-前端)")
-    @UserTypePattern
-    private UserType type;
+    @PermissionTypePattern
+    private PermissionType type;
 
     /**
      * 父类名称

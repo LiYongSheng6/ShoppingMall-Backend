@@ -6,8 +6,8 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
-import com.shoppingmall.demo.annotation.UserTypePattern;
-import com.shoppingmall.demo.enums.UserType;
+import com.shoppingmall.demo.annotation.PermissionTypePattern;
+import com.shoppingmall.demo.enums.PermissionType;
 import io.swagger.annotations.ApiModelProperty;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -101,8 +101,8 @@ public class PermissionDO implements Serializable {
      * 权限类型(0-后端,1-前端)
      */
     @ApiModelProperty("权限类型(0-后端,1-前端)")
-    @UserTypePattern
-    private UserType type;
+    @PermissionTypePattern
+    private PermissionType type;
 
     /**
      * 创建时间

@@ -36,7 +36,6 @@ import org.springframework.web.bind.annotation.RestController;
 @Validated
 @RestController
 @RequiredArgsConstructor
-//@CrossOrigin(origins = "*")
 @RequestMapping("/user")
 public class UserController {
 
@@ -95,16 +94,16 @@ public class UserController {
     @Operation(summary = "根据ID获取用户信息")
     @ApiImplicitParam(name = "id", value = "用户id", required = true)
     @GetMapping("/detail/admin")
-    @PreAuthorize("sys:user:getUserInfoById")
-    public Result getUserInfoById(@RequestParam @NotNull @JsonDeserialize(using = StringToLongDeserializer.class) Long id) {
+    @PreAuthorize("smb:user:detailByAdmin")
+    public Result detailByAdmin(@RequestParam @NotNull @JsonDeserialize(using = StringToLongDeserializer.class) Long id) {
         return userService.getUserInfoById(id);
     }
 
     @Log
     @Operation(summary = "分页查询用户信息列表")
     @PostMapping("/list/page")
-    @PreAuthorize("sys:user:listByPage")
-    public Result listByCondition(@RequestBody @Validated UserQuery userQuery) {
+    @PreAuthorize("smb:user:listByPage")
+    public Result listByPage(@RequestBody @Validated UserQuery userQuery) {
         return userService.pageUserListByCondition(userQuery);
     }
 
@@ -132,15 +131,15 @@ public class UserController {
     @Log
     @Operation(summary = "根据ID修改用户信息")
     @PutMapping("/update/admin")
-    @PreAuthorize("sys:user:updateUserInfoById")
-    public Result updateUserInfoById(@RequestBody @Validated UserInfoDTO userInfoDTO) {
+    @PreAuthorize("smb:user:updateByAdmin")
+    public Result updateByAdmin(@RequestBody @Validated UserInfoDTO userInfoDTO) {
         return userService.updateUserInfoById(userInfoDTO);
     }
 
     @Log
     @Operation(summary = "根据ID封禁用户账号")
     @PatchMapping("/forbidden")
-    @PreAuthorize("sys:user:forbidden")
+    @PreAuthorize("smb:user:forbidden")
     public Result forbiddenUserById(@RequestParam @NotNull @JsonDeserialize(using = StringToLongDeserializer.class) Long id) {
         return userService.forbiddenUserById(id);
     }
@@ -148,7 +147,7 @@ public class UserController {
     @Log
     @Operation(summary = "根据ID解封用户账号")
     @PatchMapping("/unblocking")
-    @PreAuthorize("sys:user:unblocking")
+    @PreAuthorize("smb:user:unblocking")
     public Result unblockingUserById(@RequestParam @NotNull @JsonDeserialize(using = StringToLongDeserializer.class) Long id) {
         return userService.unblockingUserById(id);
     }
@@ -156,7 +155,7 @@ public class UserController {
     @Log
     @Operation(summary = "根据ID删除用户信息")
     @DeleteMapping("/delete")
-    @PreAuthorize("sys:user:delete")
+    @PreAuthorize("smb:user:delete")
     public Result deleteUserById(@RequestParam @NotNull @JsonDeserialize(using = StringToLongDeserializer.class) Long id) {
         return userService.deleteUserById(id);
     }

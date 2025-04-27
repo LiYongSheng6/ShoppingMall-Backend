@@ -33,7 +33,6 @@ import org.springframework.web.bind.annotation.RestController;
 @Api(tags = "地名信息管理接口")
 @Validated
 @RequiredArgsConstructor
-//@CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/address")
 public class AddressController {
@@ -43,6 +42,7 @@ public class AddressController {
     @Log
     @Operation(summary = "添加地名信息接口")
     @PostMapping("/save")
+    @PreAuthorize("smb:address:save")
     public Result save(@RequestBody @Validated AddressSaveDTO addressSaveDTO) {
         return addressService.saveAddress(addressSaveDTO);
     }
@@ -50,6 +50,7 @@ public class AddressController {
     @Log
     @Operation(summary = "修改地名信息接口")
     @PutMapping("/update")
+    @PreAuthorize("smb:address:update")
     public Result update(@RequestBody @Validated AddressUpdateDTO addressUpdateDTO) {
         return addressService.updateAddress(addressUpdateDTO);
     }
@@ -57,6 +58,7 @@ public class AddressController {
     @Log
     @Operation(summary = "批量添加修改地名信息")
     @PostMapping("/saveOrUpdate/batch")
+    @PreAuthorize("smb:address:saveOrUpdateBatch")
     public Result saveOrUpdateBatch(@RequestBody @Validated AddressSaveBatchDTO addressSaveBatchDTO) {
         return addressService.saveOrUpdateAddressBatch(addressSaveBatchDTO);
     }
@@ -64,7 +66,7 @@ public class AddressController {
     @Log
     @Operation(summary = "获取收货地名信息接口")
     @GetMapping("/list/parentId")
-    public Result getAddressListByParentId(@JsonDeserialize(using = StringToLongDeserializer.class) Long parentId,
+    public Result listByParentId(@RequestParam @NotNull @JsonDeserialize(using = StringToLongDeserializer.class) Long parentId,
                                            @RequestParam @NotNull Integer type) {
         return addressService.getAddressListByIdAndType(parentId, type);
     }
@@ -72,8 +74,8 @@ public class AddressController {
     @Log
     @Operation(summary = "根据类型获取所属地名信息接口")
     @GetMapping("/list/type")
-    @PreAuthorize("sys:address:getAddressListByIdAndType")
-    public Result getAddressListByIdAndType(@JsonDeserialize(using = StringToLongDeserializer.class) Long parentId, Integer type) {
+    @PreAuthorize("smb:address:listByType")
+    public Result listByType(@JsonDeserialize(using = StringToLongDeserializer.class) Long parentId, Integer type) {
         return addressService.getAddressListByIdAndType(parentId, type);
     }
 
@@ -94,6 +96,7 @@ public class AddressController {
     @Log
     @Operation(summary = "删除地名信息接口")
     @DeleteMapping("/delete")
+    @PreAuthorize("smb:address:delete")
     public Result delete(@RequestParam @NotNull @JsonDeserialize(using = StringToLongDeserializer.class) Long id) {
         return addressService.deleteAddressById(id);
     }
@@ -101,6 +104,7 @@ public class AddressController {
     @Log
     @Operation(summary = "批量删除地名信息接口")
     @DeleteMapping("/delete/batch")
+    @PreAuthorize("smb:address:deleteBatch")
     public Result deleteBatch(@RequestBody @Validated AddressDeleteBatchDTO addressDeleteBatchDTO) {
         return addressService.deleteAddressBatch(addressDeleteBatchDTO);
     }

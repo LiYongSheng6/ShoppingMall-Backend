@@ -188,7 +188,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements 
     @Override
     public Result updateLoginUserInfo(UserUpdateDTO userUpdateDTO) {
         userUpdateDTO.setId(loginInfoService.getLoginId());
-
         return updateUserInfoById(BeanUtil.copyProperties(userUpdateDTO, UserInfoDTO.class));
     }
 
@@ -291,6 +290,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements 
         return userDO;
     }
 
+    @Override
     public UserDO getUserByStudentId(String studentId) {
         return lambdaQuery().eq(UserDO::getStudentId, studentId).one();
     }

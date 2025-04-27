@@ -25,7 +25,6 @@ import java.util.concurrent.ForkJoinPool;
 @RestController
 @RequiredArgsConstructor
 @Slf4j
-//@CrossOrigin(origins = "*")
 @RequestMapping("/poll")
 public class MessageController {
 

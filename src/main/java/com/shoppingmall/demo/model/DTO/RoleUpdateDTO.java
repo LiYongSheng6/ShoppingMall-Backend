@@ -48,7 +48,6 @@ public class RoleUpdateDTO {
     /**
      * 数据范围权限
      */
-    @NotNull(message = "[数据范围权限]不能为空")
     @ApiModelProperty("数据范围权限")
     private Integer dataScope;
 
@@ -63,22 +62,12 @@ public class RoleUpdateDTO {
      * 父类id
      */
     @JsonDeserialize(using = StringToLongDeserializer.class)
-    @NotNull(message = "[父类id]不能为空")
     @ApiModelProperty("父类id")
     private Long parentId;
 
     /**
-     * 创建者id
-     */
-    @JsonDeserialize(using = StringToLongDeserializer.class)
-    @NotNull(message = "[创建者id]不能为空")
-    @ApiModelProperty("创建者id")
-    private Long creatorId;
-
-    /**
      * 启用状态
      */
-    @NotNull(message = "[启用状态]不能为空")
     @ApiModelProperty("启用状态")
     private Integer status;
 
