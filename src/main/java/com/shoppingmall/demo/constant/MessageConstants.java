@@ -113,5 +113,7 @@ public class MessageConstants {
     public static final String TAG_NAME_EXIST = "标签名称已存在";
     public static final String ROLE_CODE_EXIST = "角色编码已存在";
 
+    public static final String PERMISSION_USED_ERROR = "该权限资源已被分配使用，无法删除";
+    public static final String ROLE_USED_ERROR = "该角色已被分配使用，无法删除";
 }
 

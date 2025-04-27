@@ -149,16 +149,29 @@ public class PermissionServiceImpl extends ServiceImpl<PermissionMapper, Permiss
 
     @Override
     public Result deletePermission(Long id) {
+        List<RolePermissionDO> list = Db.lambdaQuery(RolePermissionDO.class).eq(RolePermissionDO::getPermissionId, id).list();
+        if (CollectionUtils.isNotEmpty(list))
+            throw new ServiceException(MessageConstants.PERMISSION_USED_ERROR);
         return removeById(id) ? Result.success(MessageConstants.DELETE_SUCCESS) : Result.error(MessageConstants.DELETE_ERROR);
     }
 
     @Override
     public Result deletePermissionBatch(PermissionDeleteBatchDTO deleteBatchDTO) {
-        List<PermissionDO> list = lambdaQuery().in(PermissionDO::getId, deleteBatchDTO.getPermissionIds()).list();
-        if (CollectionUtils.isEmpty(list))
+        List<Long> permissionIds = deleteBatchDTO.getPermissionIds();
+        List<PermissionDO> permissionDOList = lambdaQuery().in(PermissionDO::getId, permissionIds).list();
+        if (CollectionUtils.isEmpty(permissionDOList))
             throw new ServiceException(MessageConstants.NO_FOUND_PERMISSION_ERROR);
 
-        return Db.removeByIds(list, PermissionDO.class) ?
+        List<Long> rolePermissionIds = Db.lambdaQuery(RolePermissionDO.class).in(RolePermissionDO::getPermissionId, permissionIds).list()
+                .stream().map(rolePermissionDO -> CompletableFuture.supplyAsync(rolePermissionDO::getPermissionId)).toList()
+                .stream().map(CompletableFuture::join).toList();
+
+        List<PermissionDO> permissionDOS = permissionDOList.stream().map(permissionDO -> {
+            if (!rolePermissionIds.contains(permissionDO.getId())) return permissionDO;
+            return null;
+        }).toList();
+
+        return Db.removeByIds(permissionDOS, PermissionDO.class) ?
                 Result.success(MessageConstants.OPERATION_SUCCESS) : Result.error(MessageConstants.OPERATION_ERROR);
     }
 

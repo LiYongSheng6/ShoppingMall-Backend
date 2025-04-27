@@ -9,6 +9,7 @@ import com.shoppingmall.demo.constant.HttpStatus;
 import com.shoppingmall.demo.constant.MessageConstants;
 import com.shoppingmall.demo.enums.GoodStatus;
 import com.shoppingmall.demo.enums.OrderStatus;
+import com.shoppingmall.demo.enums.UserType;
 import com.shoppingmall.demo.exception.ServiceException;
 import com.shoppingmall.demo.mapper.OrderMapper;
 import com.shoppingmall.demo.model.DO.DeliveryDO;
@@ -35,6 +36,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -100,6 +102,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, OrderDO> implemen
 
             boolean isSuccess = Db.lambdaUpdate(GoodDO.class)
                     .setSql("stock_num = stock_num - " + purchaseNum)
+                    .setSql("sale_num = sale_num + " + purchaseNum)
                     .set(GoodDO::getUpdateTime, LocalDateTime.now())
                     .eq(GoodDO::getId, goodId)
                     .update();
@@ -144,8 +147,10 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, OrderDO> implemen
 
         //查询是否为创建者
         Long userId = loginInfoService.getLoginId();
-        if (!orderDO.getUserId().equals(userId)) {
-            throw new ServiceException(HttpStatus.ACCESS_RESTRICTED, MessageConstants.PERMISSION_PROHIBITED_ERROR);
+        if (!Objects.equals(UserType.ADMIN, userService.getById(loginInfoService.getLoginId()).getType())) {
+            if (!orderDO.getUserId().equals(userId)) {
+                throw new ServiceException(HttpStatus.ACCESS_RESTRICTED, MessageConstants.PERMISSION_PROHIBITED_ERROR);
+            }
         }
 
         if (!(OrderStatus.PAYING.equals(orderDO.getStatus()) || OrderStatus.Shipping.equals(orderDO.getStatus()))) {
@@ -193,8 +198,10 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, OrderDO> implemen
         Optional.ofNullable(getById(id)).ifPresentOrElse(OrderDO -> {
             Long userId = loginInfoService.getLoginId();
             //查询是否为创建者
-            if (!OrderDO.getUserId().equals(userId)) {
-                throw new ServiceException(HttpStatus.ACCESS_RESTRICTED, MessageConstants.PERMISSION_PROHIBITED_ERROR);
+            if (!Objects.equals(UserType.ADMIN, userService.getById(loginInfoService.getLoginId()).getType())) {
+                if (!OrderDO.getUserId().equals(userId)) {
+                    throw new ServiceException(HttpStatus.ACCESS_RESTRICTED, MessageConstants.PERMISSION_PROHIBITED_ERROR);
+                }
             }
             removeById(id);
         }, () -> {
@@ -205,8 +212,12 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, OrderDO> implemen
 
     @Override
     public Result deleteOrderBatch(OrderDeleteBatchDTO deleteBatchDTO) {
-        List<OrderDO> list = lambdaQuery().in(OrderDO::getId, deleteBatchDTO.getOrderIds())
-                .eq(OrderDO::getUserId, loginInfoService.getLoginId()).list();
+        List<OrderDO> list;
+        if (!Objects.equals(UserType.ADMIN, userService.getById(loginInfoService.getLoginId()).getType())) {
+            list = lambdaQuery().in(OrderDO::getId, deleteBatchDTO.getOrderIds())
+                    .eq(OrderDO::getUserId, loginInfoService.getLoginId()).list();
+        } else list = lambdaQuery().in(OrderDO::getId, deleteBatchDTO.getOrderIds()).list();
+
         if (CollectionUtils.isEmpty(list))
             throw new ServiceException(MessageConstants.NO_FOUND_ORDER_ERROR);
 

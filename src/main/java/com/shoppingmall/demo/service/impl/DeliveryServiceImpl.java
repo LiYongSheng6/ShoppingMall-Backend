@@ -7,9 +7,11 @@ import com.baomidou.mybatisplus.extension.toolkit.Db;
 import com.shoppingmall.demo.constant.CacheConstants;
 import com.shoppingmall.demo.constant.MessageConstants;
 import com.shoppingmall.demo.enums.AddressType;
+import com.shoppingmall.demo.enums.UserType;
 import com.shoppingmall.demo.exception.ServiceException;
 import com.shoppingmall.demo.mapper.DeliveryMapper;
 import com.shoppingmall.demo.model.DO.DeliveryDO;
+import com.shoppingmall.demo.model.DO.UserDO;
 import com.shoppingmall.demo.model.DTO.DeliveryDeleteBatchDTO;
 import com.shoppingmall.demo.model.DTO.DeliverySaveDTO;
 import com.shoppingmall.demo.model.DTO.DeliverySaveIdDTO;
@@ -31,6 +33,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
@@ -56,7 +59,9 @@ public class DeliveryServiceImpl extends ServiceImpl<DeliveryMapper, DeliveryDO>
 
     @Override
     public Result updateDelivery(DeliveryUpdateDTO deliveryUpdateDTO) {
-        loginInfoService.CheckLoginUserObject(getUserIdByDeliveryId(deliveryUpdateDTO.getId()));
+        if (!Objects.equals(UserType.ADMIN, Db.getById(loginInfoService.getLoginId(), UserDO.class).getType())) {
+            loginInfoService.CheckLoginUserObject(getUserIdByDeliveryId(deliveryUpdateDTO.getId()));
+        }
         return updateById(BeanUtil.copyProperties(deliveryUpdateDTO, DeliveryDO.class)
                 .setProvinceId((addressService.getAddressIdByName(deliveryUpdateDTO.getProvince(), AddressType.PROVINCE)))
                 .setCityId((addressService.getAddressIdByName(deliveryUpdateDTO.getCity(), AddressType.CITY)))
@@ -75,21 +80,29 @@ public class DeliveryServiceImpl extends ServiceImpl<DeliveryMapper, DeliveryDO>
 
     @Override
     public Result updateIdDelivery(DeliveryUpdateIdDTO deliveryUpdateDTO) {
-        loginInfoService.CheckLoginUserObject(getUserIdByDeliveryId(deliveryUpdateDTO.getId()));
+        if (!Objects.equals(UserType.ADMIN, Db.getById(loginInfoService.getLoginId(), UserDO.class).getType())) {
+            loginInfoService.CheckLoginUserObject(getUserIdByDeliveryId(deliveryUpdateDTO.getId()));
+        }
         return updateById(BeanUtil.copyProperties(deliveryUpdateDTO, DeliveryDO.class).setUpdateTime(LocalDateTime.now())) ?
                 Result.success(MessageConstants.UPDATE_SUCCESS) : Result.error(MessageConstants.UPDATE_ERROR);
     }
 
     @Override
     public Result deleteDeliveryById(Long id) {
-        loginInfoService.CheckLoginUserObject(getUserIdByDeliveryId(id));
+        if (!Objects.equals(UserType.ADMIN, Db.getById(loginInfoService.getLoginId(), UserDO.class).getType())) {
+            loginInfoService.CheckLoginUserObject(getUserIdByDeliveryId(id));
+        }
         return removeById(id) ? Result.success(MessageConstants.DELETE_SUCCESS) : Result.error(MessageConstants.DELETE_ERROR);
     }
 
     @Override
     public Result deleteDeliveryBatch(DeliveryDeleteBatchDTO deleteBatchDTO) {
-        List<DeliveryDO> deliveryDOList = lambdaQuery().eq(DeliveryDO::getUserId, loginInfoService.getLoginId())
-                .in(DeliveryDO::getId, deleteBatchDTO.getDeliveryIds()).list();
+        List<DeliveryDO> deliveryDOList;
+        if (!Objects.equals(UserType.ADMIN, Db.getById(loginInfoService.getLoginId(), UserDO.class).getType())) {
+            deliveryDOList = lambdaQuery().eq(DeliveryDO::getUserId, loginInfoService.getLoginId())
+                    .in(DeliveryDO::getId, deleteBatchDTO.getDeliveryIds()).list();
+        } else deliveryDOList = lambdaQuery().in(DeliveryDO::getId, deleteBatchDTO.getDeliveryIds()).list();
+
         if (CollectionUtils.isEmpty(deliveryDOList))
             throw new ServiceException(MessageConstants.NO_FOUND_DELIVERY_ERROR);
 

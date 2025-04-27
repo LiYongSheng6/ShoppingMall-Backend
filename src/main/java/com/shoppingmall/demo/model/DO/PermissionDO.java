@@ -105,6 +105,12 @@ public class PermissionDO implements Serializable {
     private PermissionType type;
 
     /**
+     * 逻辑删除字段(0为未删除，1为已删除)
+     */
+    @ApiModelProperty("逻辑删除字段(0为未删除，1为已删除)")
+    private Integer isDeleted;
+    
+    /**
      * 创建时间
      */
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")

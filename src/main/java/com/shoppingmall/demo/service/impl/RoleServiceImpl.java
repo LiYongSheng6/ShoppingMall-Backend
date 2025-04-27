@@ -87,16 +87,29 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, RoleDO> implements 
 
     @Override
     public Result deleteRole(Long id) {
+        List<UserRoleDO> userRoleDOList = Db.lambdaQuery(UserRoleDO.class).eq(UserRoleDO::getRoleId, id).list();
+        if (CollectionUtils.isNotEmpty(userRoleDOList))
+            throw new ServiceException(MessageConstants.ROLE_USED_ERROR);
         return removeById(id) ? Result.success(MessageConstants.DELETE_SUCCESS) : Result.error(MessageConstants.DELETE_ERROR);
     }
 
     @Override
     public Result deleteRoleBatch(RoleDeleteBatchDTO deleteBatchDTO) {
-        List<RoleDO> list = lambdaQuery().in(RoleDO::getId, deleteBatchDTO.getRoleIds()).list();
-        if (CollectionUtils.isEmpty(list))
+        List<Long> roleIds = deleteBatchDTO.getRoleIds();
+        List<RoleDO> roleDOList = lambdaQuery().in(RoleDO::getId, roleIds).list();
+        if (CollectionUtils.isEmpty(roleDOList))
             throw new ServiceException(MessageConstants.NO_FOUND_ROLE_ERROR);
 
-        return Db.removeByIds(list, RoleDO.class) ?
+        List<Long> useRoleIds = Db.lambdaQuery(UserRoleDO.class).in(UserRoleDO::getRoleId, roleIds).list()
+                .stream().map(userRoleDO -> CompletableFuture.supplyAsync(userRoleDO::getRoleId)).toList()
+                .stream().map(CompletableFuture::join).toList();
+
+        List<RoleDO> roleDOS = roleDOList.stream().map(roleDO -> {
+            if (!useRoleIds.contains(roleDO.getId())) return roleDO;
+            return null;
+        }).toList();
+
+        return Db.removeByIds(roleDOS, RoleDO.class) ?
                 Result.success(MessageConstants.OPERATION_SUCCESS) : Result.error(MessageConstants.OPERATION_ERROR);
     }
 

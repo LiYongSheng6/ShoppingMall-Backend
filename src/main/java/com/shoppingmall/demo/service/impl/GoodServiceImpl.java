@@ -9,6 +9,7 @@ import com.shoppingmall.demo.constant.MessageConstants;
 import com.shoppingmall.demo.enums.GoodRankType;
 import com.shoppingmall.demo.enums.GoodStatus;
 import com.shoppingmall.demo.enums.GoodType;
+import com.shoppingmall.demo.enums.UserType;
 import com.shoppingmall.demo.exception.ServiceException;
 import com.shoppingmall.demo.mapper.GoodMapper;
 import com.shoppingmall.demo.model.DO.GoodDO;
@@ -31,7 +32,6 @@ import com.shoppingmall.demo.utils.Result;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
-import org.redisson.api.RedissonClient;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
@@ -42,6 +42,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 @Slf4j
@@ -51,7 +52,6 @@ public class GoodServiceImpl extends ServiceImpl<GoodMapper, GoodDO> implements 
 
     private final RedisIdWorker redisIdWorker;
     private final RedisCacheService redisCacheService;
-    private final RedissonClient redissonClient;
     private final LoginInfoService loginInfoService;
     private final ICategoryService categoryService;
     private final ITagService tagService;
@@ -67,13 +67,15 @@ public class GoodServiceImpl extends ServiceImpl<GoodMapper, GoodDO> implements 
 
     @Override
     public Result updateGood(GoodUpdateDTO goodUpdateDTO) {
-        loginInfoService.CheckLoginUserObject(getCreatorIdByGoodId(goodUpdateDTO.getId()));
+        if (!Objects.equals(UserType.ADMIN, userService.getById(loginInfoService.getLoginId()).getType())) {
+            loginInfoService.CheckLoginUserObject(getCreatorIdByGoodId(goodUpdateDTO.getId()));
+        }
         return updateById(BeanUtil.copyProperties(goodUpdateDTO, GoodDO.class).setUpdateTime(LocalDateTime.now())) ?
                 Result.success(MessageConstants.UPDATE_SUCCESS) : Result.error(MessageConstants.UPDATE_ERROR);
     }
 
     @Override
-    @Retryable(value = ServiceException.class, maxAttempts = 3, backoff = @Backoff(delay = 1000))
+    @Retryable(value = ServiceException.class, maxAttempts = 2, backoff = @Backoff(delay = 1000))
     public Result updateGoodStockNum(GoodUpdateStockNumDTO updateDTO) {
         GoodDO goodDO = getById(updateDTO.getId());
         if (goodDO == null) throw new ServiceException(MessageConstants.NO_FOUND_GOOD_ERROR);
@@ -94,13 +96,19 @@ public class GoodServiceImpl extends ServiceImpl<GoodMapper, GoodDO> implements 
 
     @Override
     public Result deleteGoodById(Long id) {
-        loginInfoService.CheckLoginUserObject(getCreatorIdByGoodId(id));
+        if (!Objects.equals(UserType.ADMIN, userService.getById(loginInfoService.getLoginId()).getType())) {
+            loginInfoService.CheckLoginUserObject(getCreatorIdByGoodId(id));
+        }
         return removeById(id) ? Result.success(MessageConstants.DELETE_SUCCESS) : Result.error(MessageConstants.DELETE_ERROR);
     }
 
     @Override
     public Result deleteGoodBatch(GoodDeleteBatchDTO deleteBatchDTO) {
-        List<GoodDO> list = lambdaQuery().in(GoodDO::getId, deleteBatchDTO.getGoodIds()).eq(GoodDO::getCreatorId, loginInfoService.getLoginId()).list();
+        List<GoodDO> list;
+        if (!Objects.equals(UserType.ADMIN, userService.getById(loginInfoService.getLoginId()).getType())) {
+            list = lambdaQuery().in(GoodDO::getId, deleteBatchDTO.getGoodIds()).eq(GoodDO::getCreatorId, loginInfoService.getLoginId()).list();
+        } else list = lambdaQuery().in(GoodDO::getId, deleteBatchDTO.getGoodIds()).list();
+
         if (CollectionUtils.isEmpty(list)) throw new ServiceException(MessageConstants.NO_FOUND_GOOD_ERROR);
         return Db.removeByIds(list, GoodDO.class) ?
                 Result.success(MessageConstants.OPERATION_SUCCESS) : Result.error(MessageConstants.OPERATION_ERROR);
