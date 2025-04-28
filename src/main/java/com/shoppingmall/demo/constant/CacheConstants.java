@@ -43,24 +43,29 @@ public class CacheConstants {
 
 
     /**
+     * 账号注册-图片验证码key
+     */
+    public static final String REGISTER_IMAGE_CODE_KEY = "code:image:register:";
+
+    /**
      * 账号注册-邮箱验证码key
      */
-    public static  final String REGISTER_EMAIL_CODE_KEY = "email:code:register:";
+    public static final String REGISTER_EMAIL_CODE_KEY = "code:email:register:";
 
     /**
      * 账号登录-邮箱验证码key
      */
-    public static  final String LOGIN_EMAIL_CODE_KEY = "email:code:login:";
+    public static final String LOGIN_EMAIL_CODE_KEY = "code:email:login:";
 
     /**
      * 密码重置-邮箱验证码key
      */
-    public static final String RESET_EMAIL_CODE_KEY = "email:code:reset:";
+    public static final String RESET_EMAIL_CODE_KEY = "code:email:reset:";
 
     /**
      * 邮箱修改-邮箱验证码key
      */
-    public static final String UPDATE_EMAIL_CODE_KEY = "email:code:update:";
+    public static final String UPDATE_EMAIL_CODE_KEY = "code:email:update:";
 
     /**
      * 数字验证码生成源

@@ -13,7 +13,6 @@ import com.shoppingmall.demo.enums.UserType;
 import com.shoppingmall.demo.exception.ServiceException;
 import com.shoppingmall.demo.mapper.GoodMapper;
 import com.shoppingmall.demo.model.DO.GoodDO;
-import com.shoppingmall.demo.model.DO.UserDO;
 import com.shoppingmall.demo.model.DTO.GoodDeleteBatchDTO;
 import com.shoppingmall.demo.model.DTO.GoodSaveDTO;
 import com.shoppingmall.demo.model.DTO.GoodUpdateDTO;
@@ -124,11 +123,9 @@ public class GoodServiceImpl extends ServiceImpl<GoodMapper, GoodDO> implements 
         GoodDO goodDO = getById(id);
         Optional.ofNullable(goodDO).orElseThrow(() -> new ServiceException(MessageConstants.NO_FOUND_GOOD_ERROR));
 
-        UserDO creator = Db.lambdaQuery(UserDO.class).eq(UserDO::getId, goodDO.getCreatorId()).one();
-        Optional.ofNullable(creator).orElseThrow(() -> new ServiceException(MessageConstants.NO_FOUND_USER_ERROR));
-
         return Result.success(new GoodVO(getById(id))
-                .setCreatorName(creator.getUsername()).setCreatorAvatar(creator.getAvatar())
+                .setCreatorName(userService.getUserNameById(goodDO.getCreatorId()))
+                .setCreatorAvatar(userService.getUserAvatarById(goodDO.getCreatorId()))
                 .setTagName(tagService.getTagNameById((goodDO.getTagId())))
                 .setCategoryName(categoryService.getCategoryNameById(String.valueOf(goodDO.getCategoryId()))));
     }

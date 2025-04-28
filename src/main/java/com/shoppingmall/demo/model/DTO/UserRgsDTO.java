@@ -30,6 +30,11 @@ public class UserRgsDTO {
     @Pattern(regexp = RegexConstants.PASSWORD_REGEX, message = MessageConstants.PASSWORD_REGEX_MESSAGE)
     private String password;
 
+/*    @ApiModelProperty("用户电话")
+    @NotBlank(message = MessageConstants.PARAM_MISSING)
+    @Pattern(regexp = RegexConstants.PHONE_REGEX, message = MessageConstants.PHONE_REGEX_MESSAGE)
+    private String phone;*/
+
     @ApiModelProperty("用户邮箱")
     @NotBlank(message = MessageConstants.PARAM_MISSING)
     @Pattern(regexp = RegexConstants.EMAIL_REGEX, message = MessageConstants.EMAIL_REGEX_MESSAGE)
@@ -40,4 +45,6 @@ public class UserRgsDTO {
     @Pattern(regexp = RegexConstants.CODE_REGEX, message = MessageConstants.CODE_LENGTH_MESSAGE)
     private String code;
 
+    @ApiModelProperty("验证码key")
+    private String verifyCodeKey;
 }

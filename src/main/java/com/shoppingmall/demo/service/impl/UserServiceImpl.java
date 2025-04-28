@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.shoppingmall.demo.constant.CacheConstants;
 import com.shoppingmall.demo.constant.MessageConstants;
+import com.shoppingmall.demo.constant.RegexConstants;
 import com.shoppingmall.demo.enums.ForbiddenType;
 import com.shoppingmall.demo.enums.PermissionType;
 import com.shoppingmall.demo.enums.UserType;
@@ -124,10 +125,18 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements 
             throw new ServiceException(MessageConstants.EMAIL_READY_EXIT);
         });
 
-        //获取redis邮箱验证码key
-        String key = CheckCodeUtil.generateKey(CacheConstants.REGISTER_EMAIL_CODE_KEY, email);
+        //redis验证码key
+        String key, verifyCode = userRgsDTO.getCode();
+        if (verifyCode.matches(RegexConstants.EMAIL_VERIFY_CODE_REGEX)) {
+            //获取redis邮箱验证码key
+            key = CheckCodeUtil.generateKey(CacheConstants.REGISTER_EMAIL_CODE_KEY, email);
+        } else {
+            //获取redis图片验证码key
+            key = CheckCodeUtil.generateKey(CacheConstants.REGISTER_IMAGE_CODE_KEY, userRgsDTO.getVerifyCodeKey());
+        }
+
         //比对验证码
-        checkVerifyCode(key, userRgsDTO.getCode());
+        checkVerifyCode(key, verifyCode);
 
         // 加密密码
         userRgsDTO.setPassword(MD5Util.generate(userRgsDTO.getPassword()));
@@ -155,16 +164,17 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements 
         if (ForbiddenType.TRUE.equals(userDO.getIsForbidden())) {
             throw new ServiceException(MessageConstants.USER_FORBIDDEN_ERROR);
         }
-
+        // 检查是否提供了密码或验证码
         if (!StringUtils.hasLength(userLoginDTO.getCode()) && !StringUtils.hasLength(userLoginDTO.getPassword())) {
             throw new ServiceException(MessageConstants.PARAM_MISSING);
         }
-
+        // 检查密码是否正确
         if (StringUtils.hasLength(userLoginDTO.getPassword())) {
             if (!MD5Util.verify(userLoginDTO.getPassword(), userDO.getPassword())) {
                 throw new ServiceException(MessageConstants.PASSWORD_ERROR);
             }
         } else {
+            // 检查验证码是否正确
             checkVerifyCode(CacheConstants.LOGIN_EMAIL_CODE_KEY, account, userLoginDTO.getCode());
         }
 

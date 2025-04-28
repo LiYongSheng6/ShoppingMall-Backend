@@ -229,7 +229,11 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, OrderDO> implemen
     public Result<OrderVO> getOrderById(Long id) {
         OrderDO orderDO = getById(id);
         if (orderDO == null) throw new ServiceException(MessageConstants.NO_FOUND_ORDER_ERROR);
-        loginInfoService.CheckLoginUserObject((orderDO.getUserId()));
+        if (!Objects.equals(UserType.ADMIN, userService.getById(loginInfoService.getLoginId()).getType())) {
+            if (!Objects.equals(orderDO.getBusinessId(), loginInfoService.getLoginId())) {
+                loginInfoService.CheckLoginUserObject((orderDO.getUserId()));
+            }
+        }
         return Result.success(new OrderVO(orderDO)
                 .setUsername(userService.getUserNameById((orderDO.getUserId())))
                 .setBusinessName(userService.getUserNameById((orderDO.getBusinessId()))));

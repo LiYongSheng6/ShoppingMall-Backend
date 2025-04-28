@@ -68,10 +68,15 @@ public class RegexConstants {
     /**
      * 邮箱验证码正则
      */
-    public static final String CODE_REGEX = "^\\w{6}$";
+    public static final String CODE_REGEX = "^\\d{6}||\\w{4}$";
 
     /**
      * 权限类型正则
      */
     public static final String PERMISSION_TYPE_REGEX = "^[01]$";
+
+    /**
+     * 邮箱验证码正则
+     */
+    public static final String EMAIL_VERIFY_CODE_REGEX = "^\\d{6}$";
 }

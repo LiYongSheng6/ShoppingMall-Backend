@@ -36,7 +36,7 @@ public class MailUtil {
         prop.setProperty("mail.smtp.auth", emailConfigProperties.auth);
         // 发送邮件协议名称
         prop.setProperty("mail.transport.protocol", "smtp");
-        // 设置端口号为465或587
+        // 可设置端口号为465或587(默认本地用25端口，云服务25端口被封无法使用)
         prop.setProperty("mail.smtp.port", "25");
         try {
             MailSSLSocketFactory sf = new MailSSLSocketFactory();

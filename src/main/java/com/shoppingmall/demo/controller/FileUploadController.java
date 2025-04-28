@@ -5,7 +5,6 @@ import com.aliyun.oss.OSS;
 import com.aliyun.oss.common.utils.BinaryUtil;
 import com.aliyun.oss.model.MatchMode;
 import com.aliyun.oss.model.PolicyConditions;
-import com.shoppingmall.demo.annotation.PreAuthorize;
 import com.shoppingmall.demo.config.property.AliOssConfigProperties;
 import com.shoppingmall.demo.constant.MessageConstants;
 import com.shoppingmall.demo.utils.AliOssUtil;
@@ -42,7 +41,7 @@ public class FileUploadController {
 
     @Operation(summary = "获取前端图片上传签名接口")
     @RequestMapping("/picture/front")
-    @PreAuthorize("smb:upload:pictureFront")
+    //@PreAuthorize("smb:upload:pictureFront")
     public Result oss() throws UnsupportedEncodingException {
         HashMap<String, String> map = new HashMap<>();
         String format = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
@@ -91,7 +90,7 @@ public class FileUploadController {
 
     @Operation(summary = "获取后端图片访问地址接口")
     @PostMapping("/picture/backend")
-    @PreAuthorize("smb:upload:pictureBackend")
+    //@PreAuthorize("smb:upload:pictureBackend")
     public Result uploadPicture(@NotNull MultipartFile file) throws Exception {
         long maxSize = 10 * 1024 * 1024; // 10MB
         if (file.getSize() > maxSize) {

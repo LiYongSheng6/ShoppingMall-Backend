@@ -203,7 +203,7 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, RoleDO> implements 
                     .stream().map(roleDO -> CompletableFuture.supplyAsync(roleDO::getCode)).toList()
                     .stream().map(CompletableFuture::join).toList();
 
-            if (codeList.contains(UserType.SUPER_ADMIN.getDesc())) type = UserType.SUPER_ADMIN;
+            if (codeList.contains(UserType.SUPER_ADMIN.getDesc())) type = UserType.ADMIN;
             else if (codeList.contains(UserType.ADMIN.getDesc())) type = UserType.ADMIN;
             else if (codeList.contains(UserType.MERCHANT.getDesc())) type = UserType.MERCHANT;
         }
