@@ -66,27 +66,36 @@ public class GoodServiceImpl extends ServiceImpl<GoodMapper, GoodDO> implements 
 
     @Override
     public Result updateGood(GoodUpdateDTO goodUpdateDTO) {
+        // 校验用户权限
         if (!Objects.equals(UserType.ADMIN, userService.getById(loginInfoService.getLoginId()).getType())) {
             loginInfoService.CheckLoginUserObject(getCreatorIdByGoodId(goodUpdateDTO.getId()));
         }
+        // 更新商品信息
         return updateById(BeanUtil.copyProperties(goodUpdateDTO, GoodDO.class).setUpdateTime(LocalDateTime.now())) ?
                 Result.success(MessageConstants.UPDATE_SUCCESS) : Result.error(MessageConstants.UPDATE_ERROR);
     }
 
+    /**
+     * 管理在线商品库存数量
+     *
+     * @param updateDTO
+     * @return
+     */
     @Override
     @Retryable(value = ServiceException.class, maxAttempts = 2, backoff = @Backoff(delay = 1000))
     public Result updateGoodStockNum(GoodUpdateStockNumDTO updateDTO) {
+        // 获取商品信息
         GoodDO goodDO = getById(updateDTO.getId());
         if (goodDO == null) throw new ServiceException(MessageConstants.NO_FOUND_GOOD_ERROR);
-
+        // 校验用户权限
         loginInfoService.CheckLoginUserObject((goodDO.getCreatorId()));
-
+        //  校验商品状态
         if (!GoodStatus.REMOVE.equals(goodDO.getStatus()))
             throw new ServiceException(MessageConstants.GOOD_NOT_REMOVE_ERROR);
-
+        // 校验商品库存数量
         if (goodDO.getStockNum() + updateDTO.getStockNum() < 0)
             throw new ServiceException(MessageConstants.NUMBER_NEGATIVE_ERROR);
-
+        // 更新商品库存数量
         return Db.lambdaUpdate(GoodDO.class).setSql("stock_num=stock_num+(" + updateDTO.getStockNum() + ")")
                 .set(GoodDO::getUpdateTime, LocalDateTime.now())
                 .eq(GoodDO::getId, updateDTO.getId()).update() ?
