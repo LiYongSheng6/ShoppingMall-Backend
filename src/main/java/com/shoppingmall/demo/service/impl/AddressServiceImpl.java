@@ -53,24 +53,6 @@ public class AddressServiceImpl extends ServiceImpl<AddressMapper, AddressDO> im
                 Result.success(MessageConstants.UPDATE_SUCCESS) : Result.error(MessageConstants.UPDATE_ERROR);
     }
 
-    private static List<AddressVO> makeAddressTree(List<AddressVO> addressList, Long pid) {
-        //创建集合保存分类数据
-        List<AddressVO> addressVOList = new ArrayList<AddressVO>();
-        //判断分类列表是否为空，如果不为空则使用分类列表，否则创建集合对象
-        Optional.ofNullable(addressList).orElse(new ArrayList<AddressVO>())
-                .stream().filter(item -> item != null && item.getParentId().equals(pid))
-                .forEach(item -> {
-                    //获取每一个item对象的子分类，递归生成分类树
-                    List<AddressVO> children = makeAddressTree(addressList, item.getId());
-                    //设置子分类
-                    item.setChildren(children);
-                    //将分类对象添加到集合
-                    addressVOList.add(item);
-                });
-        //返回分类信息
-        return addressVOList;
-    }
-
     private void checkDuplicationColumn(Long id, String addressName) {
         Optional.ofNullable(lambdaQuery().ne(id != null, AddressDO::getId, id).eq(AddressDO::getAddressName, addressName).one())
                 .ifPresent(addressDO -> {
@@ -124,18 +106,46 @@ public class AddressServiceImpl extends ServiceImpl<AddressMapper, AddressDO> im
                 Result.success(MessageConstants.OPERATION_SUCCESS) : Result.error(MessageConstants.OPERATION_ERROR);
     }
 
+    /**
+     * 递归生成地址树
+     *
+     * @param addressList
+     * @param pid
+     * @return
+     */
+    private static List<AddressVO> makeAddressTree(List<AddressVO> addressList, Long pid) {
+        //创建集合保存分类数据
+        List<AddressVO> addressVOList = new ArrayList<AddressVO>();
+        //判断分类列表是否为空，如果不为空则使用分类列表，否则创建集合对象
+        Optional.ofNullable(addressList).orElse(new ArrayList<AddressVO>())
+                .stream().filter(item -> item != null && item.getParentId().equals(pid))
+                .forEach(item -> {
+                    //获取每一个item对象的子分类，递归生成分类树
+                    List<AddressVO> children = makeAddressTree(addressList, item.getId());
+                    //设置子分类
+                    item.setChildren(children);
+                    //将分类对象添加到集合
+                    addressVOList.add(item);
+                });
+        //返回分类信息
+        return addressVOList;
+    }
+
     @Override
     public Result getAddressTreeInfo() {
+        // 查询所有地址信息
         List<AddressDO> addressDOList = lambdaQuery().list();
         if (CollectionUtils.isEmpty(addressDOList))
             throw new ServiceException(MessageConstants.NO_FOUND_ADDRESS_ERROR);
-
+        //  创建集合保存地址数据
         List<AddressVO> addressVOList = addressDOList.stream()
                 .map(item -> CompletableFuture.supplyAsync(() -> new AddressVO(item)
                         .setParentName(getAddressNameById(item.getParentId())))).toList()
                 .stream().map(CompletableFuture::join).toList();
+        //  生成地址树并返回
         return Result.success(makeAddressTree(addressVOList, 0L));
     }
+
 
     @Override
     public Result pageAddressListByCondition(AddressQuery addressQuery) {

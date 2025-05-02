@@ -53,24 +53,6 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, CategoryDO>
                 Result.success(MessageConstants.UPDATE_SUCCESS) : Result.error(MessageConstants.UPDATE_ERROR);
     }
 
-    private static List<CategoryVO> makeCategoryTree(List<CategoryVO> categoryList, Long pid) {
-        //创建集合保存分类数据
-        List<CategoryVO> categoryVOList = new ArrayList<CategoryVO>();
-        //判断分类列表是否为空，如果不为空则使用分类列表，否则创建集合对象
-        Optional.ofNullable(categoryList).orElse(new ArrayList<CategoryVO>())
-                .stream().filter(item -> item != null && item.getParentId().equals(pid))
-                .forEach(item -> {
-                    //获取每一个item对象的子分类，递归生成分类树
-                    List<CategoryVO> children = makeCategoryTree(categoryList, item.getId());
-                    //设置子分类
-                    item.setChildren(children);
-                    //将分类对象添加到集合
-                    categoryVOList.add(item);
-                });
-        //返回分类信息
-        return categoryVOList;
-    }
-
     private void checkDuplicationColumn(Long id, String categoryName) {
         Optional.ofNullable(lambdaQuery().ne(id != null, CategoryDO::getId, id).eq(CategoryDO::getCategoryName, categoryName).one())
                 .ifPresent(category -> {
@@ -95,33 +77,61 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, CategoryDO>
                 .stream().map(CompletableFuture::join).toList());
     }
 
+    /**
+     * 递归生成分类树
+     *
+     * @param categoryList
+     * @param pid
+     * @return
+     */
+    private static List<CategoryVO> makeCategoryTree(List<CategoryVO> categoryList, Long pid) {
+        //创建集合保存分类数据
+        List<CategoryVO> categoryVOList = new ArrayList<CategoryVO>();
+        //判断分类列表是否为空，如果不为空则使用分类列表，否则创建集合对象
+        Optional.ofNullable(categoryList).orElse(new ArrayList<CategoryVO>())
+                .stream().filter(item -> item != null && item.getParentId().equals(pid))
+                .forEach(item -> {
+                    //获取每一个item对象的子分类，递归生成分类树
+                    List<CategoryVO> children = makeCategoryTree(categoryList, item.getId());
+                    //设置子分类
+                    item.setChildren(children);
+                    //将分类对象添加到集合
+                    categoryVOList.add(item);
+                });
+        //返回分类信息
+        return categoryVOList;
+    }
+
     @Override
     public Result getCategoryTreeInfo() {
+        // 查找所有分类信息
         List<CategoryDO> categoryDOList = lambdaQuery().list();
         if (CollectionUtils.isEmpty(categoryDOList))
             throw new ServiceException(MessageConstants.NO_FOUND_CATEGORY_ERROR);
-
+        //  创建集合保存分类数据
         List<CategoryVO> categoryVOList = categoryDOList.stream()
                 .map(item -> CompletableFuture.supplyAsync(() -> new CategoryVO(item)
                         .setParentName(getCategoryNameById(item.getParentId().toString())))).toList()
                 .stream().map(CompletableFuture::join).toList();
+        //  生成分类树并返回
         return Result.success(makeCategoryTree(categoryVOList, 0L));
     }
 
     @Override
     public Result pageCategoryListByCondition(CategoryQuery categoryQuery) {
+        // 获取分页参数
         Page<CategoryDO> page = categoryQuery.toMpPageDefaultSortByUpdateTime();
         String categoryName = categoryQuery.getCategoryName();
         CategoryType type = categoryQuery.getType();
-
+        // 查找条件参数
         Page<CategoryDO> pageDO = lambdaQuery()
                 .like(StringUtils.hasLength(categoryName), CategoryDO::getCategoryName, categoryName)
                 .eq(type != null, CategoryDO::getType, type)
                 .page(page);
-
+        // 非空集合返回
         if (CollectionUtils.isEmpty(pageDO.getRecords()))
             return Result.success(new PageVO<>(0L, 0L, 0L, new ArrayList<CategoryVO>()));
-
+        // 封装转换并返回
         return Result.success(PageVO.of(pageDO, categoryDO -> new CategoryVO(categoryDO)
                 .setParentName(getCategoryNameById(categoryDO.getParentId().toString()))));
     }
