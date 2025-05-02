@@ -156,6 +156,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements 
 
     @Override
     public Result login(UserLoginDTO userLoginDTO) {
+        // 检查用户是否存在
         String account = userLoginDTO.getEmail();
         UserDO userDO = lambdaQuery().eq(UserDO::getEmail, account).one();
         Optional.ofNullable(userDO).orElseThrow(() -> new ServiceException(MessageConstants.NO_FOUND_USER_ERROR));
@@ -168,8 +169,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements 
         if (!StringUtils.hasLength(userLoginDTO.getCode()) && !StringUtils.hasLength(userLoginDTO.getPassword())) {
             throw new ServiceException(MessageConstants.PARAM_MISSING);
         }
-        // 检查密码是否正确
+        // 检查登录方式
         if (StringUtils.hasLength(userLoginDTO.getPassword())) {
+            // 验证密码是否正确
             if (!MD5Util.verify(userLoginDTO.getPassword(), userDO.getPassword())) {
                 throw new ServiceException(MessageConstants.PASSWORD_ERROR);
             }
@@ -177,14 +179,14 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements 
             // 检查验证码是否正确
             checkVerifyCode(CacheConstants.LOGIN_EMAIL_CODE_KEY, account, userLoginDTO.getCode());
         }
-
+        // 日志记录
         log.info("用户登录信息：{}", userDO);
-
         // 登录成功，生成token
         String token = getToken(userDO);
         Map<String, Object> map = new HashMap<>();
         map.put("token", token);
         map.put("type", userDO.getType().getValue());
+        // 封装返回结果
         return Result.success(MessageConstants.LOGIN_SUCCESS, map);
     }
 
