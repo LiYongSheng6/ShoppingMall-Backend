@@ -290,13 +290,24 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements 
 
     @Override
     public Result getUserInfoById(Long id) {
+        // 检查并获取用户信息
         UserDO userDO = getUserDO(id);
+        // 封装返回数据
         return Result.success(new UserVO(userDO));
     }
 
+    /**
+     * 根据id获取用户信息
+     *
+     * @param id
+     * @return
+     */
     private UserDO getUserDO(Long id) {
+        // 根据id获取用户数据库信息
         UserDO userDO = getById(id);
+        // 判断用户是否存在
         Optional.ofNullable(userDO).orElseThrow(() -> new ServiceException(MessageConstants.NO_FOUND_USER_ERROR));
+        // 返回用户信息
         return userDO;
     }
 
