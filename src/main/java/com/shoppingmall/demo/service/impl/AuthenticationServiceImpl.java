@@ -95,10 +95,11 @@ public class AuthenticationServiceImpl extends ServiceImpl<AuthenticationMapper,
             throw new ServiceException(MessageConstants.STUDENT_ID_EXIST);
         });
         // 更新用户认证信息
-        if (!Db.lambdaUpdate(UserDO.class).set(UserDO::getType, UserType.MERCHANT)
+        if (!Db.lambdaUpdate(UserDO.class)
+                .set(Objects.equals(UserType.USER, userService.getById(userId).getType()), UserDO::getType, UserType.MERCHANT)
                 .set(UserDO::getStudentId, studentId)
                 .set(UserDO::getUpdateTime, LocalDateTime.now())
-                .eq(UserDO::getId, userId).eq(UserDO::getType, UserType.USER).update()) {
+                .eq(UserDO::getId, userId).update()) {
             throw new ServiceException(MessageConstants.UPDATE_ERROR);
         }
         // 更新用户角色信息
@@ -123,10 +124,11 @@ public class AuthenticationServiceImpl extends ServiceImpl<AuthenticationMapper,
             throw new ServiceException(MessageConstants.PERMISSION_PROHIBITED_ERROR);
 
         Long userId = loginInfoService.getLoginId();
-        if (!Db.lambdaUpdate(UserDO.class).set(UserDO::getType, UserType.USER)
+        if (!Db.lambdaUpdate(UserDO.class)
+                .set(Objects.equals(UserType.MERCHANT, userService.getById(userId).getType()), UserDO::getType, UserType.USER)
                 .set(UserDO::getStudentId, null)
                 .set(UserDO::getUpdateTime, LocalDateTime.now())
-                .eq(UserDO::getId, userId).eq(UserDO::getType, UserType.MERCHANT).update()) {
+                .eq(UserDO::getId, userId).update()) {
             throw new ServiceException(MessageConstants.UPDATE_ERROR);
         }
 

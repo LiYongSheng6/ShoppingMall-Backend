@@ -11,6 +11,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -49,14 +50,14 @@ public class AuthenticationController {
 
     @Log
     @Operation(summary = "申请实名信息认证接口")
-    @DeleteMapping("/apply")
+    @PatchMapping("/apply")
     public Result applyAuthentication(@RequestParam @NotNull String studentId, @RequestParam @NotNull String realName) {
         return authenticationService.applyAuthentication(studentId, realName);
     }
 
     @Log
     @Operation(summary = "取消实名信息认证接口")
-    @DeleteMapping("/cancel")
+    @PatchMapping("/cancel")
     public Result cancelAuthentication(@RequestParam @NotNull String studentId) {
         return authenticationService.cancelAuthentication(studentId);
     }
