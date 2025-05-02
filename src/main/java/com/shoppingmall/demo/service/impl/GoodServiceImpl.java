@@ -138,8 +138,9 @@ public class GoodServiceImpl extends ServiceImpl<GoodMapper, GoodDO> implements 
 
     @Override
     public Result pageGoodListByCondition(GoodQuery goodQuery) {
+        // 分页参数
         Page<GoodDO> page = goodQuery.toMpPageDefaultSortByUpdateTime();
-
+        // 查询参数
         Long creatorId = goodQuery.getCreatorId();
         List<Long> tagId = goodQuery.getTagIds();
         List<Long> categoryIds = goodQuery.getCategoryIds();
@@ -149,7 +150,7 @@ public class GoodServiceImpl extends ServiceImpl<GoodMapper, GoodDO> implements 
         GoodType type = goodQuery.getType();
         String goodName = goodQuery.getGoodName();
         //GoodRankType rankType = goodQuery.getRankType();
-
+        // 查找条件参数
         Page<GoodDO> pageDO = lambdaQuery()
                 .eq(creatorId != null, GoodDO::getCreatorId, creatorId)
                 .in(CollectionUtils.isNotEmpty(tagId), GoodDO::getTagId, tagId)
@@ -160,10 +161,10 @@ public class GoodServiceImpl extends ServiceImpl<GoodMapper, GoodDO> implements 
                 .eq(type != null, GoodDO::getType, type)
                 .like(StringUtils.hasLength(goodName), GoodDO::getGoodName, goodName)
                 .page(page);
-
+        // 非空集合返回
         if (CollectionUtils.isEmpty(pageDO.getRecords()))
             return Result.success(new PageVO<>(0L, 0L, 0L, new ArrayList<GoodVO>()));
-
+        // 封装转换并返回
         return Result.success(PageVO.of(pageDO, GoodDO -> new GoodVO(GoodDO)
                 .setCreatorName(userService.getUserNameById((GoodDO.getCreatorId())))
                 .setCreatorAvatar(userService.getUserAvatarById((GoodDO.getCreatorId())))
