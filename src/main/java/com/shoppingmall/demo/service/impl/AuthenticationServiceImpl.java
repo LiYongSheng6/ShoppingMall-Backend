@@ -79,33 +79,35 @@ public class AuthenticationServiceImpl extends ServiceImpl<AuthenticationMapper,
     @Override
     @Transactional(rollbackFor = {ServiceException.class, Exception.class})
     public Result applyAuthentication(String studentId, String realName) {
+        // 查询认证信息
         AuthenticationDO authDo = lambdaQuery().eq(AuthenticationDO::getStudentId, studentId).one();
         if (authDo == null)
             throw new ServiceException(MessageConstants.NO_FOUND_AUTHENTICATION_ERROR);
-
+        // 判断真实姓名是否匹配
         if (!Objects.equals(authDo.getRealName(), realName))
             throw new ServiceException(MessageConstants.AUTHENTICATION_MATCH_ERROR);
-
+        // 判断用户是否已经申请过认证
         if (!Objects.equals(authDo.getUserId(), 0L))
             throw new ServiceException(MessageConstants.AUTHENTICATION_APPLIED_EXIST);
-
+        // 判断实名信息是否已经被占用
         Long userId = loginInfoService.getLoginId();
         Optional.ofNullable(userService.getUserByStudentId(studentId)).ifPresent(userDO -> {
             throw new ServiceException(MessageConstants.STUDENT_ID_EXIST);
         });
+        // 更新用户认证信息
         if (!Db.lambdaUpdate(UserDO.class).set(UserDO::getType, UserType.MERCHANT)
                 .set(UserDO::getStudentId, studentId)
                 .set(UserDO::getUpdateTime, LocalDateTime.now())
                 .eq(UserDO::getId, userId).eq(UserDO::getType, UserType.USER).update()) {
             throw new ServiceException(MessageConstants.UPDATE_ERROR);
         }
-
+        // 更新用户角色信息
         Long roleId = Db.lambdaQuery(RoleDO.class).eq(RoleDO::getCode, UserType.MERCHANT.getDesc()).one().getId();
         UserRoleDO userRoleDO = Db.lambdaQuery(UserRoleDO.class).eq(UserRoleDO::getUserId, userId).eq(UserRoleDO::getRoleId, roleId).one();
         if (userRoleDO != null) Db.saveOrUpdate(userRoleDO.setUpdateTime(LocalDateTime.now()));
         else
             Db.save(new UserRoleDO().setId(redisIdWorker.nextId(CacheConstants.USER_ROLE_ID)).setUserId(userId).setRoleId(roleId));
-
+        // 更新认证信息
         return updateById(authDo.setUserId(userId).setUpdateTime(LocalDateTime.now())) ?
                 Result.success(MessageConstants.OPERATION_SUCCESS) : Result.error(MessageConstants.OPERATION_ERROR);
     }
